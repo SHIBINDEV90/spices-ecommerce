@@ -3,9 +3,11 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/lib/models/Order';
 import { headers } from 'next/headers';
+import { Resend } from 'resend';
+import ReceiptEmail from '@/emails/ReceiptEmail';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-04-10',
+  apiVersion: '2026-03-25.dahlia',
 });
 
 // Next.js config to tell it to not parse the raw body, we need it raw for Stripe signature
@@ -73,6 +75,22 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
     });
     
     console.log(`[Webhook] Mapped new Paid Order for ${totalAmount} from ${session.customer_email}`);
+
+    try {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: 'orders@yourdomain.com', // Replace with your actual verified sender domain later
+        to: [session.customer_details?.email || session.customer_email || 'unknown@example.com'],
+        subject: 'Malabar Coast Spices: Order Confirmation',
+        react: ReceiptEmail({ 
+          customerName: session.metadata?.customerName || 'Stripe Customer',
+          orderTotal: totalAmount
+        }) as any, // Cast as any because TS route doesn't have React context
+      });
+      console.log(`[Webhook] Sent receipt email to ${session.customer_details?.email || session.customer_email}`);
+    } catch (emailError) {
+      console.error('[Webhook Email Error]', emailError);
+    }
   } catch (error) {
     console.error('[Webhook DB Error]', error);
   }
