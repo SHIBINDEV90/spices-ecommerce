@@ -4,16 +4,19 @@ import dbConnect from '@/lib/db';
 import Order from '@/lib/models/Order';
 import { headers } from 'next/headers';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-04-10',
-});
+function getStripeClient(): Stripe {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('Please define STRIPE_SECRET_KEY in your environment');
+  }
 
-// Next.js config to tell it to not parse the raw body, we need it raw for Stripe signature
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+  return new Stripe(secretKey, {
+    apiVersion: '2026-03-25.dahlia',
+  });
+}
+
+// Disable body parsing so we can read the raw body for Stripe signature verification
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -25,6 +28,7 @@ export async function POST(req: Request) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     
     if (webhookSecret) {
+       const stripe = getStripeClient();
        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } else {
        // Gracefully fall back to insecure payload parsing if DEV hasn't hooked up CLI secret yet

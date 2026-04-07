@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { CartProvider } from "@/context/CartContext";
 
+export const dynamic = 'force-dynamic';
+
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],

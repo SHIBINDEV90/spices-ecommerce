@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: spices-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: spices_ecommerce
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spices-app
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXTAUTH_URL: http://localhost:4300
+      NEXTAUTH_SECRET: change-me-in-production
+      MONGODB_URI: mongodb://mongodb:27017/spices_ecommerce
+      STRIPE_SECRET_KEY: ""
+      STRIPE_WEBHOOK_SECRET: ""
+      NEXT_PUBLIC_SITE_URL: http://localhost:4300
+    ports:
+      - "${APP_PORT:-4300}:3000"
+
+volumes:
+  mongo_data:

@@ -1,11 +1,18 @@
-import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Product from '@/lib/models/Product';
+import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-04-10', // Latest stable API
-});
+function getStripeClient(): Stripe {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('Please define STRIPE_SECRET_KEY in your environment');
+  }
+
+  return new Stripe(secretKey, {
+    apiVersion: '2026-03-25.dahlia',
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -36,6 +43,8 @@ export async function POST(req: Request) {
         };
       })
     );
+
+    const stripe = getStripeClient();
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({

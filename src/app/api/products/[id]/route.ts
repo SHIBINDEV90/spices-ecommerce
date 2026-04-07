@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '../../../../lib/db';
-import Product from '../../../../lib/models/product';
+import Product from '../../../../lib/models/Product';
 import mongoose from 'mongoose';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   await connectToDatabase();
