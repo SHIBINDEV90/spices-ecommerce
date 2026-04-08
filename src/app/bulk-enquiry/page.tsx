@@ -5,7 +5,7 @@ import BulkEnquiryForm from '@/components/BulkEnquiryForm';
 import { Suspense } from 'react';
 
 export const metadata = {
-  title: 'Request a Bulk Quote | Malabar Coast Spices',
+  title: 'Request a Bulk Quote | Spicewizz',
   description: 'Initiate a specialized cargo order for wholesale spices direct from the Malabar Coast.',
 };
 

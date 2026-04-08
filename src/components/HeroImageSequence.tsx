@@ -23,6 +23,8 @@ export default function HeroImageSequence({ onComplete }: HeroImageSequenceProps
       if (canvasRef.current) {
         const ctx = canvasRef.current.getContext("2d");
         if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(firstImg, 0, 0, canvasRef.current.width, canvasRef.current.height);
         }
       }
@@ -74,6 +76,8 @@ export default function HeroImageSequence({ onComplete }: HeroImageSequenceProps
         const img = imagesRef.current[frame];
         
         if (img && img.complete && img.naturalHeight !== 0) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
           const x = (canvas.width / 2) - (img.width / 2) * scale;
           const y = (canvas.height / 2) - (img.height / 2) * scale;
@@ -111,14 +115,14 @@ export default function HeroImageSequence({ onComplete }: HeroImageSequenceProps
     <div className="absolute inset-0 z-0 bg-black w-full h-full">
       <canvas
         ref={canvasRef}
-        className="w-full h-full object-cover brightness-75"
+        className="w-full h-full object-cover brightness-[0.8] contrast-[1.1] saturate-[1.1]"
       />
       {/* Fallback before load or if disabled */}
       {!imagesLoaded && (
         <img 
           src="/hero-section/ezgif-frame-001.jpg" 
           alt="Loading sequence..." 
-          className="absolute inset-0 w-full h-full object-cover brightness-75 transition-opacity duration-1000"
+          className="absolute inset-0 w-full h-full object-cover brightness-[0.8] contrast-[1.1] saturate-[1.1] transition-opacity duration-1000"
         />
       )}
     </div>

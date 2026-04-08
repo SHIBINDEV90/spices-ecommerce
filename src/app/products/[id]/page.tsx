@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   try {
     const p = await Product.findById(params.id);
     if (!p) return { title: 'Product Not Found' };
-    return { title: `${p.name} | Malabar Coast Spices`, description: p.description };
+    return { title: `${p.name} | Spicewizz`, description: p.description };
   } catch (err) {
     return { title: 'Spice Catalog' };
   }
