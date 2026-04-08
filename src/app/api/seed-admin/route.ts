@@ -8,16 +8,16 @@ export async function GET() {
 
   try {
     // Check if admin already exists
-    const existingAdmin = await User.findOne({ email: 'admin@malabarcoast.com' });
+    const existingAdmin = await User.findOne({ email: 'admin@spicewizz.com' });
     if (existingAdmin) {
       return NextResponse.json({ success: true, message: 'Admin already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash('malabar123', 10);
+    const hashedPassword = await bcrypt.hash('spicewizz123', 10);
 
     const newAdmin = await User.create({
       name: 'System Admin',
-      email: 'admin@malabarcoast.com',
+      email: 'admin@spicewizz.com',
       password: hashedPassword,
       role: 'Admin',
     });
@@ -25,7 +25,7 @@ export async function GET() {
     return NextResponse.json({ 
       success: true, 
       message: 'Admin account created successfully',
-      credentials: { email: 'admin@malabarcoast.com', password: 'malabar123' }
+      credentials: { email: 'admin@spicewizz.com', password: 'spicewizz123' }
     });
 
   } catch (error) {

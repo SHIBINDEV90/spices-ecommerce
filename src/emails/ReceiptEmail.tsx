@@ -32,7 +32,7 @@ export const ReceiptEmail = ({ customerName = 'Customer', orderTotal = 0 }: Rece
           <Container className="mx-auto py-10 px-4">
             <Section className="mb-6">
               <Heading className="text-3xl font-bold tracking-tight text-orange-400 text-center">
-                MALABAR COAST SPICES
+                SPICEWIZZ
               </Heading>
             </Section>
 
@@ -67,7 +67,7 @@ export const ReceiptEmail = ({ customerName = 'Customer', orderTotal = 0 }: Rece
             
             <Section className="mt-8 text-center text-zinc-500 text-xs">
               <Text>
-                Malabar Coast Spices | Worldwide Delivery | Premium Quality
+                Spicewizz | Worldwide Delivery | Premium Quality
               </Text>
               <Text className="mt-2">
                 If you have any questions, reply to this email or contact our support team.

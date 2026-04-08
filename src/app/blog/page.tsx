@@ -5,7 +5,7 @@ import { ArrowRight, Calendar, User, BookOpen } from 'lucide-react';
 import AnimatedSection from '@/components/AnimatedSection'; // Assuming it's in components
 
 export const metadata = {
-  title: 'Spice Industry Insights | Malabar Coast Spices',
+  title: 'Spice Industry Insights | Spicewizz',
   description: 'Expert articles, market trends, and sourcing guides for global wholesale spice buyers.',
 };
 

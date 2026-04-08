@@ -82,7 +82,7 @@ export default function Home() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2" />
         <AnimatedSection className="container mx-auto px-4 text-center">
           <span className="text-secondary font-bold tracking-widest uppercase text-sm mb-2 block">Our Heritage</span>
-          <h2 className="text-4xl font-bold mb-8 text-foreground drop-shadow-sm">About Malabar Coast Spices</h2>
+          <h2 className="text-4xl font-bold mb-8 text-foreground drop-shadow-sm">About Spicewizz</h2>
           <p className="max-w-3xl mx-auto text-lg text-foreground/80 leading-relaxed">
             We are a leading exporter of high-quality, authentic spices sourced directly from the lush farms of Kerala. With generations of expertise, our commitment is to bring you the freshest, most aromatic spices that meet international export standards and elevate global culinary experiences.
           </p>
@@ -114,7 +114,7 @@ export default function Home() {
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl -z-10 -translate-x-1/2 translate-y-1/2" />
         <AnimatedSection className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <span className="text-secondary font-bold tracking-widest uppercase text-sm mb-2 block">The Malabar Difference</span>
+            <span className="text-secondary font-bold tracking-widest uppercase text-sm mb-2 block">The Spicewizz Difference</span>
             <h2 className="text-4xl font-bold text-foreground">Why Choose Us?</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -189,11 +189,11 @@ export default function Home() {
       {/* Footer Section */}
       <footer className="bg-neutral-900 justify-self-end text-neutral-400 py-12 border-t border-neutral-800">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold mb-4 text-white">Malabar Coast Spices</h2>
+          <h2 className="text-2xl font-bold mb-4 text-white">Spicewizz</h2>
           <p className="mb-4 text-sm max-w-md mx-auto line-clamp-2">Delivering the ancient magic of Indian spices to modern kitchens worldwide. Authentic, pure, and sustainably sourced.</p>
-          <p className="mb-6">Email: <a href="mailto:exports@malabarcoast.com" className="text-accent hover:underline">exports@malabarcoast.com</a></p>
+          <p className="mb-6">Email: <a href="mailto:exports@spicewizz.com" className="text-accent hover:underline">exports@spicewizz.com</a></p>
           <div className="pt-8 border-t border-neutral-800 text-sm flex justify-center items-center gap-6">
-            <p>&copy; {new Date().getFullYear()} Malabar Coast Spices. All Rights Reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Spicewizz. All Rights Reserved.</p>
             <div className="flex gap-4">
               <Link href="#" className="hover:text-white transition-colors">Privacy</Link>
               <Link href="#" className="hover:text-white transition-colors">Terms</Link>

@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   if (!post) return { title: 'Post Not Found' };
   
   return {
-    title: `${post.title} | Malabar Coast Spices`,
+    title: `${post.title} | Spicewizz`,
     description: post.content.substring(0, 150).replace(/[#*`_\]\[]/g, '') + '...',
   };
 }

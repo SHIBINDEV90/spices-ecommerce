@@ -81,7 +81,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
       await resend.emails.send({
         from: 'orders@yourdomain.com', // Replace with your actual verified sender domain later
         to: [session.customer_details?.email || session.customer_email || 'unknown@example.com'],
-        subject: 'Malabar Coast Spices: Order Confirmation',
+        subject: 'Spicewizz: Order Confirmation',
         react: ReceiptEmail({ 
           customerName: session.metadata?.customerName || 'Stripe Customer',
           orderTotal: totalAmount
