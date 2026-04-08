@@ -5,15 +5,10 @@ import Order from '@/lib/models/Order';
 import { headers } from 'next/headers';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2024-04-10',
+  apiVersion: '2026-03-25.dahlia',
 });
 
-// Next.js config to tell it to not parse the raw body, we need it raw for Stripe signature
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   const body = await req.text();
