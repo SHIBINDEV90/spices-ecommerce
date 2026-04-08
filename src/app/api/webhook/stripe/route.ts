@@ -1,12 +1,19 @@
-import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/lib/models/Order';
 import { headers } from 'next/headers';
+import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2026-03-25.dahlia',
-});
+function getStripeClient(): Stripe {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('Please define STRIPE_SECRET_KEY in your environment');
+  }
+
+  return new Stripe(secretKey, {
+    apiVersion: '2026-03-25.dahlia',
+  });
+}
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +27,7 @@ export async function POST(req: Request) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     
     if (webhookSecret) {
+       const stripe = getStripeClient();
        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } else {
        // Gracefully fall back to insecure payload parsing if DEV hasn't hooked up CLI secret yet
