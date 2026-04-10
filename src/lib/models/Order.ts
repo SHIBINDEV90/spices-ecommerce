@@ -1,9 +1,10 @@
 import { Document, Schema, model, models } from 'mongoose';
+import mongoose from 'mongoose';
 import { IProduct } from '@/lib/models/Product';
 
 // Interface for a single item within an order
 export interface IOrderItem {
-  productId: Schema.Types.ObjectId | IProduct;
+  productId: mongoose.Types.ObjectId | IProduct;
   name: string; // Denormalized for order history stability
   quantity: number;
   price: number; // Price at the time of purchase

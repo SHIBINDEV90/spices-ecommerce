@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '../../../lib/db';
-import Product from '../../../lib/models/product';
+import Product from '../../../lib/models/Product';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   await connectToDatabase();

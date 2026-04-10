@@ -9,6 +9,7 @@ export interface IProduct extends Document {
   productType: string;
   stock: number;
   isBulkAvailable: boolean;
+  isRetailAvailable: boolean;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -20,6 +21,7 @@ const ProductSchema: Schema = new Schema({
   productType: { type: String, required: true, default: 'Spice' },
   stock: { type: Number, required: true, default: 0 },
   isBulkAvailable: { type: Boolean, default: false },
+  isRetailAvailable: { type: Boolean, default: true },
 }, { timestamps: true });
 
 delete mongoose.models.Product;

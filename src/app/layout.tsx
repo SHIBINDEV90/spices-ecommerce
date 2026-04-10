@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import { CartProvider } from "@/context/CartContext";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
+export const dynamic = 'force-dynamic';
+
 const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
