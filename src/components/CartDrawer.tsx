@@ -96,8 +96,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     <div className="flex flex-col flex-grow justify-center">
                       <h4 className="font-bold text-foreground line-clamp-1">{item.name}</h4>
                       <p className="text-sm text-secondary mb-2">Qty: {item.quantity}</p>
-                      {/* Fake Price for Visual Polish */}
-                      <p className="font-bold text-primary mt-auto">${(24.99 * item.quantity).toFixed(2)}</p>
+                      <p className="font-bold text-primary mt-auto">₹{((item.price || 500) * item.quantity).toFixed(2)}</p>
                     </div>
                     <button 
                       onClick={() => removeFromCart(item._id)}
@@ -116,7 +115,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <div className="flex justify-between items-center mb-6">
                   <span className="text-neutral-500 font-semibold text-lg">Subtotal</span>
                   <span className="text-2xl font-bold text-foreground">
-                    ${(cartItems.reduce((acc, item) => acc + (24.99 * item.quantity), 0)).toFixed(2)}
+                    ₹{(cartItems.reduce((acc, item) => acc + ((item.price || 500) * item.quantity), 0)).toFixed(2)}
                   </span>
                 </div>
                 <Link href="/bulk-enquiry" onClick={onClose} className="w-full bg-primary text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-opacity-90 transition-colors shadow-lg active:scale-95 transform duration-200">

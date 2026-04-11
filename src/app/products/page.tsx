@@ -1,39 +1,44 @@
 import React from 'react';
+import connectToDatabase from '@/lib/db';
+import ProductModel from '@/lib/models/Product';
+import ProductCard from '@/components/ProductCard';
 
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-}
+export const dynamic = 'force-dynamic';
 
-async function getProducts(): Promise<Product[]> {
-  const res = await fetch('/api/products', { cache: 'no-store' });
-  if (!res.ok) {
-    throw new Error('Failed to fetch products');
-  }
-  return res.json();
+async function getProducts() {
+  await connectToDatabase();
+  const products = await ProductModel.find({}).lean();
+  
+  // Parse MongoDB documents to plain objects for safe passing to client components
+  return JSON.parse(JSON.stringify(products));
 }
 
 export default async function ProductsPage() {
   const products = await getProducts();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Our Spices</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {products.map((product) => (
-          <div key={product._id} className="border rounded-lg overflow-hidden shadow-lg">
-            <img src={product.imageUrl} alt={product.name} className="w-full h-48 object-cover" />
-            <div className="p-4">
-              <h2 className="text-xl font-semibold">{product.name}</h2>
-              <p className="text-gray-600 mt-2">{product.description}</p>
-              <p className="text-lg font-bold mt-4">${product.price}</p>
-            </div>
-          </div>
-        ))}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 min-h-screen">
+      <div className="mb-12">
+        <h1 className="text-4xl font-extrabold text-foreground mb-2">All Products</h1>
+        <p className="text-foreground/60 text-lg">{products.length} products available</p>
       </div>
+      
+      {products.length === 0 ? (
+        <div className="text-center py-20 text-foreground/50 bg-surface rounded-2xl border border-black/5">
+          No products found. Add some from the admin dashboard!
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product: any, index: number) => (
+            <ProductCard 
+              key={product._id} 
+              product={product} 
+              index={index} 
+              featured={index < 2} 
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

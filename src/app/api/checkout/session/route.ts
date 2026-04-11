@@ -32,12 +32,12 @@ export async function POST(req: Request) {
 
         return {
           price_data: {
-            currency: 'usd',
+            currency: 'inr',
             product_data: {
               name: dbProduct.name,
               images: [dbProduct.imageUrl],
             },
-            unit_amount: Math.round(dbProduct.price * 100), // Stripe expects cents
+            unit_amount: Math.round(dbProduct.price * 100), // Stripe expects paisa
           },
           quantity: item.quantity,
         };
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 4500, currency: 'usd' }, // $45.00
+            fixed_amount: { amount: 4500, currency: 'inr' }, // ₹45.00
             display_name: 'Standard Global Ocean Freight',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 7 },
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
         {
           shipping_rate_data: {
             type: 'fixed_amount',
-            fixed_amount: { amount: 12500, currency: 'usd' }, // $125.00
+            fixed_amount: { amount: 12500, currency: 'inr' }, // ₹125.00
             display_name: 'Priority Air Cargo',
             delivery_estimate: {
               minimum: { unit: 'business_day', value: 3 },

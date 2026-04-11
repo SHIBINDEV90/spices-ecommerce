@@ -27,6 +27,9 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     isBulkAvailable: initialData?.isBulkAvailable || false,
   });
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(initialData?.imageUrl || '');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
@@ -49,12 +52,22 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
       const url = productId ? `/api/products/${productId}` : '/api/products';
       const method = productId ? 'PUT' : 'POST';
 
+      const payload = new FormData();
+      payload.append('name', formData.name);
+      payload.append('slug', formData.slug);
+      payload.append('description', formData.description);
+      payload.append('price', formData.price.toString());
+      payload.append('productType', formData.productType);
+      payload.append('stock', formData.stock.toString());
+      payload.append('isBulkAvailable', formData.isBulkAvailable.toString());
+      
+      if (imageFile) {
+        payload.append('image', imageFile);
+      }
+
       const res = await fetch(url, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: payload,
       });
 
       if (!res.ok) {
@@ -193,20 +206,24 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-300">Image URL</label>
+          <label className="text-sm font-medium text-gray-300">Product Image</label>
           <input
-            required
-            name="imageUrl"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
-            placeholder="https://example.com/image.jpg"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                setImageFile(file);
+                setImagePreview(URL.createObjectURL(file));
+              }
+            }}
+            className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-orange-500/10 file:text-orange-500 hover:file:bg-orange-500/20 cursor-pointer"
           />
-          {formData.imageUrl && (
+          {imagePreview && (
             <div className="mt-4 w-full h-48 rounded-xl overflow-hidden border border-white/10 bg-black/20 relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src={formData.imageUrl} 
+                src={imagePreview} 
                 alt="Preview" 
                 className="w-full h-full object-cover"
                 onError={(e) => {
