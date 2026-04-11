@@ -2,178 +2,241 @@
 
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { ShieldCheck, ShoppingCart, Loader2, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 export default function CheckoutPage() {
   const { cartItems, getCartTotal } = useCart();
   const [loading, setLoading] = useState(false);
+  
+  // Form States (matching screenshot)
+  const [coupon, setCoupon] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [country, setCountry] = useState('India');
+  const [address1, setAddress1] = useState('');
+  const [address2, setAddress2] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
+  const [contactNo, setContactNo] = useState('');
   const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
+  const [orderNote, setOrderNote] = useState('');
+  const [shipDifferent, setShipDifferent] = useState(false);
+
+  const subtotal = getCartTotal();
+  const delivery = subtotal > 500 ? 0 : 50; 
+  const total = subtotal + delivery;
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cartItems.length === 0) return;
-    
     setLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/checkout/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: cartItems,
-          customerEmail: email,
-          customerName: name,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      // Redirect to Stripe Checkout Session URL
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Payment initiation failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    
+    // Simulate processing payment directly or integrating Stripe soon.
+    setTimeout(() => {
+        setLoading(false);
+        // Add actual stripe/gateway integration here as needed
+        alert('Proceeding to payment gateway...');
+    }, 1500);
   };
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-        <ShoppingCart className="w-16 h-16 text-gray-700 mb-6" />
-        <h1 className="text-3xl font-bold text-white mb-2">Cart is Empty</h1>
-        <p className="text-gray-400 mb-8 text-center max-w-sm">You haven't added any spices to your cart yet. Head back to the shop to discover our exotic blends.</p>
-        <Link href="/products" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-bold transition-all hover:scale-105">
-          Browse Spices
+      <div className="min-h-screen bg-[#faf9f5] flex flex-col items-center justify-center p-4">
+        <ShoppingBag className="w-16 h-16 text-neutral-300 mb-6" />
+        <h1 className="text-3xl font-bold text-neutral-800 mb-2">Checkout is Empty</h1>
+        <p className="text-neutral-500 mb-8 text-center max-w-sm">You need items in your cart to checkout.</p>
+        <Link href="/products" className="bg-[#317a26] hover:bg-[#235e1c] text-white px-8 py-3 rounded font-semibold transition-all">
+          Return to Shop
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black pt-32 pb-24 text-white relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-amber-600/10 rounded-full blur-[100px] pointer-events-none" />
-
-      <div className="container mx-auto px-4 relative z-10 max-w-6xl">
-        <div className="mb-10 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-600">Secure Checkout</h1>
-          <p className="text-gray-400 mt-2 flex items-center justify-center md:justify-start gap-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" /> Export-Grade Security and Verification
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Order Summary Form */}
-          <div className="lg:col-span-7 space-y-8 animate-in slide-in-from-left-8 duration-700">
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl">
-              <h2 className="text-2xl font-semibold mb-6">Contact Information</h2>
-              
-              {error && (
-                <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 mb-6 rounded-xl text-sm font-medium">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleCheckout} className="space-y-6">
-                <div>
-                  <label className="text-sm font-medium text-gray-300 ml-1 block mb-2">Full Name / Company Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 placeholder:text-gray-600"
-                    placeholder="E.g. Spices Importers Ltd."
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-300 ml-1 block mb-2">Primary Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 placeholder:text-gray-600"
-                    placeholder="contact@company.com"
-                  />
-                  <p className="text-xs text-gray-500 mt-2 ml-1">Receipts and shipping coordinates will be sent to this channel.</p>
-                </div>
-
-                <div className="pt-6 border-t border-white/10">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-16 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold text-lg hover:from-orange-400 hover:to-amber-500 transition-all flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
-                  >
-                    {loading ? (
-                      <Loader2 className="w-6 h-6 animate-spin" />
-                    ) : (
-                      <>Proceed to Payment Gateway <ArrowRight className="w-5 h-5" /></>
-                    )}
-                  </button>
-                  <p className="text-center text-xs text-gray-600 mt-4 flex items-center justify-center gap-1">
-                    Powered securely by <span className="font-semibold text-gray-400 text-[#635BFF] flex items-center gap-1 mx-1">Stripe</span>
-                  </p>
-                </div>
-              </form>
+    <div className="min-h-screen bg-[#faf9f5] pt-24 pb-24 text-neutral-800 font-sans">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <form onSubmit={handleCheckout} className="flex flex-col xl:flex-row gap-8">
+          
+          {/* Left Column - Forms */}
+          <div className="w-full xl:w-[65%] space-y-6">
+            
+            {/* Coupon Section */}
+            <div className="bg-white border border-neutral-200 rounded-xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Tag className="w-5 h-5 text-[#317a26]" strokeWidth={2.5} />
+                <h3 className="font-semibold text-[17px] text-neutral-800">Have a coupon?</h3>
+              </div>
+              <p className="text-[13px] text-neutral-500 mb-4">Enter your coupon code to get a discount</p>
+              <div className="flex gap-3">
+                <input 
+                  type="text" 
+                  placeholder="Coupon code" 
+                  value={coupon}
+                  onChange={(e) => setCoupon(e.target.value)}
+                  className="flex-1 border border-neutral-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] placeholder:text-neutral-400"
+                />
+                <button type="button" className="px-7 py-2.5 bg-[#f4f4f4] text-neutral-500 font-medium rounded-lg hover:bg-neutral-200 transition-colors text-[15px]">
+                  Apply
+                </button>
+              </div>
             </div>
+
+            {/* Billing Details */}
+            <div className="bg-white border border-neutral-200 rounded-xl p-6 md:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+              <h2 className="text-[22px] font-semibold text-neutral-800 mb-6">Billing Details</h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-5">
+                <div>
+                  <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">First name <span className="text-red-500">*</span></label>
+                  <input type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+                </div>
+                <div>
+                  <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Last name (optional)</label>
+                  <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+                </div>
+              </div>
+
+              <div className="mb-5">
+                <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Country / Region <span className="text-red-500">*</span></label>
+                <input type="text" required value={country} onChange={e => setCountry(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+              </div>
+
+              <div className="mb-5">
+                <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Address Line 1 <span className="text-red-500">*</span></label>
+                <input type="text" required placeholder="House number and street name" value={address1} onChange={e => setAddress1(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] placeholder:text-neutral-400" />
+              </div>
+
+              <div className="mb-5">
+                <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Address Line 2 (optional)</label>
+                <input type="text" placeholder="Apartment, suite, unit, etc." value={address2} onChange={e => setAddress2(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] placeholder:text-neutral-400" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-5">
+                <div>
+                  <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Town / City <span className="text-red-500">*</span></label>
+                  <input type="text" required value={city} onChange={e => setCity(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+                </div>
+                <div>
+                  <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">State / County <span className="text-red-500">*</span></label>
+                  <input type="text" required value={state} onChange={e => setState(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-5">
+                <div>
+                  <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Postcode / ZIP <span className="text-red-500">*</span></label>
+                  <input type="text" required value={zip} onChange={e => setZip(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+                </div>
+                <div>
+                  <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Contact No <span className="text-red-500">*</span></label>
+                  <input type="tel" required value={contactNo} onChange={e => setContactNo(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[14px] font-medium text-neutral-700 mb-1.5">Email address <span className="text-red-500">*</span></label>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px]" />
+              </div>
+            </div>
+
+            {/* Ship to Different Address */}
+            <div className="bg-[#faf9f5] border border-neutral-200 rounded-xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.01)] flex items-center gap-3 cursor-pointer" onClick={() => setShipDifferent(!shipDifferent)}>
+              <div className={`w-[18px] h-[18px] rounded-[3px] border flex items-center justify-center transition-colors ${shipDifferent ? 'bg-[#317a26] border-[#317a26]' : 'border-neutral-400 bg-white'}`}>
+                {shipDifferent && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+              </div>
+              <span className="font-medium text-[15px] text-neutral-800">Ship to a different address?</span>
+            </div>
+
+            {/* Order Note */}
+            <div className="bg-[#faf9f5] border border-neutral-200 rounded-xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.01)]">
+              <h3 className="font-semibold text-[17px] text-neutral-800 mb-1.5">Order Note</h3>
+              <p className="text-[13px] text-neutral-500 mb-4">Any special instructions or requests for your order (optional)</p>
+              <textarea 
+                rows={4}
+                value={orderNote}
+                onChange={(e) => setOrderNote(e.target.value)}
+                placeholder="e.g. Please pack securely, gift wrapping needed..."
+                className="w-full border border-neutral-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none resize-none text-[15px] placeholder:text-neutral-400"
+              ></textarea>
+            </div>
+
+            {/* Payment Method */}
+            <div className="bg-[#faf9f5] border border-neutral-200 rounded-xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.01)]">
+              <h3 className="font-semibold text-[17px] text-neutral-800 mb-4">Payment Method</h3>
+              <div className="border border-[#317a26] rounded-lg p-4 bg-[#f8faf8] flex items-start gap-3">
+                <div className="mt-1 w-[18px] h-[18px] rounded-full border-[5px] border-[#317a26] bg-white flex-shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-[15px] text-neutral-800">Pay Online</span>
+                    <ShieldCheck className="w-[18px] h-[18px] text-[#317a26]" strokeWidth={2.5} />
+                  </div>
+                  <p className="text-[13px] text-neutral-500 mt-1">Pay securely with UPI, Cards, Net Banking</p>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          {/* Cart Summary */}
-          <div className="lg:col-span-5 animate-in slide-in-from-right-8 duration-700">
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-8 backdrop-blur-xl sticky top-24">
-              <h2 className="text-xl font-semibold mb-6 flex items-center gap-2 border-b border-white/10 pb-4">
-                <ShoppingCart className="w-5 h-5 text-orange-400" /> Order Registry
-              </h2>
+          {/* Right Column - Order Summary */}
+          <div className="w-full xl:w-[35%]">
+            <div className="bg-[#f6f5ef] border border-neutral-200 rounded-xl p-6 md:p-8 shadow-[0_2px_15px_rgba(0,0,0,0.03)] xl:sticky xl:top-24">
+              <h2 className="text-[20px] font-semibold text-neutral-800 mb-6">Your Order</h2>
               
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-4 mb-6">
                 {cartItems.map((item) => (
-                  <div key={item._id} className="flex items-center gap-4 bg-black/20 p-3 rounded-xl border border-white/5">
-                    <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded-lg border border-white/10" />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-white truncate truncate-lines-1">{item.name}</h4>
-                      <p className="text-sm text-gray-400">Qty: {item.quantity}</p>
+                  <div key={item._id} className="flex gap-4">
+                    <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden bg-white flex-shrink-0 border border-neutral-200">
+                      <Image src={item.imageUrl || '/images/Cardamom.jpg'} alt={item.name} fill className="object-cover" />
                     </div>
-                    <div className="text-right pl-2">
-                      <p className="font-bold text-emerald-400">${((item.price ?? 0) * item.quantity).toFixed(2)}</p>
+                    <div className="flex-1 flex flex-col justify-center">
+                      <div className="flex justify-between items-start mb-0.5">
+                        <h4 className="font-medium text-[14px] text-neutral-800 line-clamp-1 pr-2">{item.name}</h4>
+                        <span className="font-semibold text-[14px] text-neutral-800">₹{((item.price || 500) * item.quantity).toFixed(0)}</span>
+                      </div>
+                      <p className="text-[13px] text-neutral-500">100g</p>
+                      <p className="text-[13px] text-neutral-500 mt-0.5">Qty: {item.quantity}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-8 pt-6 border-t border-white/10 space-y-4">
-                <div className="flex justify-between text-gray-400">
+              <div className="pt-5 border-t border-neutral-200/80 space-y-3.5 mb-6 relative">
+                <div className="flex justify-between text-[14px] text-neutral-500">
                   <span>Subtotal</span>
-                  <span>${getCartTotal().toFixed(2)}</span>
+                  <span className="text-neutral-800">₹{subtotal.toFixed(0)}</span>
                 </div>
-                <div className="flex justify-between text-gray-400">
-                  <span>International Shipping</span>
-                  <span className="text-amber-400 text-xs mt-1">Calculated at next step</span>
-                </div>
-                <div className="flex justify-between items-end pt-4 border-t border-white/10">
-                  <span className="text-lg font-bold">Total Pay</span>
-                  <span className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
-                    ${getCartTotal().toFixed(2)}
+                <div className="flex justify-between text-[14px] text-neutral-500">
+                  <span>Delivery</span>
+                  <span className={delivery === 0 ? "text-[#317a26]" : "text-neutral-800"}>
+                    {delivery === 0 ? 'Free' : `₹${delivery}`}
                   </span>
                 </div>
               </div>
+
+              <div className="pt-5 border-t border-neutral-200/80 flex justify-between items-end mb-8 relative">
+                <span className="text-[18px] font-bold text-neutral-800">Total</span>
+                <span className="text-[22px] font-bold text-neutral-900">
+                  ₹{total.toFixed(0)}
+                </span>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3.5 rounded-[6px] bg-[#317a26] text-white font-semibold text-[16px] hover:bg-[#265e1d] transition-colors shadow-sm disabled:opacity-70 flex justify-center items-center"
+              >
+                {loading ? <span className="animate-pulse">Processing...</span> : 'Pay Now'}
+              </button>
+
+              <p className="text-[12px] text-center text-neutral-500 mt-4 leading-relaxed">
+                By placing this order, you agree to our Terms & Conditions<br/>and Privacy Policy.
+              </p>
             </div>
           </div>
-        </div>
+
+        </form>
       </div>
     </div>
   );

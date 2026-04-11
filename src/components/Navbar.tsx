@@ -9,8 +9,7 @@ import CartDrawer from './CartDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
-  const { cartItems } = useCart();
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { cartItems, isCartOpen, setIsCartOpen } = useCart();
 
   // Calculate total items
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -40,7 +39,7 @@ export default function Navbar() {
               </div>
 
               <button 
-                onClick={() => setIsDrawerOpen(true)}
+                onClick={() => setIsCartOpen(true)}
                 className="relative text-foreground hover:text-primary bg-foreground/5 hover:bg-foreground/10 px-4 py-2 rounded-full transition-all flex items-center gap-2 border border-black/5 dark:border-white/5"
               >
                 <ShoppingCart size={20} strokeWidth={2} />
@@ -65,7 +64,7 @@ export default function Navbar() {
       </nav>
 
       {/* Persistent Cart Drawer UI */}
-      <CartDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 }

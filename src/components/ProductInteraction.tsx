@@ -7,13 +7,14 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 export default function ProductInteraction({ product }: { product: any }) {
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
   const [added, setAdded] = useState(false);
 
   // Since we modified context to expect a product directly instead of just _id
   // The original context addToCart takes only one argument `product`! The context manages quantity natively internally (always +1 or array map logic).
   const handleAddToCart = () => {
     addToCart(product);
+    setIsCartOpen(true);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };

@@ -16,12 +16,13 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0, featured = true }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, setIsCartOpen } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAdded(true);
     addToCart(product);
+    setIsCartOpen(true);
     setTimeout(() => {
       setIsAdded(false);
     }, 2000);

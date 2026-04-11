@@ -15,6 +15,9 @@ interface ICartContext {
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
   getCartTotal: () => number;
+  updateQuantity: (productId: string, quantity: number) => void;
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
 }
 
 // Create the context with a default value
@@ -23,6 +26,7 @@ const CartContext = createContext<ICartContext | undefined>(undefined);
 // Create the provider component
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Load cart from localStorage on initial render
   useEffect(() => {
@@ -58,6 +62,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const updateQuantity = (productId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item._id === productId ? { ...item, quantity } : item
+      )
+    );
+  };
+
   const clearCart = () => {
     setCartItems([]);
   };
@@ -67,7 +83,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart, getCartTotal }}>
+    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, clearCart, getCartTotal, updateQuantity, isCartOpen, setIsCartOpen }}>
       {children}
     </CartContext.Provider>
   );
