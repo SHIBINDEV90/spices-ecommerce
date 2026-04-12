@@ -25,7 +25,7 @@ export default function ProductInteraction({ product }: { product: any }) {
         <div>
           <p className="text-gray-400 text-sm font-medium uppercase tracking-widest mb-1">Standard Market Price</p>
           <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
-            ${product.price.toFixed(2)}
+            ₹{product.price.toFixed(2)}
             <span className="text-sm text-gray-500 font-normal ml-2">/ kg</span>
           </p>
         </div>
