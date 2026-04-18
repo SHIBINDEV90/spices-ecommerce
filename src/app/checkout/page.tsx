@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
-import { ShoppingBag, Tag, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, Tag, CheckCircle2, ShieldCheck, Truck } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -24,10 +24,24 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState('');
   const [orderNote, setOrderNote] = useState('');
   const [shipDifferent, setShipDifferent] = useState(false);
+  
+  // Shipping Form States
+  const [shipFirstName, setShipFirstName] = useState('');
+  const [shipLastName, setShipLastName] = useState('');
+  const [shipCountry, setShipCountry] = useState('India');
+  const [shipAddress1, setShipAddress1] = useState('');
+  const [shipAddress2, setShipAddress2] = useState('');
+  const [shipCity, setShipCity] = useState('');
+  const [shipState, setShipState] = useState('');
+  const [shipZip, setShipZip] = useState('');
+  
+  // Payment State
+  const [paymentMethod, setPaymentMethod] = useState('online');
 
   const subtotal = getCartTotal();
   const delivery = subtotal > 500 ? 0 : 50; 
-  const total = subtotal + delivery;
+  const codFee = paymentMethod === 'cod' ? 75 : 0;
+  const total = subtotal + delivery + codFee;
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -142,11 +156,68 @@ export default function CheckoutPage() {
             </div>
 
             {/* Ship to Different Address */}
-            <div className="bg-[#faf9f5] border border-neutral-200 rounded-xl p-5 shadow-[0_2px_10px_rgba(0,0,0,0.01)] flex items-center gap-3 cursor-pointer" onClick={() => setShipDifferent(!shipDifferent)}>
-              <div className={`w-[18px] h-[18px] rounded-[3px] border flex items-center justify-center transition-colors ${shipDifferent ? 'bg-[#317a26] border-[#317a26]' : 'border-neutral-400 bg-white'}`}>
-                {shipDifferent && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+            <div className={`rounded-xl px-2 py-4 sm:p-6 transition-all ${shipDifferent ? 'bg-[#faf9f5]' : 'bg-transparent'}`}>
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => setShipDifferent(!shipDifferent)}>
+                <div className={`w-[20px] h-[20px] rounded-[4px] border flex items-center justify-center transition-colors ${shipDifferent ? 'bg-[#317a26] border-[#317a26]' : 'border-neutral-400 bg-white'}`}>
+                  {shipDifferent && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                </div>
+                <span className="font-medium text-[15.5px] text-neutral-800 tracking-wide">Ship to a different address?</span>
               </div>
-              <span className="font-medium text-[15px] text-neutral-800">Ship to a different address?</span>
+
+              <div className={`grid transition-all duration-300 ease-in-out ${shipDifferent ? 'grid-rows-[1fr] opacity-100 mt-6' : 'grid-rows-[0fr] opacity-0'}`}>
+                <div className="overflow-hidden">
+                  <div className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                      <div>
+                        <label className="block text-[14.5px] text-neutral-800 mb-1.5">First name <span className="text-[#a52a2a]">*</span></label>
+                        <input type="text" required={shipDifferent} value={shipFirstName} onChange={e => setShipFirstName(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] bg-white transition-shadow" />
+                      </div>
+                      <div>
+                        <label className="block text-[14.5px] text-neutral-800 mb-1.5">Last name (optional)</label>
+                        <input type="text" value={shipLastName} onChange={e => setShipLastName(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] bg-white transition-shadow" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[14.5px] text-neutral-800 mb-1.5">Country / Region <span className="text-[#a52a2a]">*</span></label>
+                      <input type="text" required={shipDifferent} value={shipCountry} onChange={e => setShipCountry(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] bg-white transition-shadow" />
+                    </div>
+
+                    <div>
+                      <label className="block text-[14.5px] text-neutral-800 mb-1.5">Address Line 1 <span className="text-[#a52a2a]">*</span></label>
+                      <input type="text" required={shipDifferent} placeholder="House number and street name" value={shipAddress1} onChange={e => setShipAddress1(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] placeholder:text-neutral-500 bg-white transition-shadow" />
+                    </div>
+
+                    <div>
+                      <label className="block text-[14.5px] text-neutral-800 mb-1.5">Address Line 2 (optional)</label>
+                      <input type="text" placeholder="Apartment, suite, unit, etc." value={shipAddress2} onChange={e => setShipAddress2(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] placeholder:text-neutral-500 bg-white transition-shadow" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                      <div>
+                        <label className="block text-[14.5px] text-neutral-800 mb-1.5">Town / City <span className="text-[#a52a2a]">*</span></label>
+                        <input type="text" required={shipDifferent} value={shipCity} onChange={e => setShipCity(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] bg-white transition-shadow" />
+                      </div>
+                      <div>
+                        <label className="block text-[14.5px] text-neutral-800 mb-1.5">State / County <span className="text-[#a52a2a]">*</span></label>
+                        <select required={shipDifferent} value={shipState} onChange={e => setShipState(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] bg-white text-neutral-800 transition-shadow">
+                          <option value="" disabled>Select a state</option>
+                          <option value="kerala">Kerala</option>
+                          <option value="karnataka">Karnataka</option>
+                          <option value="tamil-nadu">Tamil Nadu</option>
+                          <option value="maharashtra">Maharashtra</option>
+                          <option value="delhi">Delhi</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="w-full md:w-[calc(50%-12px)]">
+                      <label className="block text-[14.5px] text-neutral-800 mb-1.5">Postcode / ZIP <span className="text-[#a52a2a]">*</span></label>
+                      <input type="text" required={shipDifferent} value={shipZip} onChange={e => setShipZip(e.target.value)} className="w-full border border-neutral-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] bg-white transition-shadow" />
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Order Note */}
@@ -165,15 +236,41 @@ export default function CheckoutPage() {
             {/* Payment Method */}
             <div className="bg-[#faf9f5] border border-neutral-200 rounded-xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.01)]">
               <h3 className="font-semibold text-[17px] text-neutral-800 mb-4">Payment Method</h3>
-              <div className="border border-[#317a26] rounded-lg p-4 bg-[#f8faf8] flex items-start gap-3">
-                <div className="mt-1 w-[18px] h-[18px] rounded-full border-[5px] border-[#317a26] bg-white flex-shrink-0" />
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-[15px] text-neutral-800">Pay Online</span>
-                    <ShieldCheck className="w-[18px] h-[18px] text-[#317a26]" strokeWidth={2.5} />
+              <div className="space-y-4">
+                
+                {/* Pay Online */}
+                <div 
+                  className={`border rounded-lg p-4 flex items-center gap-4 cursor-pointer transition-all ${paymentMethod === 'online' ? 'bg-white border-neutral-200 shadow-sm' : 'bg-transparent border-neutral-200 hover:bg-neutral-50/50'}`}
+                  onClick={() => setPaymentMethod('online')}
+                >
+                  <div className={`w-[18px] h-[18px] rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${paymentMethod === 'online' ? 'border-[#317a26]' : 'border-neutral-400'}`}>
+                    {paymentMethod === 'online' && <div className="w-[8px] h-[8px] rounded-full bg-[#317a26]" />}
                   </div>
-                  <p className="text-[13px] text-neutral-500 mt-1">Pay securely with UPI, Cards, Net Banking</p>
+                  <div className="flex-1">
+                    <span className="block font-medium text-[15px] text-neutral-900 leading-snug">Pay Online</span>
+                    <span className="block text-[13.5px] text-neutral-500 mt-0.5">Pay securely with UPI, Cards, Net Banking</span>
+                  </div>
+                  <ShieldCheck className="w-5 h-5 text-[#317a26] flex-shrink-0" strokeWidth={2} />
                 </div>
+
+                {/* Cash On Delivery */}
+                <div 
+                  className={`border rounded-lg p-4 flex items-center gap-4 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'bg-white border-neutral-200 shadow-sm' : 'bg-transparent border-neutral-200 hover:bg-neutral-50/50'}`}
+                  onClick={() => setPaymentMethod('cod')}
+                >
+                  <div className={`w-[18px] h-[18px] rounded-full border flex items-center justify-center flex-shrink-0 transition-colors ${paymentMethod === 'cod' ? 'border-[#317a26]' : 'border-neutral-400'}`}>
+                    {paymentMethod === 'cod' && <div className="w-[8px] h-[8px] rounded-full bg-[#317a26]" />}
+                  </div>
+                  <div className="flex-1">
+                    <span className="block font-medium text-[15px] text-neutral-900 leading-snug">Cash On Delivery (COD)</span>
+                    <span className="block text-[13.5px] text-neutral-500 mt-0.5">Pay when your order is delivered</span>
+                  </div>
+                  <div className="flex items-center gap-2.5 flex-shrink-0">
+                    <span className="font-medium text-[14px] text-[#d97706]">+₹75</span>
+                    <Truck className="w-5 h-5 text-neutral-600" strokeWidth={2} />
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -213,6 +310,12 @@ export default function CheckoutPage() {
                     {delivery === 0 ? 'Free' : `₹${delivery}`}
                   </span>
                 </div>
+                {paymentMethod === 'cod' && (
+                  <div className="flex justify-between text-[14px] text-neutral-500 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <span>COD Fee</span>
+                    <span className="text-neutral-800">₹75</span>
+                  </div>
+                )}
               </div>
 
               <div className="pt-5 border-t border-neutral-200/80 flex justify-between items-end mb-8 relative">

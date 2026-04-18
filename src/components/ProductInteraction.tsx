@@ -29,13 +29,13 @@ export default function ProductInteraction({ product }: { product: any }) {
             <span className="text-sm text-gray-500 font-normal ml-2">/ kg</span>
           </p>
         </div>
-        <div className="text-right">
-          <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-            product.stock > 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/20 text-red-500 border border-red-500/20'
-          }`}>
-            {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
-          </span>
-        </div>
+        {product.stock > 0 && (
+          <div className="text-right">
+            <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">
+              In Stock
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

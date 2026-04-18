@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ShoppingBag, Check, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
+import QuickViewModal from './QuickViewModal';
 
 interface ProductCardProps {
   product: Product;
@@ -17,6 +18,7 @@ interface ProductCardProps {
 export default function ProductCard({ product, index = 0, featured = true }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
   const { addToCart, setIsCartOpen } = useCart();
+  const [isQuickViewOpen, setQuickViewOpen] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -59,10 +61,17 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
         )}
 
         {/* Hover Quick View Overlay */}
-        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-          <span className="translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-white text-primary px-6 py-3 rounded-full font-bold shadow-xl flex items-center gap-2">
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm z-20">
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setQuickViewOpen(true);
+            }}
+            className="translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-primary text-white hover:bg-orange-600 active:scale-95 active:bg-orange-700 px-6 py-3 rounded-full font-bold shadow-2xl flex items-center gap-2 border border-white/20"
+          >
             Quick View <ArrowRight size={18} />
-          </span>
+          </button>
         </div>
       </Link>
       
@@ -140,6 +149,12 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
           </motion.button>
         </div>
       </div>
+      
+      <QuickViewModal 
+        isOpen={isQuickViewOpen} 
+        onClose={() => setQuickViewOpen(false)} 
+        product={product} 
+      />
     </motion.div>
   );
 }
