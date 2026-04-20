@@ -8,10 +8,15 @@ export interface CartItem extends Product {
   quantity: number;
 }
 
+// Accept normal products and optional preselected quantity from callers like QuickView.
+export type AddToCartInput = Product & {
+  quantity?: number;
+};
+
 // Define the shape of the context value
 interface ICartContext {
   cartItems: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: AddToCartInput) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
   getCartTotal: () => number;
@@ -41,17 +46,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: AddToCartInput) => {
+    const quantityToAdd = Math.max(1, product.quantity ?? 1);
+
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item._id === product._id);
       if (existingItem) {
         // If item exists, increase quantity
         return prevItems.map((item) =>
-          item._id === product._id ? { ...item, quantity: item.quantity + 1 } : item
+          item._id === product._id ? { ...item, quantity: item.quantity + quantityToAdd } : item
         );
       } else {
-        // If item doesn't exist, add it to the cart with quantity 1
-        return [...prevItems, { ...product, quantity: 1 }];
+        // If item doesn't exist, add it to the cart with requested quantity
+        return [...prevItems, { ...product, quantity: quantityToAdd }];
       }
     });
   };
