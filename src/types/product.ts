@@ -18,4 +18,5 @@ export interface Product {
   origin?: string;
   grades?: string[];
   moistureContent?: string;
+  selectedWeight?: string;
 }

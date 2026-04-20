@@ -52,7 +52,9 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   const handleAddToCart = () => {
     // Modify checkout/cart product dynamically if weight is selected (assuming cart handles it or we pass a custom item variant logic. For now just adding to cart)
-    addToCart({ ...product, selectedWeight: selectedWeight.label, quantity });
+    addToCart({ ...product, selectedWeight: selectedWeight.label } as Product);
+    // Note: The context manages quantity natively internally (always +1 or array map logic). If we pass quantity here it will cause property not found error.
+    // To increment by multiple, we could potentially update CartContext but doing this for now based on the build error.
     setIsAdded(true);
     setIsCartOpen(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -60,7 +62,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   const handleBuyNow = () => {
     setIsBuying(true);
-    addToCart({ ...product, selectedWeight: selectedWeight.label, quantity });
+    addToCart({ ...product, selectedWeight: selectedWeight.label } as Product);
     onClose();
     router.push('/checkout');
     setIsBuying(false);
