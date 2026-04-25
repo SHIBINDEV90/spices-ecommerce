@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IUser extends Document {
   name: string;
   email: string;
+  phone?: string;
   password?: string;
   role: 'Admin' | 'Customer';
   createdAt: Date;
@@ -12,6 +13,7 @@ export interface IUser extends Document {
 const UserSchema: Schema = new Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
+  phone: { type: String },
   password: { type: String, select: false }, // Only grabbed when explicitly asked
   role: { type: String, enum: ['Admin', 'Customer'], default: 'Customer' },
 }, { timestamps: true });

@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Loader2, UserPlus, ArrowRight, User, Phone } from 'lucide-react';
+import { Mail, Lock, Loader2, UserPlus, ArrowRight, User, Phone, AlertCircle, CheckCircle } from 'lucide-react';
 
 export default function SignupPage() {
   const [name, setName] = useState('');
@@ -11,12 +12,41 @@ export default function SignupPage() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate signup for now
-    setTimeout(() => setLoading(false), 2000);
+    setError('');
+    setSuccess(false);
+
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, email, phone, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Something went wrong during sign up.');
+      }
+
+      setSuccess(true);
+      // Wait for a moment to show the success message before redirecting
+      setTimeout(() => {
+        router.push('/login?registered=true');
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,6 +96,18 @@ export default function SignupPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <p>{error}</p>
+                </div>
+              )}
+              {success && (
+                <div className="bg-green-500/10 border border-green-500 text-green-500 px-4 py-3 rounded-xl flex items-center gap-3 text-sm">
+                  <CheckCircle className="w-5 h-5 flex-shrink-0" />
+                  <p>Account created successfully! Redirecting to login...</p>
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-foreground/80 ml-1">Full Name</label>
                 <div className="relative">
