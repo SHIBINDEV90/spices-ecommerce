@@ -151,7 +151,7 @@ export default function Home() {
             transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
             className="flex items-center gap-16 min-w-full pl-16"
           >
-            {['IEC Registration', 'FSSAI Certified', 'Spice Board of India', 'ISO 9001:2015', 'HACCP Compliant', 'APEDA', 'Halal Certified', 'USDA Organic'].map((cert, idx) => (
+            {['IEC (Import Export Code)', 'FSSAI (Food Safety and Standards Authority of India)', 'Spice Board of India', 'ISO (International Organization for Standardization)'].map((cert, idx) => (
               <div key={idx} className="flex-shrink-0 px-8 py-4 bg-white border border-neutral-200 rounded-xl shadow-sm text-lg font-semibold text-primary/80">
                 {cert}
               </div>
@@ -163,7 +163,7 @@ export default function Home() {
             transition={{ repeat: Infinity, duration: 20, ease: "linear" }}
             className="flex items-center gap-16 min-w-full pl-16 absolute top-0 left-full"
           >
-            {['IEC Registration', 'FSSAI Certified', 'Spice Board of India', 'ISO 9001:2015', 'HACCP Compliant', 'APEDA', 'Halal Certified', 'USDA Organic'].map((cert, idx) => (
+            {['IEC (Import Export Code)', 'FSSAI (Food Safety and Standards Authority of India)', 'Spice Board of India', 'ISO (International Organization for Standardization)'].map((cert, idx) => (
               <div key={idx} className="flex-shrink-0 px-8 py-4 bg-white border border-neutral-200 rounded-xl shadow-sm text-lg font-semibold text-primary/80">
                 {cert}
               </div>
