@@ -1,20 +1,89 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Loader2, LogIn, ArrowRight } from 'lucide-react';
+import { Phone, Lock, Loader2, LogIn, ArrowRight } from 'lucide-react';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const router = useRouter();
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [timeLeft, setTimeLeft] = useState(300);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (step === 2 && timeLeft > 0) {
+      timer = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [step, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handleRequestOtp = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccessMessage('');
+
+    try {
+      const res = await fetch('/api/auth/request-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || 'Failed to request OTP');
+        setLoading(false);
+      } else {
+        setSuccessMessage('OTP sent successfully!');
+        setTimeLeft(300);
+        setStep(2);
+        setLoading(false);
+      }
+    } catch (err) {
+      setError('An error occurred while requesting OTP');
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate login for now
-    setTimeout(() => setLoading(false), 2000);
+    setError('');
+
+    try {
+      const res = await signIn('customer-credentials', {
+        redirect: false,
+        phone,
+        otp,
+      });
+
+      if (res?.error) {
+        setError(res.error);
+        setLoading(false);
+      } else {
+        router.push('/products'); // Redirect to products or dashboard after login
+        router.refresh();
+      }
+    } catch (err) {
+      setError('An error occurred during sign in');
+      setLoading(false);
+    }
   };
 
   return (
@@ -63,56 +132,89 @@ export default function LoginPage() {
               <p className="text-foreground/60 text-sm">Enter your details to access your account</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground/80 ml-1">Email Address</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
-                    placeholder="hello@example.com"
-                  />
+            <form onSubmit={step === 1 ? handleRequestOtp : handleVerifyOtp} className="space-y-6 relative z-10">
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-xl mb-4 text-center">
+                  {error}
                 </div>
-              </div>
+              )}
+              {successMessage && step === 2 && (
+                <div className="bg-green-500/10 border border-green-500/20 text-green-500 text-sm p-3 rounded-xl mb-4 text-center">
+                  {successMessage}
+                </div>
+              )}
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center ml-1">
-                  <label className="text-sm font-semibold text-foreground/80">Password</label>
-                  <Link href="#" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
-                    Forgot Password?
-                  </Link>
-                </div>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
-                    <Lock className="w-5 h-5" />
+              {step === 1 ? (
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground/80 ml-1">Mobile Number</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
+                      <Phone className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
+                      placeholder="Enter registered mobile number"
+                    />
                   </div>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
-                    placeholder="••••••••"
-                  />
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center ml-1">
+                    <label className="text-sm font-semibold text-foreground/80">Enter OTP</label>
+                    <button 
+                      type="button" 
+                      onClick={() => { setStep(1); setOtp(''); setSuccessMessage(''); }}
+                      className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Change Number
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all tracking-[0.5em] text-center font-bold placeholder:tracking-normal placeholder:font-normal placeholder:text-foreground/30 disabled:opacity-50"
+                      placeholder="Enter 6-digit OTP"
+                      maxLength={6}
+                      disabled={timeLeft === 0}
+                    />
+                  </div>
+                  <div className="flex justify-between items-center mt-2 px-1">
+                    <span className={`text-xs font-medium ${timeLeft > 0 ? 'text-foreground/60' : 'text-red-500'}`}>
+                      {timeLeft > 0 ? `OTP expires in ${formatTime(timeLeft)}` : 'OTP has expired'}
+                    </span>
+                    {timeLeft === 0 && (
+                      <button
+                        type="button"
+                        onClick={handleRequestOtp}
+                        className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                      >
+                        Resend OTP
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={loading}
+                disabled={loading || (step === 2 && timeLeft === 0)}
                 className="w-full py-4 bg-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 disabled:opacity-70"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                   <>
-                    Sign In
+                    {step === 1 ? 'Request OTP' : 'Verify & Sign In'}
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}

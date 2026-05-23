@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, email, phone, password } = body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !phone || !password) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -18,6 +18,13 @@ export async function POST(req: Request) {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json({ error: 'User already exists with this email' }, { status: 409 });
+    }
+
+    if (phone) {
+      const existingPhone = await User.findOne({ phone });
+      if (existingPhone) {
+        return NextResponse.json({ error: 'User already exists with this phone number' }, { status: 409 });
+      }
     }
 
     // Hash the password

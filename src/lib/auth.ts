@@ -7,6 +7,7 @@ import User from "@/lib/models/User";
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
+      id: "admin-credentials",
       name: "Admin Credentials",
       credentials: {
         email: { label: "Email", type: "email", placeholder: "admin@malabarcoast.com" },
@@ -30,7 +31,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!user.password) {
-          throw new Error('User has no password configured. Please login with a provider.');
+          throw new Error('User has no password configured.');
         }
 
         const isPasswordMatch = await bcrypt.compare(credentials.password, user.password);
@@ -38,6 +39,51 @@ export const authOptions: NextAuthOptions = {
         if (!isPasswordMatch) {
           throw new Error('Invalid credentials');
         }
+
+        return {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
+      }
+    }),
+    CredentialsProvider({
+      id: "customer-credentials",
+      name: "Customer Credentials",
+      credentials: {
+        phone: { label: "Phone Number", type: "text", placeholder: "Enter your registered mobile number" },
+        otp: { label: "OTP", type: "text" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.phone || !credentials?.otp) {
+          throw new Error('Please enter your mobile number and OTP');
+        }
+
+        await dbConnect();
+
+        const user = await User.findOne({ phone: credentials.phone }).select('+otp +otpExpiry');
+
+        if (!user) {
+          throw new Error('No user found with this mobile number');
+        }
+
+        if (!user.otp || !user.otpExpiry) {
+          throw new Error('Please request an OTP first.');
+        }
+
+        if (new Date() > user.otpExpiry) {
+          throw new Error('OTP has expired. Please request a new one.');
+        }
+
+        if (user.otp !== credentials.otp) {
+          throw new Error('Invalid OTP');
+        }
+
+        // Optional: clear the OTP after successful login
+        user.otp = undefined;
+        user.otpExpiry = undefined;
+        await user.save();
 
         return {
           id: user._id.toString(),

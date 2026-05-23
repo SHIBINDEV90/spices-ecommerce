@@ -7,9 +7,11 @@ import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
 import CartDrawer from './CartDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function Navbar() {
   const { cartItems, isCartOpen, setIsCartOpen } = useCart();
+  const { data: session } = useSession();
 
   // Calculate total items
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -34,8 +36,14 @@ export default function Navbar() {
 
             <div className="flex items-center space-x-4">
               <div className="hidden md:flex items-center space-x-4 border-r border-black/10 dark:border-white/10 pr-4 mr-2">
-                <Link href="/login" className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">Log In</Link>
-                <Link href="/signup" className="text-sm font-bold bg-primary text-primary-foreground px-5 py-2 rounded-full shadow-sm hover:opacity-90 transition-opacity">Sign Up</Link>
+                {session ? (
+                  <button onClick={() => signOut()} className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">Log Out</button>
+                ) : (
+                  <>
+                    <Link href="/login" className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">Log In</Link>
+                    <Link href="/signup" className="text-sm font-bold bg-primary text-primary-foreground px-5 py-2 rounded-full shadow-sm hover:opacity-90 transition-opacity">Sign Up</Link>
+                  </>
+                )}
               </div>
 
               <button 

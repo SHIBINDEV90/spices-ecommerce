@@ -5,6 +5,8 @@ export interface IUser extends Document {
   email: string;
   phone?: string;
   password?: string;
+  otp?: string;
+  otpExpiry?: Date;
   role: 'Admin' | 'Customer';
   createdAt: Date;
   updatedAt: Date;
@@ -15,6 +17,8 @@ const UserSchema: Schema = new Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String },
   password: { type: String, select: false }, // Only grabbed when explicitly asked
+  otp: { type: String, select: false }, // Store OTP temporarily
+  otpExpiry: { type: Date, select: false },
   role: { type: String, enum: ['Admin', 'Customer'], default: 'Customer' },
 }, { timestamps: true });
 

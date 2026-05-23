@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { CartProvider } from "@/context/CartContext";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Providers } from "@/components/Providers";
 
 export const dynamic = 'force-dynamic';
 
@@ -32,10 +33,12 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${robotoMono.variable} antialiased`}
       >
-        <CartProvider>
-          <Navbar />
-          <main className="p-8">{children}</main>
-        </CartProvider>
+        <Providers>
+          <CartProvider>
+            <Navbar />
+            <main className="p-8">{children}</main>
+          </CartProvider>
+        </Providers>
       </body>
       {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
     </html>
