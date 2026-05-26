@@ -58,3 +58,32 @@ html, body {
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
 }
+
+/* ==========================================================================
+   Global Media Queries (Tailwind Breakpoints)
+   ========================================================================== */
+
+/* Small Devices (Phones / Tablets, 640px and up) - tailwind: sm */
+@media (min-width: 640px) {
+  
+}
+
+/* Medium Devices (Tablets / Laptops, 768px and up) - tailwind: md */
+@media (min-width: 768px) {
+  
+}
+
+/* Large Devices (Laptops / Desktops, 1024px and up) - tailwind: lg */
+@media (min-width: 1024px) {
+  
+}
+
+/* Extra Large Devices (Large Desktops, 1280px and up) - tailwind: xl */
+@media (min-width: 1280px) {
+  
+}
+
+/* 2X Large Devices (Ultra Wide, 1536px and up) - tailwind: 2xl */
+@media (min-width: 1536px) {
+  
+}

@@ -9,25 +9,33 @@ export async function GET() {
   await dbConnect();
 
   try {
-    // Check if admin already exists
-    const existingAdmin = await User.findOne({ email: 'admin@spicewizz.com' });
-    if (existingAdmin) {
-      return NextResponse.json({ success: true, message: 'Admin already exists' });
+    const admins = [
+      { email: 'admin@malabarcoast.com', password: 'malabar123', name: 'Malabar Admin' },
+      { email: 'admin@spicewizz.com', password: 'spicewizz123', name: 'Spicewizz Admin' }
+    ];
+
+    for (const admin of admins) {
+      const hashedPassword = await bcrypt.hash(admin.password, 10);
+      
+      const existingUser = await User.findOne({ email: admin.email });
+      if (existingUser) {
+        existingUser.password = hashedPassword;
+        existingUser.role = 'Admin';
+        await existingUser.save();
+      } else {
+        await User.create({
+          name: admin.name,
+          email: admin.email,
+          password: hashedPassword,
+          role: 'Admin',
+        });
+      }
     }
-
-    const hashedPassword = await bcrypt.hash('spicewizz123', 10);
-
-    const newAdmin = await User.create({
-      name: 'System Admin',
-      email: 'admin@spicewizz.com',
-      password: hashedPassword,
-      role: 'Admin',
-    });
 
     return NextResponse.json({ 
       success: true, 
-      message: 'Admin account created successfully',
-      credentials: { email: 'admin@spicewizz.com', password: 'spicewizz123' }
+      message: 'Admin accounts updated/created successfully',
+      admins: admins.map(a => ({ email: a.email, password: a.password }))
     });
 
   } catch (error) {

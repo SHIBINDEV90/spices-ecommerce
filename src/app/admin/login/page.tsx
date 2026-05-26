@@ -20,7 +20,7 @@ export default function AdminLogin() {
     setLoading(true);
     setError('');
 
-    const res = await signIn('credentials', {
+    const res = await signIn('admin-credentials', {
       redirect: false,
       email,
       password,
