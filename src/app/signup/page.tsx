@@ -54,11 +54,11 @@ export default function SignupPage() {
       {/* Cinematic Background */}
       <div className="absolute bottom-[-20%] left-[-10%] w-[800px] h-[800px] bg-secondary/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-      
+
       <div className="w-full max-w-6xl mx-auto px-4 grid md:grid-cols-2 gap-8 md:gap-16 items-center relative z-10">
-        
+
         {/* Left Side: Cinematic Copy */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
@@ -77,7 +77,7 @@ export default function SignupPage() {
         </motion.div>
 
         {/* Right Side: Signup Form */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -86,7 +86,7 @@ export default function SignupPage() {
           <div className="bg-surface glass p-8 md:p-10 rounded-3xl shadow-2xl border border-foreground/5 relative overflow-hidden">
             {/* Inner glow */}
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="text-center mb-8 relative z-10">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-secondary/10 mb-6 text-secondary">
                 <UserPlus className="w-8 h-8" />
