@@ -36,7 +36,7 @@ export default function Navbar() {
                   Products
                 </Link>
                 <div className="absolute top-full left-0 w-48 bg-surface rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
-                  {['Cardomom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
+                  {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
                     <Link 
                       key={item} 
                       href={`/products?filter=${encodeURIComponent(item.toLowerCase())}`}
