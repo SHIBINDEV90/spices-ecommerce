@@ -45,7 +45,7 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
       transition={{ duration: 0.6, delay: index * 0.1, type: "spring", stiffness: 100 }}
       className="group relative overflow-hidden rounded-[20px] bg-surface border border-neutral-200/60 shadow-sm hover:shadow-2xl hover:border-primary/20 transition-all duration-500 h-full flex flex-col"
     >
-      <Link href={`/products/${product._id || product.slug}`} className="relative block h-52 w-full overflow-hidden bg-neutral-100 flex-shrink-0 cursor-pointer">
+      <Link href={`/products/${product._id || product.slug}`} className="relative block h-40 w-full overflow-hidden bg-neutral-100 flex-shrink-0 cursor-pointer">
         <Image
           src={product.imageUrl || '/images/Cardamom.jpg'}
           alt={product.name}
@@ -75,7 +75,7 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
         </div>
       </Link>
       
-      <div className="p-4 flex flex-col flex-grow">
+      <div className="p-3 flex flex-col flex-grow">
         <Link href={`/products/${product._id || product.slug}`}>
           <h3 className="font-semibold text-[15px] leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2 cursor-pointer mb-2 min-h-[36px]">
             {product.name}
@@ -110,7 +110,7 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
         </div>
         
         {/* Animated Add to Cart Button */}
-        <div className="pt-3 border-t border-neutral-100">
+        <div className="pt-2 border-t border-neutral-100 mt-2">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.95 }}

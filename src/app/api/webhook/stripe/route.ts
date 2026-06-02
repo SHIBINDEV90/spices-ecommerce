@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/lib/models/Order';
+import Coupon from '@/lib/models/Coupon';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
 
@@ -57,6 +58,15 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
     // NOTE: In production, you would fetch `line_items` from Stripe to capture exactly what they bought
     // For this blueprint, we log the high-level transaction payload
     const totalAmount = (session.amount_total || 0) / 100;
+    const couponCode = session.metadata?.couponCode;
+    const discountAmount = session.metadata?.discountAmount ? parseFloat(session.metadata.discountAmount) : 0;
+
+    if (session.payment_status === 'paid' && couponCode) {
+      await Coupon.findOneAndUpdate(
+        { code: couponCode },
+        { $inc: { usedCount: 1 } }
+      );
+    }
 
     await Order.create({
       customerName: session.metadata?.customerName || 'Stripe Customer',
@@ -70,6 +80,8 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
         zipCode: session.customer_details?.address?.postal_code || 'N/A',
         country: session.customer_details?.address?.country || 'N/A',
       },
+      couponCode: couponCode || undefined,
+      discountAmount: discountAmount || 0,
       paymentStatus: session.payment_status === 'paid' ? 'paid' : 'failed',
       orderStatus: 'Pending',
       paymentGatewayId: session.id, // Stores the pi_ or cs_ identifier for the Ledger!

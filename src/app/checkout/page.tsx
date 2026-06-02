@@ -12,6 +12,9 @@ export default function CheckoutPage() {
   
   // Form States (matching screenshot)
   const [coupon, setCoupon] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [couponError, setCouponError] = useState('');
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [country, setCountry] = useState('India');
@@ -41,7 +44,60 @@ export default function CheckoutPage() {
   const subtotal = getCartTotal();
   const delivery = subtotal > 500 ? 0 : 50; 
   const codFee = paymentMethod === 'cod' ? 75 : 0;
-  const total = subtotal + delivery + codFee;
+  
+  // Calculate discount based on applied coupon
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === 'percentage') {
+      discountAmount = (subtotal * appliedCoupon.discountValue) / 100;
+      if (appliedCoupon.maximumDiscount && discountAmount > appliedCoupon.maximumDiscount) {
+        discountAmount = appliedCoupon.maximumDiscount;
+      }
+    } else {
+      discountAmount = appliedCoupon.discountValue;
+      if (discountAmount > subtotal) discountAmount = subtotal;
+    }
+  }
+
+  const total = subtotal - discountAmount + delivery + codFee;
+
+  const handleApplyCoupon = async () => {
+    if (!coupon.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+    
+    setValidatingCoupon(true);
+    setCouponError('');
+    
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ couponCode: coupon, cartTotal: subtotal })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.message || 'Invalid coupon');
+      }
+      
+      setAppliedCoupon(data);
+      setCouponError('');
+    } catch (err: any) {
+      setCouponError(err.message);
+      setAppliedCoupon(null);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const removeCoupon = () => {
+    setCoupon('');
+    setAppliedCoupon(null);
+    setCouponError('');
+  };
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,12 +145,30 @@ export default function CheckoutPage() {
                   placeholder="Coupon code" 
                   value={coupon}
                   onChange={(e) => setCoupon(e.target.value)}
-                  className="flex-1 border border-neutral-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] placeholder:text-neutral-400"
+                  disabled={!!appliedCoupon || validatingCoupon}
+                  className="flex-1 border border-neutral-200 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#317a26]/20 focus:border-[#317a26] outline-none text-[15px] placeholder:text-neutral-400 disabled:opacity-60 disabled:bg-neutral-100 uppercase"
                 />
-                <button type="button" className="px-7 py-2.5 bg-[#f4f4f4] text-neutral-500 font-medium rounded-lg hover:bg-neutral-200 transition-colors text-[15px]">
-                  Apply
-                </button>
+                {!appliedCoupon ? (
+                  <button 
+                    type="button" 
+                    onClick={handleApplyCoupon}
+                    disabled={validatingCoupon || !coupon.trim()}
+                    className="px-7 py-2.5 bg-[#f4f4f4] text-neutral-600 font-medium rounded-lg hover:bg-neutral-200 transition-colors text-[15px] disabled:opacity-50 flex items-center justify-center min-w-[90px]"
+                  >
+                    {validatingCoupon ? '...' : 'Apply'}
+                  </button>
+                ) : (
+                  <button 
+                    type="button" 
+                    onClick={removeCoupon}
+                    className="px-7 py-2.5 bg-red-50 text-red-600 font-medium rounded-lg hover:bg-red-100 transition-colors text-[15px] min-w-[90px]"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
+              {couponError && <p className="text-red-500 text-sm mt-2">{couponError}</p>}
+              {appliedCoupon && <p className="text-[#317a26] text-sm mt-2 font-medium">Coupon applied successfully!</p>}
             </div>
 
             {/* Billing Details */}
@@ -310,6 +384,12 @@ export default function CheckoutPage() {
                     {delivery === 0 ? 'Free' : `₹${delivery}`}
                   </span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-[14px] text-[#317a26] font-medium animate-in fade-in slide-in-from-top-2 duration-300">
+                    <span>Discount ({appliedCoupon.coupon})</span>
+                    <span>-₹{discountAmount.toFixed(0)}</span>
+                  </div>
+                )}
                 {paymentMethod === 'cod' && (
                   <div className="flex justify-between text-[14px] text-neutral-500 animate-in fade-in slide-in-from-top-2 duration-300">
                     <span>COD Fee</span>

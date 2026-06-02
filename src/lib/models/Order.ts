@@ -23,6 +23,8 @@ export interface IOrder extends Document {
   };
   products: IOrderItem[];
   totalAmount: number;
+  couponCode?: string;
+  discountAmount?: number;
   paymentStatus: 'pending' | 'paid' | 'failed';
   orderStatus: 'Pending' | 'Paid' | 'Shipped' | 'Delivered';
   paymentGatewayId?: string; // To store Razorpay/Stripe order ID
@@ -50,6 +52,8 @@ const OrderSchema = new Schema<IOrder>(
     },
     products: [OrderItemSchema],
     totalAmount: { type: Number, required: true },
+    couponCode: { type: String },
+    discountAmount: { type: Number, default: 0 },
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed'],

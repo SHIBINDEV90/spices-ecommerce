@@ -12,6 +12,7 @@ import {
   CreditCard, 
   FileText, 
   Settings, 
+  Ticket,
   LogOut 
 } from 'lucide-react';
 
@@ -21,6 +22,7 @@ const MENU_ITEMS = [
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Enquiries', href: '/admin/enquiries', icon: MessageSquare },
   { name: 'Customers', href: '/admin/customers', icon: Users },
+  { name: 'Coupons', href: '/admin/coupons', icon: Ticket },
   { name: 'Payments', href: '/admin/payments', icon: CreditCard },
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Settings', href: '/admin/settings', icon: Settings },

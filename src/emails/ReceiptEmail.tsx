@@ -15,13 +15,20 @@ import * as React from 'react';
 interface ReceiptEmailProps {
   customerName: string;
   orderTotal: number;
+  discountAmount?: number;
+  couponCode?: string;
 }
 
-export const ReceiptEmail = ({ customerName = 'Customer', orderTotal = 0 }: ReceiptEmailProps) => {
+export const ReceiptEmail = ({ customerName = 'Customer', orderTotal = 0, discountAmount = 0, couponCode = '' }: ReceiptEmailProps) => {
   const formattedTotal = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
   }).format(orderTotal);
+  
+  const formattedDiscount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(discountAmount);
 
   return (
     <Html>
@@ -53,6 +60,11 @@ export const ReceiptEmail = ({ customerName = 'Customer', orderTotal = 0 }: Rece
                 <Text className="font-semibold text-zinc-400 uppercase tracking-widest text-xs mb-2">
                   Order Total
                 </Text>
+                {discountAmount > 0 && (
+                  <Text className="text-sm font-medium text-emerald-400 m-0 mb-2">
+                    Discount ({couponCode}): -{formattedDiscount}
+                  </Text>
+                )}
                 <Text className="text-3xl font-bold text-emerald-400 m-0">
                   {formattedTotal}
                 </Text>

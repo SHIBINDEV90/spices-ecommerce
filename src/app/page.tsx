@@ -18,8 +18,8 @@ export default function Home() {
       try {
         const res = await fetch('/api/products');
         const data = await res.json();
-        // Just take first 3-6 products for the homepage
-        setProducts(data.slice(0, 6));
+        // Just take first 8 products for the homepage
+        setProducts(data.slice(0, 8));
       } catch (err) {
         console.error("Error fetching products", err);
       }
@@ -96,7 +96,7 @@ export default function Home() {
             <span className="text-secondary font-bold tracking-widest uppercase text-sm mb-2 block">From Our Farms</span>
             <h2 className="text-4xl font-bold text-foreground">Featured Products</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product, idx) => (
               <ProductCard key={product._id} product={product} index={idx} />
             ))}

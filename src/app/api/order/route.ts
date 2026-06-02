@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Order from '@/lib/models/Order';
 import Product from '@/lib/models/Product'; // To validate products
+import Coupon from '@/lib/models/Coupon';
 import { IOrderItem } from '@/lib/models/Order';
 
 export async function POST(req: NextRequest) {
@@ -9,7 +10,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { customerName, customerEmail, shippingAddress, products } = body;
+    const { customerName, customerEmail, shippingAddress, products, couponCode } = body;
 
     // --- 1. Basic Validation ---
     if (!customerName || !customerEmail || !shippingAddress || !products || !Array.isArray(products) || products.length === 0) {
@@ -41,6 +42,26 @@ export async function POST(req: NextRequest) {
         });
     }
 
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true });
+      if (coupon && new Date(coupon.endDate) >= new Date() && new Date(coupon.startDate) <= new Date() && totalAmount >= coupon.minimumOrderAmount && coupon.usedCount < coupon.usageLimit) {
+        if (coupon.discountType === 'percentage') {
+          discountAmount = (totalAmount * coupon.discountValue) / 100;
+          if (coupon.maximumDiscount && discountAmount > coupon.maximumDiscount) {
+            discountAmount = coupon.maximumDiscount;
+          }
+        } else if (coupon.discountType === 'fixed') {
+          discountAmount = coupon.discountValue;
+          if (discountAmount > totalAmount) discountAmount = totalAmount;
+        }
+        appliedCoupon = coupon;
+        totalAmount -= discountAmount;
+      }
+    }
+
     // --- 3. Create the Order in your Database ---
     const newOrder = new Order({
       customerName,
@@ -48,6 +69,8 @@ export async function POST(req: NextRequest) {
       shippingAddress,
       products: validatedProducts,
       totalAmount,
+      couponCode: appliedCoupon ? appliedCoupon.code : undefined,
+      discountAmount,
       paymentStatus: 'pending', // Status is pending until payment is confirmed
     });
 
