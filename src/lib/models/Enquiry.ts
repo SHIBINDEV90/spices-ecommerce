@@ -2,7 +2,7 @@ import { Document, Schema, model, models } from 'mongoose';
 import { IProduct } from '@/lib/models/Product';
 
 export interface IEnquiry extends Document {
-  product: Schema.Types.ObjectId | IProduct;
+  product: string;
   name: string;
   email: string;
   country: string;
@@ -17,7 +17,7 @@ export interface IEnquiry extends Document {
 
 const EnquirySchema = new Schema<IEnquiry>(
   {
-    product: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+    product: { type: String, required: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
     country: { type: String, required: true },

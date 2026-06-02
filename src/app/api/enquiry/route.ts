@@ -15,12 +15,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
     }
 
-    // Check if product exists
-    const productExists = await Product.findById(product);
-    if (!productExists) {
-        return NextResponse.json({ success: false, message: 'Product not found' }, { status: 404 });
-    }
-
     const newEnquiry = new Enquiry({
         product,
         name,

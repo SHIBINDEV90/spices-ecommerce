@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Send, Loader2, CheckCircle } from 'lucide-react';
+import { Send, Loader2, CheckCircle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const NAVBAR_PRODUCTS = ['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'];
 
 export default function BulkEnquiryForm({ products }: { products: any[] }) {
   const searchParams = useSearchParams();
@@ -14,7 +16,7 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
   const [error, setError] = useState('');
 
   const [formData, setFormData] = useState({
-    product: preselectedProductId || (products.length > 0 ? products[0]._id : ''),
+    product: preselectedProductId || (NAVBAR_PRODUCTS.length > 0 ? NAVBAR_PRODUCTS[0] : ''),
     name: '',
     email: '',
     company: '',
@@ -79,20 +81,25 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300 ml-1">Commodity of Interest *</label>
-            <select
-              required
-              name="product"
-              value={formData.product}
-              onChange={handleChange}
-              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none font-semibold"
-            >
-              <option value="" disabled>Select a Commodity</option>
-              {products.map(p => (
-                <option key={p._id} value={p._id} className="bg-gray-800 text-white">
-                  {p.name}
-                </option>
-              ))}
-            </select>
+            <div className="relative">
+              <select
+                required
+                name="product"
+                value={formData.product}
+                onChange={handleChange}
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none font-semibold"
+              >
+                <option value="" disabled>Select a Commodity</option>
+                {NAVBAR_PRODUCTS.map(item => (
+                  <option key={item} value={item} className="bg-gray-800 text-white">
+                    {item}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              </div>
+            </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300 ml-1">Estimated Cargo Volume *</label>

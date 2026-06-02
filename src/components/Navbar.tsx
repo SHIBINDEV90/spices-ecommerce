@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Menu, X } from 'lucide-react';
+import { ShoppingCart, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useState } from 'react';
 import CartDrawer from './CartDrawer';
@@ -28,12 +28,13 @@ export default function Navbar() {
           </Link>
           
           <div className="flex items-center space-x-4 md:space-x-8">
-            <div className="hidden md:flex space-x-6">
+            <div className="hidden md:flex space-x-6 items-center">
               <Link href="/" className="text-foreground/80 font-medium hover:text-primary transition-colors">Home</Link>
               <Link href="/about" className="text-foreground/80 font-medium hover:text-primary transition-colors">About</Link>
               <div className="relative group">
-                <Link href="/products" className="text-foreground/80 font-medium hover:text-primary transition-colors py-4">
+                <Link href="/products" className="text-foreground/80 font-medium hover:text-primary transition-colors py-4 flex items-center gap-1">
                   Products
+                  <ChevronDown size={16} className="transition-transform duration-200 group-hover:-rotate-180" />
                 </Link>
                 <div className="absolute top-full left-0 w-48 bg-surface rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
                   {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
