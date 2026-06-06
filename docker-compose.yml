@@ -30,12 +30,16 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXTAUTH_URL: http://localhost:4300
-      NEXTAUTH_SECRET: change-me-in-production
-      MONGODB_URI: mongodb://mongodb:27017/spices_ecommerce
-      STRIPE_SECRET_KEY: ""
-      STRIPE_WEBHOOK_SECRET: ""
-      NEXT_PUBLIC_SITE_URL: http://localhost:4300
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:4300}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-me-in-production}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/spices_ecommerce}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:4300}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4300}
+      NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
     ports:
       - "${APP_PORT:-4300}:3000"
 
