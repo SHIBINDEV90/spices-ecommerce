@@ -42,6 +42,9 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY:-}
     ports:
       - "${APP_PORT:-4300}:3000"
+    volumes:
+      - app_uploads:/app/public/uploads
 
 volumes:
   mongo_data:
+  app_uploads:
