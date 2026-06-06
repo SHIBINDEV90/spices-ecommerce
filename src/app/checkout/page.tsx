@@ -6,6 +6,8 @@ import { ShoppingBag, Tag, CheckCircle2, ShieldCheck, Truck } from 'lucide-react
 import Image from 'next/image';
 import Link from 'next/link';
 
+const isUploadedImage = (src: string) => src.startsWith('/uploads/');
+
 export default function CheckoutPage() {
   const { cartItems, getCartTotal } = useCart();
   const [loading, setLoading] = useState(false);
@@ -359,7 +361,7 @@ export default function CheckoutPage() {
                 {cartItems.map((item) => (
                   <div key={item._id} className="flex gap-4">
                     <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden bg-white flex-shrink-0 border border-neutral-200">
-                      <Image src={item.imageUrl || '/images/Cardamom.jpg'} alt={item.name} fill className="object-cover" />
+                      <Image src={item.imageUrl || '/images/Cardamom.jpg'} alt={item.name} fill className="object-cover" unoptimized={isUploadedImage(item.imageUrl || '/images/Cardamom.jpg')} />
                     </div>
                     <div className="flex-1 flex flex-col justify-center">
                       <div className="flex justify-between items-start mb-0.5">

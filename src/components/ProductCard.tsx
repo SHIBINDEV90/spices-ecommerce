@@ -36,6 +36,8 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const basePrice = product.price || 500;
   const originalPrice = Math.round(basePrice * 1.15);
   const usp = (basePrice / 100).toFixed(2);
+  const productImage = product.imageUrl || '/images/Cardamom.jpg';
+  const isUploadedImage = productImage.startsWith('/uploads/');
 
   return (
     <motion.div
@@ -47,10 +49,11 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
     >
       <Link href={`/products/${product._id || product.slug}`} className="relative block h-40 w-full overflow-hidden bg-neutral-100 flex-shrink-0 cursor-pointer">
         <Image
-          src={product.imageUrl || '/images/Cardamom.jpg'}
+          src={productImage}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-1000 group-hover:scale-105"
+          unoptimized={isUploadedImage}
         />
         
         {/* Featured Badge */}

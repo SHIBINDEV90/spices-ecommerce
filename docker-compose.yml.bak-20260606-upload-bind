@@ -43,7 +43,7 @@ services:
     ports:
       - "${APP_PORT:-4300}:3000"
     volumes:
-      - /var/www/spicewizz/uploads:/app/public/uploads
+      - app_uploads:/app/public/uploads
 
 volumes:
   mongo_data:

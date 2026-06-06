@@ -49,6 +49,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
     product.imageUrl || '/images/Cardamom.jpg',
     product.imageUrl || '/images/Cardamom.jpg',
   ];
+  const isUploadedImage = (src: string) => src.startsWith('/uploads/');
 
   const handleAddToCart = () => {
     addToCart({ ...product, selectedWeight: selectedWeight.label, quantity });
@@ -114,6 +115,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                     alt={product.name}
                     fill
                     className="object-cover"
+                    unoptimized={isUploadedImage(images[activeImage])}
                   />
                   {/* Badge */}
                   <div className="absolute top-4 left-4 bg-orange-600/90 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-md shadow-sm border border-orange-500">
@@ -129,7 +131,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                       onClick={() => setActiveImage(idx)}
                       className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 ${activeImage === idx ? 'border-primary scale-105' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`}
                     >
-                      <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-cover" />
+                      <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-cover" unoptimized={isUploadedImage(img)} />
                     </button>
                   ))}
                 </div>
