@@ -10,7 +10,7 @@ export const authOptions: NextAuthOptions = {
       id: "admin-credentials",
       name: "Admin Credentials",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "admin@malabarcoast.com" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
@@ -25,7 +25,7 @@ export const authOptions: NextAuthOptions = {
         if (!user) {
           const isAdminEmail = credentials.email === 'admin@malabarcoast.com' || credentials.email === 'admin@spicewizz.com';
           const defaultAdminPassword = process.env.ADMIN_PASSWORD || 'admin';
-          
+
           if (isAdminEmail && credentials.password === defaultAdminPassword) {
             const hashedPassword = await bcrypt.hash(credentials.password, 10);
             user = await User.create({
@@ -42,7 +42,7 @@ export const authOptions: NextAuthOptions = {
               role: user.role,
             };
           }
-          
+
           throw new Error('No user found with this email');
         }
 

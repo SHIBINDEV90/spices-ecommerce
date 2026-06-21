@@ -8,11 +8,18 @@ import { useState } from 'react';
 import CartDrawer from './CartDrawer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const { cartItems, isCartOpen, setIsCartOpen } = useCart();
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Hide the standard user navbar completely on all admin routes
+  if (pathname?.startsWith('/admin')) {
+    return null;
+  }
 
   // Calculate total items
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -55,7 +62,7 @@ export default function Navbar() {
 
             <div className="flex items-center space-x-3 md:space-x-4">
               <div className="hidden md:flex items-center space-x-4 border-r border-black/10 dark:border-white/10 pr-4 mr-2">
-                {session ? (
+                {session && (session.user as any)?.role === 'Customer' ? (
                   <button onClick={() => signOut()} className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">Log Out</button>
                 ) : (
                   <>
@@ -115,7 +122,7 @@ export default function Navbar() {
                 <Link href="/contact" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Contact</Link>
                 
                 <div className="pt-6 border-t border-black/10 dark:border-white/10 flex flex-col space-y-4">
-                  {session ? (
+                  {session && (session.user as any)?.role === 'Customer' ? (
                     <button onClick={() => { signOut(); closeMobileMenu(); }} className="text-left font-bold text-foreground/90 hover:text-primary transition-colors text-lg">Log Out</button>
                   ) : (
                     <>

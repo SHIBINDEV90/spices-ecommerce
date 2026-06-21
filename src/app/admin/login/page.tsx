@@ -30,8 +30,8 @@ export default function AdminLogin() {
     if (res?.error) {
       setError(res.error);
       setLoading(false);
-    } else if (res?.url) {
-      router.push(res.url);
+    } else if (res?.ok) {
+      router.push('/admin/dashboard');
       router.refresh();
     }
   };
