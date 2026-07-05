@@ -12,6 +12,8 @@ interface CartDrawerProps {
   onClose: () => void;
 }
 
+const isUploadedImage = (src: string) => src.startsWith('/uploads/');
+
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { cartItems, removeFromCart, getCartTotal, updateQuantity, clearCart } = useCart();
 
@@ -96,6 +98,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         alt={item.name} 
                         fill 
                         className="object-cover"
+                        unoptimized={isUploadedImage(item.imageUrl || '/images/Cardamom.jpg')}
                       />
                     </div>
                     <div className="flex flex-col flex-grow">

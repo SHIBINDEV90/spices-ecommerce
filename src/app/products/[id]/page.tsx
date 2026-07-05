@@ -30,6 +30,8 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
     notFound();
   }
 
+  const isUploadedImage = typeof product.imageUrl === 'string' && product.imageUrl.startsWith('/uploads/');
+
   return (
     <div className="min-h-screen bg-black text-white pb-32">
       {/* Background Decor */}
@@ -49,6 +51,7 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
               alt={`Image of ${product.name}`}
               fill
               className="object-cover transition-transform duration-700 hover:scale-105"
+              unoptimized={isUploadedImage}
             />
             {product.isBulkAvailable && (
               <div className="absolute top-6 left-6 bg-amber-500 text-black px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-xl">
