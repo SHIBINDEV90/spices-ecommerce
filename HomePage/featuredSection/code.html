@@ -1,0 +1,593 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Spicewizz | Premium Kerala Spices for Global Markets</title>
+<!-- Google Fonts: EB Garamond & Hanken Grotesk -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed": "#e5e2e1",
+                    "surface-dim": "#dcdad3",
+                    "on-primary-fixed-variant": "#354e00",
+                    "primary-fixed": "#ccef8e",
+                    "outline-variant": "#c5c8b6",
+                    "primary-container": "#607d2b",
+                    "surface-container": "#f0eee7",
+                    "on-background": "#1c1c18",
+                    "on-secondary-container": "#684000",
+                    "surface-container-high": "#ebe8e1",
+                    "on-primary-fixed": "#131f00",
+                    "inverse-on-surface": "#f3f0ea",
+                    "on-error": "#ffffff",
+                    "primary": "#486413",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#747373",
+                    "secondary-fixed-dim": "#ffb95f",
+                    "surface-variant": "#e5e2db",
+                    "on-surface-variant": "#44483b",
+                    "on-error-container": "#93000a",
+                    "background": "#fcf9f2",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#4b6716",
+                    "surface-bright": "#fcf9f2",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed": "#1c1b1b",
+                    "secondary": "#855300",
+                    "on-tertiary-container": "#fdfaf9",
+                    "cream-paper": "#FDFBF7",
+                    "on-secondary-fixed": "#2a1700",
+                    "inverse-surface": "#31312c",
+                    "on-tertiary": "#ffffff",
+                    "slate-ink": "#1A1A1A",
+                    "on-primary-container": "#f6ffdf",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#474746",
+                    "tertiary-fixed-dim": "#c8c6c5",
+                    "outline": "#757969",
+                    "primary-fixed-dim": "#b1d275",
+                    "surface-container-low": "#f6f3ec",
+                    "saffron-glow": "#FFB82E",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#1c1c18",
+                    "secondary-container": "#fea619",
+                    "secondary-fixed": "#ffddb8",
+                    "inverse-primary": "#b1d275",
+                    "surface": "#fcf9f2",
+                    "surface-container-highest": "#e5e2db",
+                    "moss-deep": "#4A6121",
+                    "on-secondary-fixed-variant": "#653e00",
+                    "tertiary": "#5c5b5b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "container-max": "1280px",
+                    "margin-mobile": "20px",
+                    "gutter": "24px",
+                    "margin-desktop": "64px",
+                    "base": "8px"
+            },
+            "fontFamily": {
+                    "body-md": [
+                            "Hanken Grotesk"
+                    ],
+                    "headline-md": [
+                            "EB Garamond"
+                    ],
+                    "headline-lg-mobile": [
+                            "EB Garamond"
+                    ],
+                    "title-lg": [
+                            "Hanken Grotesk"
+                    ],
+                    "display-lg": [
+                            "EB Garamond"
+                    ],
+                    "headline-lg": [
+                            "EB Garamond"
+                    ],
+                    "body-lg": [
+                            "Hanken Grotesk"
+                    ],
+                    "label-md": [
+                            "Hanken Grotesk"
+                    ]
+            },
+            "fontSize": {
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "title-lg": [
+                            "22px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "display-lg": [
+                            "64px",
+                            {
+                                    "lineHeight": "72px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "56px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+    </style>
+<script src="https://cdn.jsdelivr.net/npm/gl-shader-element@latest"></script>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-cream-paper/80 dark:bg-slate-ink/80 backdrop-blur-md border-b border-outline-variant dark:border-outline sticky top-0 z-50 transition-all duration-300">
+<div class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto">
+<!-- Brand -->
+<a class="font-headline-md text-headline-md font-bold text-moss-deep dark:text-primary-fixed flex items-center gap-2" href="/">
+<img alt="Spicewizz Logo" class="h-8 w-auto mix-blend-multiply" src="https://lh3.googleusercontent.com/aida/AP1WRLuKGEoh6-_Sk-4plsOqNhI_gSxU2IpDso_iM1RASuGGMFgBnCmMkWrRvWGJG0uqzfxs76YYq2EePbKLW28Zw8lOGIyRw7JM7pAKk5qTq-lSo2p8vbVr--4tMBKKmnlsko6dK8vL4s31VQbOtp04Plr-cUcA74wgAvNgk4xjDusz6Ssngvcb-6XiO1MBI69jUp176urXy76Hk1CMKGX0DOu4zjuC7DQjS5EOnLTXUOnWezB0FEY4gPcui1w">
+                SPICEWIZZ
+            </a>
+<!-- Desktop Navigation -->
+<nav class="hidden md:flex gap-gutter items-center"><a class="font-body-md text-body-md uppercase tracking-wider text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-300 scale-100 active:scale-95 transition-transform" href="/">Home</a>
+<a class="font-body-md text-body-md uppercase tracking-wider text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-300 scale-100 active:scale-95 transition-transform" href="#about">About</a>
+<a class="font-body-md text-body-md uppercase tracking-wider text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-300 scale-100 active:scale-95 transition-transform" href="/products">Products</a>
+<a class="font-body-md text-body-md uppercase tracking-wider text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-300 scale-100 active:scale-95 transition-transform" href="/certifications">Certifications</a>
+<a class="font-body-md text-body-md uppercase tracking-wider text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-300 scale-100 active:scale-95 transition-transform" href="/journal">Journal</a>
+<a class="font-body-md text-body-md uppercase tracking-wider text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed transition-colors duration-300 scale-100 active:scale-95 transition-transform" href="#quote">Contact</a></nav>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button class="hidden md:inline-flex bg-saffron-glow text-slate-ink font-label-md text-label-md uppercase px-6 py-3 rounded hover:bg-secondary-fixed-dim transition-colors scale-100 active:scale-95">
+                    REQUEST QUOTE
+                </button>
+<button class="md:hidden text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="menu">menu</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-grow">
+<!-- 1. Hero Section -->
+<section class="relative w-full h-[80vh] md:h-[90vh] flex items-center justify-center overflow-hidden">
+<!-- Background WebGL Shader -->
+<!-- STITCH_SHADER_START:ANIMATION_11 class="absolute inset-0 w-full h-full opacity-40" -->
+<div class="absolute inset-0 w-full h-full opacity-40" style="display:block;">
+<canvas id="shader-canvas-ANIMATION_11" style="display:block;width:100%;height:100%" width="1280" height="921"></canvas>
+<script>
+(function() {
+  const canvas = document.getElementById('shader-canvas-ANIMATION_11');
+
+  // Sync the WebGL drawing-buffer size with the CSS-driven layout size.
+  // This fires on initial layout and whenever the element is resized.
+  function syncSize() {
+    const w = canvas.clientWidth  || 1280;
+    const h = canvas.clientHeight || 720;
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width  = w;
+      canvas.height = h;
+    }
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(syncSize).observe(canvas);
+  }
+  syncSize();
+
+  const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 a_position;
+varying vec2 v_texCoord;
+void main() {
+  v_texCoord = a_position * 0.5 + 0.5;
+  gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+  const fs = `precision highp float;
+
+uniform float u_time;
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+varying vec2 v_texCoord;
+
+// Simplex noise function
+vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+float snoise(vec2 v) {
+  const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+  vec2 i  = floor(v + dot(v, C.yy) );
+  vec2 x0 = v -   i + dot(i, C.xx);
+  vec2 i1;
+  i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+  vec4 x12 = x0.xyxy + C.xxzz;
+  x12.xy -= i1;
+  i = mod289(i);
+  vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+  vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+  m = m*m ;
+  m = m*m ;
+  vec3 x = 2.0 * fract(p * C.www) - 1.0;
+  vec3 h = abs(x) - 0.5;
+  vec3 ox = floor(x + 0.5);
+  vec3 a0 = x - ox;
+  m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+  vec3 g;
+  g.x  = a0.x  * x0.x  + h.x  * x0.y;
+  g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+  return 130.0 * dot(m, g);
+}
+
+void main() {
+    vec2 uv = v_texCoord;
+    vec2 mouse = u_mouse / u_resolution;
+    
+    // Create a fluid, organic movement based on noise and time
+    float n = snoise(uv * 3.0 + u_time * 0.2 + mouse * 0.5);
+    n += 0.5 * snoise(uv * 6.0 - u_time * 0.3);
+    
+    // Colors inspired by the SpiceWizz palette (Moss Green, Saffron, Cream)
+    vec3 color1 = vec3(0.117, 0.337, 0.192); // Deep Green (#1E5631)
+    vec3 color2 = vec3(0.902, 0.494, 0.133); // Saffron (#E67E22)
+    vec3 color3 = vec3(0.988, 0.976, 0.949); // Surface/Cream (#fcf9f2)
+    
+    // Mix colors based on noise
+    vec3 finalColor = mix(color1, color2, n * 0.5 + 0.5);
+    finalColor = mix(finalColor, color3, clamp(snoise(uv * 2.0 + u_time * 0.1), 0.0, 1.0) * 0.3);
+    
+    // Vignette
+    float vignette = 1.0 - smoothstep(0.5, 1.5, length(uv - 0.5));
+    
+    gl_FragColor = vec4(finalColor * vignette, 1.0);
+}`;
+  function cs(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, cs(gl.VERTEX_SHADER, vs));
+  gl.attachShader(prog, cs(gl.FRAGMENT_SHADER, fs));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const pos = gl.getAttribLocation(prog, 'a_position');
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'u_time');
+  const uRes = gl.getUniformLocation(prog, 'u_resolution');
+  const uMouse = gl.getUniformLocation(prog, 'u_mouse');
+
+  // u_mouse is in pixel coordinates matching u_resolution (ShaderToy convention).
+  // Shaders that need normalized coords should use: u_mouse / u_resolution.
+  let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
+  window.addEventListener('mousemove', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width && rect.height) {
+      const nx = (event.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (event.clientY - rect.top) / rect.height;
+      mouse.x = nx * canvas.width;
+      mouse.y = ny * canvas.height;
+    }
+  });
+
+  function render(t) {
+    if (typeof ResizeObserver === 'undefined') syncSize();
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    if (uTime) gl.uniform1f(uTime, t * 0.001);
+    if (uRes) gl.uniform2f(uRes, canvas.width, canvas.height);
+    if (uMouse) gl.uniform2f(uMouse, mouse.x, mouse.y);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  render(0);
+})();
+</script>
+</div>
+<!-- STITCH_SHADER_END:ANIMATION_11 -->
+<!-- Gradient Overlay for readability -->
+<div class="absolute inset-0 bg-gradient-to-t from-slate-ink/90 via-slate-ink/50 to-transparent"></div>
+<div class="relative z-10 text-center px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto flex flex-col items-center">
+<span class="font-label-md text-label-md text-saffron-glow uppercase tracking-widest mb-4 animate-fade-in-up">Export Grade</span>
+<h1 class="font-display-lg text-display-lg md:text-[80px] md:leading-[88px] text-surface-container-lowest max-w-4xl mb-8 animate-fade-in-up delay-100">
+                    Premium Kerala Spices for Global Markets
+                </h1>
+<p class="font-body-lg text-body-lg text-surface-variant max-w-2xl mb-10 animate-fade-in-up delay-200">
+                    Sourced directly from the lush farms of Kerala. We deliver the authentic, pure, and sustainably sourced magic of Indian spices to modern kitchens worldwide.
+                </p>
+<a class="bg-saffron-glow text-slate-ink font-label-md text-label-md uppercase px-8 py-4 rounded hover:bg-secondary-fixed-dim transition-colors shadow-lg shadow-saffron-glow/20 animate-fade-in-up delay-300" href="#quote">
+                    Request Export Quote
+                </a>
+</div>
+</section>
+<!-- 2. About/Heritage Section -->
+<section class="py-24 md:py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="grid md:grid-cols-2 gap-16 items-center">
+<div class="space-y-6">
+<h4 class="font-label-md text-label-md text-moss-deep uppercase tracking-widest animate-fade-in-up">Our Heritage</h4>
+<h2 class="font-headline-lg text-headline-lg text-slate-ink animate-fade-in-up delay-100">About Spicewizz</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant animate-fade-in-up delay-200">
+                        We are a leading exporter of high-quality, authentic spices sourced directly from the lush farms of Kerala. With generations of expertise, our commitment is to bring you the freshest, most aromatic spices that meet international export standards and elevate global culinary experiences.
+                    </p>
+<div class="pt-4 animate-fade-in-up delay-300">
+<img alt="Spicewizz Logo" class="h-16 opacity-80 mix-blend-multiply filter grayscale hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida/AP1WRLuKGEoh6-_Sk-4plsOqNhI_gSxU2IpDso_iM1RASuGGMFgBnCmMkWrRvWGJG0uqzfxs76YYq2EePbKLW28Zw8lOGIyRw7JM7pAKk5qTq-lSo2p8vbVr--4tMBKKmnlsko6dK8vL4s31VQbOtp04Plr-cUcA74wgAvNgk4xjDusz6Ssngvcb-6XiO1MBI69jUp176urXy76Hk1CMKGX0DOu4zjuC7DQjS5EOnLTXUOnWezB0FEY4gPcui1w">
+</div>
+</div>
+<div class="relative h-[500px] rounded overflow-hidden shadow-2xl shadow-moss-deep/5 group animate-fade-in-up delay-200">
+<img class="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" data-alt="A close-up, high-resolution shot of premium spices." src="https://lh3.googleusercontent.com/aida/AP1WRLvMGC_0FHT_yKtT7epi9raHutAOqZy-5UnmqsbDVE10xpZMrE4GB34wESHlWKX7CRcWFQ3_YGTL5N9l7R_LMiwVDAF9KRjw8cOxPapit86Kih4D71gkGyPoHQsEKKiWH5KZj7RawJVWFL1kOUGWI_aimQG-Eq6-Bq1ezGMaHnEejqnBl_EpyLOntxcETJB0kCm2vkFO4BRLRT2QcaQSjnxllpmr_x-UkgOfCcklfZlJvc5n7TJIevq9RsQ">
+<div class="absolute inset-0 border border-cream-paper/20 rounded m-4 pointer-events-none"></div>
+</div>
+</div>
+</section>
+<!-- 3. Featured Products Grid -->
+<section class="py-24 bg-surface-container-low border-y border-surface-variant">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="text-center mb-16">
+<h4 class="font-label-md text-label-md text-moss-deep uppercase tracking-widest mb-2 animate-fade-in-up">From Our Farms</h4>
+<h2 class="font-headline-lg text-headline-lg text-slate-ink animate-fade-in-up delay-100">Featured Products</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Product 1 -->
+<div class="bg-cream-paper rounded overflow-hidden shadow-sm shadow-moss-deep/5 hover:shadow-xl transition-shadow duration-300 group cursor-pointer flex flex-col h-full border border-surface-variant animate-fade-in-up delay-100 relative">
+<div class="h-64 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A macro shot of vibrant green cardamom pods scattered elegantly." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzdRVmhhVJJ_0l_zpZXQ2_9qm1bF6lCGzuJ16-1FvK2S5m4jT0nUqyxK57QDSl3nGBIcMD2NpBoYErUhb_n-InXukp4ljpu2Z0dmr6H8Hxo2TAfyYWa5OSQf9kMLMVjY62yEnD0KxB4WpjoYSaL9BHA0jteA1f2KS744Et8wj9viKE0hkLXEe9PmBzka7hO-c5XV_kOmQXJIMB-rcDhiP2BzerkLhEgN4wMTxyHLlcyejwA8SZA2gK2cWNBGfzeqWN1bRWnU8cXd4">
+<div class="absolute top-4 left-4 bg-moss-deep text-surface-container-lowest font-label-md text-xs px-3 py-1 rounded uppercase tracking-wider z-10">Export Grade</div>
+<!-- Hover Overlay -->
+<div class="absolute inset-0 bg-slate-ink/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+<button class="border-2 border-saffron-glow text-saffron-glow font-label-md px-6 py-3 uppercase tracking-wider hover:bg-saffron-glow hover:text-slate-ink transition-colors">Request Bulk Quote</button>
+</div>
+</div>
+<div class="p-8 flex-grow flex flex-col justify-between relative z-10 bg-cream-paper">
+<div>
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-2">Cardamom</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Premium Alleppey Green Cardamom, renowned for its intense aroma and bold flavor.</p>
+</div>
+<button class="text-left font-label-md text-label-md text-primary hover:text-moss-deep flex items-center gap-2 group-hover:gap-3 transition-all">
+                                View Specifications <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Product 2 -->
+<div class="bg-cream-paper rounded overflow-hidden shadow-sm shadow-moss-deep/5 hover:shadow-xl transition-shadow duration-300 group cursor-pointer flex flex-col h-full border border-surface-variant animate-fade-in-up delay-200 relative">
+<div class="h-64 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A stylized overhead shot of premium black peppercorns forming a neat mound." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKeYLIU8t_BBdynJabVaolP5rIJQZ7Bfw4IydtthDBq2O62agIHIUehh47idbmFFCFgww8fCFLZsgiiahjUehi8QvFgNb1bc6x9rDgBHCYW7nbK26caJfkQSBX4Yjpuhfd9ZV1HPadaftokBqLGWJLYmHotf4C0CpIyodGEAexU-q4hbd-Ueifub6d-1yefvCUd6HinvvZO9yC0jAw8m1l7hPjYxxNxD-zXyySnc2uREGPW785uH8U_zpdux-WP_XhvyaVEFR4Bvk">
+<div class="absolute top-4 left-4 bg-moss-deep text-surface-container-lowest font-label-md text-xs px-3 py-1 rounded uppercase tracking-wider z-10">Bulk Ready</div>
+<!-- Hover Overlay -->
+<div class="absolute inset-0 bg-slate-ink/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+<button class="border-2 border-saffron-glow text-saffron-glow font-label-md px-6 py-3 uppercase tracking-wider hover:bg-saffron-glow hover:text-slate-ink transition-colors">Request Bulk Quote</button>
+</div>
+</div>
+<div class="p-8 flex-grow flex flex-col justify-between relative z-10 bg-cream-paper">
+<div>
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-2">Black Pepper</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Tellicherry Garbled Special Extra Bold (TGSEB) pepper with high piperine content.</p>
+</div>
+<button class="text-left font-label-md text-label-md text-primary hover:text-moss-deep flex items-center gap-2 group-hover:gap-3 transition-all">
+                                View Specifications <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Product 3 -->
+<div class="bg-cream-paper rounded overflow-hidden shadow-sm shadow-moss-deep/5 hover:shadow-xl transition-shadow duration-300 group cursor-pointer flex flex-col h-full border border-surface-variant animate-fade-in-up delay-300 relative">
+<div class="h-64 relative overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Tightly rolled, high-quality Ceylon cinnamon quills arranged diagonally across the frame." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBj-ECelOshsuZLhjrU34KFz3AyIBfYhC1SoqNE269F6mTmMjftKOlzeRHhBKmvukBw1g-JIAIR_lvheEcr_HIhjBokbwDaouV0KPac_YL7g7hdeuM4kzDv5Gu8KXRa_KaobpdGYmLlDSkTvaL3JzO3huSNWRJBJL3fr2_gOSDTHyRk4kGxF6xhEmcSkg17PJeQHPc-_6_KhPPwjB0qz-HR6ptclVeEbOsvqt3gGUHH17Omz6UytxaFw9nG2PmNt0pKLnA4RGEsanE">
+<div class="absolute top-4 left-4 bg-moss-deep text-surface-container-lowest font-label-md text-xs px-3 py-1 rounded uppercase tracking-wider z-10">Sustainable</div>
+<!-- Hover Overlay -->
+<div class="absolute inset-0 bg-slate-ink/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+<button class="border-2 border-saffron-glow text-saffron-glow font-label-md px-6 py-3 uppercase tracking-wider hover:bg-saffron-glow hover:text-slate-ink transition-colors">Request Bulk Quote</button>
+</div>
+</div>
+<div class="p-8 flex-grow flex flex-col justify-between relative z-10 bg-cream-paper">
+<div>
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-2">Cinnamon</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6">Authentic, delicately sweet cinnamon quills harvested with traditional methods.</p>
+</div>
+<button class="text-left font-label-md text-label-md text-primary hover:text-moss-deep flex items-center gap-2 group-hover:gap-3 transition-all">
+                                View Specifications <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center animate-fade-in-up delay-300">
+<a class="inline-block border-2 border-moss-deep text-moss-deep font-label-md text-label-md uppercase px-8 py-4 rounded hover:bg-moss-deep hover:text-surface-container-lowest transition-colors" href="/products">
+                        View Entire Catalog
+                    </a>
+</div>
+</div>
+</section>
+<!-- 4. The Spicewizz Difference -->
+<section class="py-24 md:py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<div class="text-center mb-16">
+<h4 class="font-label-md text-label-md text-moss-deep uppercase tracking-widest mb-2 animate-fade-in-up">The Spicewizz Difference</h4>
+<h2 class="font-headline-lg text-headline-lg text-slate-ink animate-fade-in-up delay-100">Why Choose Us?</h2>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+<!-- Point 1 -->
+<div class="flex flex-col items-center text-center animate-fade-in-up delay-100">
+<div class="font-display-lg text-5xl text-moss-deep mb-4 font-bold">100+</div>
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-3 text-2xl">Products</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Sourced directly to ensure maximum freshness and rigorous quality control at the root.</p>
+</div>
+<!-- Point 2 -->
+<div class="flex flex-col items-center text-center animate-fade-in-up delay-200">
+<div class="font-display-lg text-5xl text-moss-deep mb-4 font-bold">100%</div>
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-3 text-2xl">Export Grade</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Comprehensive testing to meet and exceed strict international food safety standards.</p>
+</div>
+<!-- Point 3 -->
+<div class="flex flex-col items-center text-center animate-fade-in-up delay-300">
+<div class="font-display-lg text-5xl text-moss-deep mb-4 font-bold">50+</div>
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-3 text-2xl">Partner Farms</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Processed and packed using state-of-the-art sterile machinery in controlled environments.</p>
+</div>
+<!-- Point 4 -->
+<div class="flex flex-col items-center text-center animate-fade-in-up delay-400">
+<div class="font-display-lg text-5xl text-moss-deep mb-4 font-bold">25+</div>
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-3 text-2xl">Countries</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Timely, reliable fulfillment and logistics management to markets across the world.</p>
+</div>
+</div>
+</section>
+<!-- 5. Certifications -->
+<section class="py-16 bg-cream-paper border-t border-surface-variant">
+<div class="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center">
+<h3 class="font-headline-md text-headline-md text-slate-ink mb-10 text-2xl animate-fade-in-up">Accredited &amp; Certified For Global Trade</h3>
+<div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-70 animate-fade-in-up delay-100">
+<!-- Badges simulated with styled text/icons for clean look -->
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-saffron-glow" data-icon="workspace_premium">workspace_premium</span>
+<span class="font-label-md text-label-md text-moss-deep tracking-wider uppercase">IEC</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-saffron-glow" data-icon="workspace_premium">workspace_premium</span>
+<span class="font-label-md text-label-md text-moss-deep tracking-wider uppercase">FSSAI</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-saffron-glow" data-icon="workspace_premium">workspace_premium</span>
+<span class="font-label-md text-label-md text-moss-deep tracking-wider uppercase">Spice Board</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-4xl text-saffron-glow" data-icon="workspace_premium">workspace_premium</span>
+<span class="font-label-md text-label-md text-moss-deep tracking-wider uppercase">ISO 9001</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. Bulk Inquiry CTA -->
+<section class="bg-slate-ink text-surface-container-lowest py-24 px-margin-mobile md:px-margin-desktop relative overflow-hidden" id="quote">
+<!-- Subtle background pattern -->
+<div class="absolute inset-0 opacity-5" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px;"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10 animate-fade-in-up">
+<h2 class="font-headline-lg text-headline-lg mb-6">Partner With Us for Bulk Orders</h2>
+<p class="font-body-lg text-body-lg text-surface-variant mb-10 max-w-2xl mx-auto">
+                    We offer competitive pricing, customized packaging, and private labeling for bulk and wholesale exports. Let us source the best for your business.
+                </p>
+<form class="flex flex-col sm:flex-row gap-4 justify-center max-w-xl mx-auto">
+<input class="bg-transparent border border-outline-variant text-surface-container-lowest font-body-md px-6 py-4 rounded focus:ring-2 focus:ring-saffron-glow focus:border-transparent outline-none w-full sm:w-auto flex-grow placeholder:text-outline" placeholder="Business Email Address" type="email">
+<button class="bg-saffron-glow text-slate-ink font-label-md text-label-md uppercase px-8 py-4 rounded hover:bg-secondary-fixed-dim transition-colors flex-shrink-0 whitespace-nowrap" type="submit">
+                        Request Quote
+                    </button>
+</form>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface grid grid-cols-1 md:grid-cols-3 gap-gutter px-margin-desktop py-16 max-w-container-max mx-auto full-width">
+<!-- Brand Area -->
+<div class="flex flex-col gap-4">
+<span class="font-headline-md text-headline-md text-moss-deep dark:text-primary-fixed font-bold flex items-center gap-2">
+<img alt="Spicewizz Logo" class="h-8 w-auto mix-blend-multiply opacity-50 grayscale" src="https://lh3.googleusercontent.com/aida/AP1WRLuKGEoh6-_Sk-4plsOqNhI_gSxU2IpDso_iM1RASuGGMFgBnCmMkWrRvWGJG0uqzfxs76YYq2EePbKLW28Zw8lOGIyRw7JM7pAKk5qTq-lSo2p8vbVr--4tMBKKmnlsko6dK8vL4s31VQbOtp04Plr-cUcA74wgAvNgk4xjDusz6Ssngvcb-6XiO1MBI69jUp176urXy76Hk1CMKGX0DOu4zjuC7DQjS5EOnLTXUOnWezB0FEY4gPcui1w">
+                SPICEWIZZ
+            </span>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant max-w-xs">
+                Delivering the ancient magic of Indian spices to modern kitchens worldwide. Authentic, pure, and sustainably sourced.
+            </p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant mt-2">
+                Email: exports@spicewizz.com
+            </p>
+</div>
+<!-- Links Area -->
+<div class="flex flex-col gap-3 md:items-center">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-saffron-glow transition-colors opacity-100 hover:opacity-80" href="#">ISO Certified</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-saffron-glow transition-colors opacity-100 hover:opacity-80" href="#">FSSAI Licensed</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-saffron-glow transition-colors opacity-100 hover:opacity-80" href="#">Spices Board of India</a>
+</div>
+<!-- Legal Area -->
+<div class="flex flex-col gap-3 md:items-end justify-between">
+<div class="flex flex-col gap-3 md:items-end">
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-saffron-glow transition-colors opacity-100 hover:opacity-80" href="#">Privacy Policy</a>
+<a class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant hover:text-secondary dark:hover:text-saffron-glow transition-colors opacity-100 hover:opacity-80" href="#">Terms of Trade</a>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-surface-variant mt-8 md:mt-0">
+                © 2024 Spicewizz Global Exports. All Rights Reserved.
+            </p>
+</div>
+</footer>
+
+
+</body></html>

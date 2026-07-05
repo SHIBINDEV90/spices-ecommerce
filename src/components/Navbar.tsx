@@ -85,7 +85,7 @@ export default function Navbar() {
                       initial={{ scale: 0, y: 5 }}
                       animate={{ scale: 1, y: 0 }}
                       exit={{ scale: 0, opacity: 0 }}
-                      className="absolute -top-2 -right-2 bg-accent text-white text-[10px] font-bold h-5 w-5 rounded-full flex items-center justify-center shadow-lg border border-surface"
+                      className="absolute -top-2 -right-2 bg-moss-deep text-white text-xs font-bold h-[22px] w-[22px] rounded-full flex items-center justify-center shadow-sm"
                     >
                       {totalItems}
                     </motion.div>

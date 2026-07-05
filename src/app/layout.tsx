@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Roboto_Mono } from "next/font/google";
+import { EB_Garamond, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { CartProvider } from "@/context/CartContext";
@@ -8,13 +8,13 @@ import { Providers } from "@/components/Providers";
 
 export const dynamic = 'force-dynamic';
 
-const inter = Inter({
-  variable: "--font-sans",
+const ebGaramond = EB_Garamond({
+  variable: "--font-eb-garamond",
   subsets: ["latin"],
 });
 
-const robotoMono = Roboto_Mono({
-  variable: "--font-mono",
+const hankenGrotesk = Hanken_Grotesk({
+  variable: "--font-hanken-grotesk",
   subsets: ["latin"],
 });
 
@@ -31,12 +31,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${robotoMono.variable} antialiased`}
+        className={`${ebGaramond.variable} ${hankenGrotesk.variable} antialiased font-body-lg`}
       >
         <Providers>
           <CartProvider>
             <Navbar />
-            <main className="p-8">{children}</main>
+            <main>{children}</main>
           </CartProvider>
         </Providers>
       </body>
