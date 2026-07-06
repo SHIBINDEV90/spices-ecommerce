@@ -19,17 +19,18 @@ export default function HeroBackground() {
         canvas.height = h;
       }
     }
-    
+
     let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined') {
+    if (typeof ResizeObserver !== "undefined") {
       resizeObserver = new ResizeObserver(syncSize);
       resizeObserver.observe(canvas);
     }
     syncSize();
 
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    const gl =
+      canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
     if (!gl) return;
-    
+
     const glCtx = gl as WebGLRenderingContext;
 
     const vs = `attribute vec2 a_position;
@@ -96,7 +97,7 @@ void main() {
     
     gl_FragColor = vec4(finalColor * vignette, 1.0);
 }`;
-    
+
     function cs(type: number, src: string) {
       const s = glCtx.createShader(type);
       if (!s) return null;
@@ -104,33 +105,37 @@ void main() {
       glCtx.compileShader(s);
       return s;
     }
-    
+
     const prog = glCtx.createProgram();
     if (!prog) return;
-    
+
     const vertexShader = cs(glCtx.VERTEX_SHADER, vs);
     const fragmentShader = cs(glCtx.FRAGMENT_SHADER, fs);
     if (!vertexShader || !fragmentShader) return;
-    
+
     glCtx.attachShader(prog, vertexShader);
     glCtx.attachShader(prog, fragmentShader);
     glCtx.linkProgram(prog);
     glCtx.useProgram(prog);
-    
+
     const buf = glCtx.createBuffer();
     glCtx.bindBuffer(glCtx.ARRAY_BUFFER, buf);
-    glCtx.bufferData(glCtx.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), glCtx.STATIC_DRAW);
-    
-    const pos = glCtx.getAttribLocation(prog, 'a_position');
+    glCtx.bufferData(
+      glCtx.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+      glCtx.STATIC_DRAW,
+    );
+
+    const pos = glCtx.getAttribLocation(prog, "a_position");
     glCtx.enableVertexAttribArray(pos);
     glCtx.vertexAttribPointer(pos, 2, glCtx.FLOAT, false, 0, 0);
-    
-    const uTime = glCtx.getUniformLocation(prog, 'u_time');
-    const uRes = glCtx.getUniformLocation(prog, 'u_resolution');
-    const uMouse = glCtx.getUniformLocation(prog, 'u_mouse');
+
+    const uTime = glCtx.getUniformLocation(prog, "u_time");
+    const uRes = glCtx.getUniformLocation(prog, "u_resolution");
+    const uMouse = glCtx.getUniformLocation(prog, "u_mouse");
 
     let mouse = { x: canvas.width / 2, y: canvas.height / 2 };
-    
+
     const handleMouseMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
       if (rect.width && rect.height) {
@@ -140,25 +145,28 @@ void main() {
         mouse.y = ny * canvas.height;
       }
     };
-    
-    window.addEventListener('mousemove', handleMouseMove);
+
+    window.addEventListener("mousemove", handleMouseMove);
 
     let animationFrameId: number;
 
     function render(t: number) {
-      if (typeof ResizeObserver === 'undefined') syncSize();
-      glCtx.viewport(0, 0, canvas.width, canvas.height);
+      if (!canvas) return;
+      if (typeof ResizeObserver === "undefined") syncSize();
+      const width = canvas.width;
+      const height = canvas.height;
+      glCtx.viewport(0, 0, width, height);
       if (uTime) glCtx.uniform1f(uTime, t * 0.001);
-      if (uRes) glCtx.uniform2f(uRes, canvas.width, canvas.height);
+      if (uRes) glCtx.uniform2f(uRes, width, height);
       if (uMouse) glCtx.uniform2f(uMouse, mouse.x, mouse.y);
       glCtx.drawArrays(glCtx.TRIANGLE_STRIP, 0, 4);
       animationFrameId = requestAnimationFrame(render);
     }
-    
+
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove);
       cancelAnimationFrame(animationFrameId);
       if (resizeObserver) {
         resizeObserver.disconnect();
@@ -167,10 +175,13 @@ void main() {
   }, []);
 
   return (
-    <div className="absolute inset-0 w-full h-full" style={{ display: 'block', zIndex: 0 }}>
-      <canvas 
-        ref={canvasRef} 
-        style={{ display: 'block', width: '100%', height: '100%' }}
+    <div
+      className="absolute inset-0 w-full h-full"
+      style={{ display: "block", zIndex: 0 }}
+    >
+      <canvas
+        ref={canvasRef}
+        style={{ display: "block", width: "100%", height: "100%" }}
       />
     </div>
   );
