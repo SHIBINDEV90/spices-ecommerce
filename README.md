@@ -1,5 +1,19 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## GitHub deployment
+
+Pushes to the `main` branch run `.github/workflows/deploy.yml`. The workflow connects to the configured VPS, updates `/root/workspace/backup/spices-ecommerce`, and restarts the app with Docker Compose.
+
+Required GitHub repository secrets:
+
+```bash
+VPS_HOST
+VPS_USER
+VPS_PASSWORD
+```
+
+Set `VPS_HOST` to `176.57.150.47`, `VPS_USER` to `root`, and `VPS_PASSWORD` to the server password. The server checkout must already be able to pull from `origin`, and production environment variables should remain in the server `.env` file.
+
 ## Getting Started
 
 First, run the development server:

@@ -1,0 +1,70 @@
+name: Deploy to server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+env:
+  DEPLOY_PORT: 22
+  DEPLOY_PATH: /root/workspace/backup/spices-ecommerce
+
+jobs:
+  deploy:
+    name: Deploy production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install SSH password client
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Configure SSH known hosts
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          set -euo pipefail
+
+          install -m 700 -d ~/.ssh
+          ssh-keyscan -T 10 -p "$DEPLOY_PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts
+
+      - name: Pull latest code and restart Docker Compose
+        shell: bash
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          SSHPASS: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          set -euo pipefail
+
+          sshpass -e ssh -p "$DEPLOY_PORT" "$VPS_USER@$VPS_HOST" "DEPLOY_PATH='$DEPLOY_PATH' bash -se" <<'REMOTE_SCRIPT'
+          set -euo pipefail
+
+          cd "$DEPLOY_PATH"
+
+          git fetch origin main
+          git checkout main
+          git pull --ff-only origin main
+
+          if docker compose version >/dev/null 2>&1; then
+            COMPOSE="docker compose"
+          elif command -v docker-compose >/dev/null 2>&1; then
+            COMPOSE="docker-compose"
+          else
+            echo "Docker Compose is not installed on the server." >&2
+            exit 1
+          fi
+
+          $COMPOSE up -d --build --remove-orphans
+          docker image prune -f
+          REMOTE_SCRIPT
