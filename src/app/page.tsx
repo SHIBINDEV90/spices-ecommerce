@@ -57,7 +57,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.1 }}
             className="font-headline-lg font-medium text-4xl md:text-[80px] md:leading-[88px] text-surface-container-lowest max-w-4xl mb-8"
           >
-            Premium Kerala Spices for Global Markets
+            Premium Malabar Spices for Global Markets
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -259,7 +259,7 @@ export default function Home() {
         <div>
           <h4 className="text-primary-fixed dark:text-primary-fixed-dim font-bold mb-4 uppercase tracking-wider text-sm">Quick Links</h4>
           <ul className="space-y-2">
-            <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="#">Privacy Policy</Link></li>
+            <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="/privacy-policy">Privacy Policy</Link></li>
             <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="#">Export Terms</Link></li>
             <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="#">Quality Assurance</Link></li>
           </ul>

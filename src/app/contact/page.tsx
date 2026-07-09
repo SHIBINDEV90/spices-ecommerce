@@ -123,11 +123,9 @@ export default function ContactPage() {
                 <div className="space-y-2">
                   <label className="font-label-md text-label-md text-on-surface-variant">Product Interest</label>
                   <select className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3">
-                    <option>Organic Black Pepper</option>
-                    <option>Cardamom (V-600 Grade)</option>
-                    <option>Turmeric Finger (Curcumin 5%+)</option>
-                    <option>Mixed Spice Wholesale</option>
-                    <option>Custom Blend Extraction</option>
+                    {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
+                      <option key={item} value={item}>{item}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="md:col-span-2 space-y-2">
@@ -156,15 +154,20 @@ export default function ContactPage() {
             <p className="text-on-surface-variant max-w-xl mx-auto">Exporting heritage across 5 continents, serving over 32 countries with ISO-certified logistics.</p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Map Placeholder */}
+            {/* Google Map */}
             <div className="bg-surface h-96 rounded-xl border border-outline-variant overflow-hidden relative shadow-inner">
-              <div 
-                className="w-full h-full bg-cover bg-center" 
-                style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAAoq2dcugLg9rSfw1vLWf-WQFGYbhzICfwjAF0GhJbzf9DBtUmzlIhjdSGKU5xjr6jFqSwNw831HqClXdZ25ep1v0IWbzuGskSYY43OaaUNGoSronL6EWyhR00uFscgrwFrQZXR6Ah9erbOfK8s9wYsnjOIeL4uBhzbNTZnAgoVRqz2cmoT7pI1GeoMbGZzH-XvSqhmqmxOhOogs4ZjfFYwMwdScmV2AB6pNEPoMQUefqUgu084dZCT3y8UzaPAXMkVaiYoNTu6og')" }} 
-              />
-              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded shadow-sm">
+              <iframe
+                src="https://maps.google.com/maps?q=Marine%20Drive%20Tower,%20Kochi,%20Kerala%20682031,%20India&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded shadow-sm pointer-events-none">
                 <p className="font-label-md text-label-md text-primary flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-saffron-glow animate-pulse" /> Regional Distribution Hubs
+                  <span className="w-2 h-2 rounded-full bg-saffron-glow animate-pulse" /> Headquarters Location
                 </p>
               </div>
             </div>
