@@ -137,7 +137,14 @@ export default function CouponsTableClient({ initialCoupons }: CouponsTableClien
                         </button>
                       </td>
                       <td className="p-4 text-right">
-                        <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-2">
+                          <Link 
+                            href={`/admin/coupons/${coupon._id}`}
+                            className="p-2 text-gray-400 hover:text-orange-400 hover:bg-orange-500/10 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Link>
                           <button
                             onClick={() => handleDelete(coupon._id)}
                             disabled={loadingId === coupon._id}

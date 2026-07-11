@@ -15,6 +15,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ success: true, coupon }, { status: 200 });
   } catch (error: any) {
     console.error('Error updating coupon:', error);
+    if (error.code === 11000) {
+      return NextResponse.json({ success: false, message: 'Coupon code already exists' }, { status: 400 });
+    }
     return NextResponse.json({ success: false, message: error.message }, { status: 500 });
   }
 }

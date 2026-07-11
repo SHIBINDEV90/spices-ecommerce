@@ -5,20 +5,20 @@ import { useRouter } from 'next/navigation';
 import { Save, X, Ticket, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function CouponForm() {
+export default function CouponForm({ initialData }: { initialData?: any }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    code: '',
-    description: '',
-    discountType: 'percentage',
-    discountValue: '',
-    minimumOrderAmount: '0',
-    maximumDiscount: '',
-    startDate: new Date().toISOString().slice(0, 10),
-    endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10), // Default 30 days
-    usageLimit: '100',
-    isActive: true
+    code: initialData?.code || '',
+    description: initialData?.description || '',
+    discountType: initialData?.discountType || 'percentage',
+    discountValue: initialData?.discountValue || '',
+    minimumOrderAmount: initialData?.minimumOrderAmount || '0',
+    maximumDiscount: initialData?.maximumDiscount || '',
+    startDate: initialData?.startDate ? new Date(initialData.startDate).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
+    endDate: initialData?.endDate ? new Date(initialData.endDate).toISOString().slice(0, 10) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10), // Default 30 days
+    usageLimit: initialData?.usageLimit || '100',
+    isActive: initialData?.isActive !== undefined ? initialData.isActive : true
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,8 +37,11 @@ export default function CouponForm() {
         endDate: new Date(formData.endDate).toISOString()
       };
 
-      const res = await fetch('/api/coupons', {
-        method: 'POST',
+      const url = initialData ? `/api/coupons/${initialData._id}` : '/api/coupons';
+      const method = initialData ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
@@ -46,7 +49,7 @@ export default function CouponForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || 'Failed to create coupon');
+        throw new Error(data.message || `Failed to ${initialData ? 'update' : 'create'} coupon`);
       }
 
       router.push('/admin/coupons');
@@ -67,11 +70,11 @@ export default function CouponForm() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-600">
-            Create Coupon
+            {initialData ? 'Edit Coupon' : 'Create Coupon'}
           </h2>
           <p className="text-gray-400 mt-2 flex items-center gap-2">
             <Ticket className="w-4 h-4" />
-            Add a new discount code
+            {initialData ? 'Update discount code details' : 'Add a new discount code'}
           </p>
         </div>
         <div className="flex gap-3">
@@ -88,7 +91,7 @@ export default function CouponForm() {
             className="bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-orange-500/20 active:scale-95 disabled:opacity-70 flex items-center gap-2"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Coupon
+            {initialData ? 'Update Coupon' : 'Save Coupon'}
           </button>
         </div>
       </div>
