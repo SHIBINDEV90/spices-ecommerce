@@ -10,6 +10,16 @@ export interface IProduct extends Document {
   stock: number;
   isBulkAvailable: boolean;
   isRetailAvailable: boolean;
+  vendorId?: mongoose.Types.ObjectId;
+  approvalStatus: 'Pending' | 'Approved' | 'Rejected';
+  category?: string;
+  discount?: number;
+  sku?: string;
+  weight?: string;
+  packaging?: string;
+  origin?: string;
+  exportAvailable?: boolean;
+  shippingDays?: number;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -22,6 +32,16 @@ const ProductSchema: Schema = new Schema({
   stock: { type: Number, required: true, default: 0 },
   isBulkAvailable: { type: Boolean, default: false },
   isRetailAvailable: { type: Boolean, default: true },
+  vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor' },
+  approvalStatus: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Approved' }, // Default to Approved for backward compatibility with existing products
+  category: { type: String },
+  discount: { type: Number, default: 0 },
+  sku: { type: String },
+  weight: { type: String },
+  packaging: { type: String },
+  origin: { type: String },
+  exportAvailable: { type: Boolean, default: false },
+  shippingDays: { type: Number },
 }, { timestamps: true });
 
 delete mongoose.models.Product;

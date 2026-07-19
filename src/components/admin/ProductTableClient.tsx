@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Edit, Plus, Package, Loader2 } from 'lucide-react';
+import { Trash2, Edit, Plus, Package, Loader2, Check, X } from 'lucide-react';
 import Link from 'next/link';
 
 interface ProductTableClientProps {
@@ -37,6 +37,23 @@ export default function ProductTableClient({ initialProducts }: ProductTableClie
     }
   };
 
+  const handleStatusUpdate = async (id: string, status: string) => {
+    try {
+      const res = await fetch(`/api/admin/products/${id}/approve`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+
+      if (!res.ok) throw new Error('Failed to update status');
+
+      setProducts(prev => prev.map(p => p._id === id ? { ...p, approvalStatus: status } : p));
+    } catch (error) {
+      console.error(error);
+      alert('Failed to update product status.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -68,6 +85,7 @@ export default function ProductTableClient({ initialProducts }: ProductTableClie
                 <th className="p-4 font-medium">Price</th>
                 <th className="p-4 font-medium">Stock</th>
                 <th className="p-4 font-medium">Bulk</th>
+                <th className="p-4 font-medium">Status</th>
                 <th className="p-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
@@ -130,8 +148,35 @@ export default function ProductTableClient({ initialProducts }: ProductTableClie
                           {product.isBulkAvailable ? 'Yes' : 'No'}
                         </span>
                       </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 text-xs font-medium rounded-md ${
+                          product.approvalStatus === 'Approved' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 
+                          product.approvalStatus === 'Rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 
+                          'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                        }`}>
+                          {product.approvalStatus || 'Approved'}
+                        </span>
+                      </td>
                       <td className="p-4 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                          {product.approvalStatus === 'Pending' && (
+                            <>
+                              <button 
+                                onClick={() => handleStatusUpdate(product._id, 'Approved')}
+                                className="p-2 text-green-400 hover:text-white hover:bg-green-500/20 rounded-lg transition-colors"
+                                title="Approve"
+                              >
+                                <Check className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleStatusUpdate(product._id, 'Rejected')}
+                                className="p-2 text-red-400 hover:text-white hover:bg-red-500/20 rounded-lg transition-colors"
+                                title="Reject"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                           <Link 
                             href={`/admin/products/${product._id}/edit`}
                             className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"

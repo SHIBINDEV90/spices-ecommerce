@@ -52,11 +52,28 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
   await dbConnect();
 
   try {
-    // When a user hits checkout/session, we didn't map it into `Order` table instantly (cart abandonment). 
-    // Now that they Paid, we spin up the immutable Order.
+    const orderId = session.metadata?.orderId;
     
-    // NOTE: In production, you would fetch `line_items` from Stripe to capture exactly what they bought
-    // For this blueprint, we log the high-level transaction payload
+    if (orderId) {
+      if (session.payment_status === 'paid') {
+        const order = await Order.findByIdAndUpdate(orderId, {
+            paymentStatus: 'paid',
+            paymentGatewayId: session.id,
+        });
+
+        if (order && order.couponCode) {
+            await Coupon.findOneAndUpdate(
+              { code: order.couponCode },
+              { $inc: { usedCount: 1 } }
+            );
+        }
+
+        console.log(`[Webhook] Marked Order ${orderId} as Paid`);
+      }
+      return;
+    }
+
+    // Fallback for old sessions without orderId
     const totalAmount = (session.amount_total || 0) / 100;
     const couponCode = session.metadata?.couponCode;
     const discountAmount = session.metadata?.discountAmount ? parseFloat(session.metadata.discountAmount) : 0;
@@ -71,20 +88,20 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
     await Order.create({
       customerName: session.metadata?.customerName || 'Stripe Customer',
       customerEmail: session.customer_details?.email || session.customer_email || 'unknown@example.com',
-      products: [], // Expanded inside line-item extraction in full deployment!
+      products: [], 
       totalAmount: totalAmount,
       shippingAddress: {
-        addressLine1: session.customer_details?.address?.line1 || 'N/A',
+        street: session.customer_details?.address?.line1 || 'N/A',
         city: session.customer_details?.address?.city || 'N/A',
         state: session.customer_details?.address?.state || 'N/A',
-        zipCode: session.customer_details?.address?.postal_code || 'N/A',
+        postalCode: session.customer_details?.address?.postal_code || 'N/A',
         country: session.customer_details?.address?.country || 'N/A',
       },
       couponCode: couponCode || undefined,
       discountAmount: discountAmount || 0,
       paymentStatus: session.payment_status === 'paid' ? 'paid' : 'failed',
       orderStatus: 'Pending',
-      paymentGatewayId: session.id, // Stores the pi_ or cs_ identifier for the Ledger!
+      paymentGatewayId: session.id,
     });
     
     console.log(`[Webhook] Mapped new Paid Order for ${totalAmount} from ${session.customer_email}`);

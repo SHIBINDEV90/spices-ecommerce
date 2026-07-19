@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   await connectToDatabase();
-  const products = await Product.find({});
+  const products = await Product.find({ approvalStatus: 'Approved' });
   return NextResponse.json(products);
 }
 

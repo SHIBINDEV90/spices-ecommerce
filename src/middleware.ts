@@ -17,7 +17,9 @@ export async function middleware(request: NextRequest) {
 
     // Role-based protection: Only Admins can access /admin
     if (token.role !== 'Admin') {
-      return NextResponse.redirect(new URL('/', request.url));
+      const url = new URL('/admin/login', request.url);
+      url.searchParams.set('callbackUrl', encodeURI(request.url));
+      return NextResponse.redirect(url);
     }
   }
 

@@ -31,8 +31,7 @@ export default function AdminLogin() {
       setError(res.error);
       setLoading(false);
     } else if (res?.ok) {
-      router.push('/admin/dashboard');
-      router.refresh();
+      window.location.href = callbackUrl;
     }
   };
 

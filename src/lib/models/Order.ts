@@ -8,6 +8,8 @@ export interface IOrderItem {
   name: string; // Denormalized for order history stability
   quantity: number;
   price: number; // Price at the time of purchase
+  vendorId?: mongoose.Types.ObjectId;
+  status?: 'Pending' | 'Accepted' | 'Shipped' | 'Delivered';
 }
 
 // Interface for the complete order document
@@ -37,6 +39,8 @@ const OrderItemSchema = new Schema<IOrderItem>({
   name: { type: String, required: true },
   quantity: { type: Number, required: true, min: 1 },
   price: { type: Number, required: true },
+  vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor' },
+  status: { type: String, enum: ['Pending', 'Accepted', 'Shipped', 'Delivered'], default: 'Pending' },
 });
 
 const OrderSchema = new Schema<IOrder>(

@@ -9,7 +9,7 @@ import Link from 'next/link';
 const isUploadedImage = (src: string) => src.startsWith('/uploads/');
 
 export default function CheckoutPage() {
-  const { cartItems, getCartTotal } = useCart();
+  const { cartItems, getCartTotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   
   // Form States (matching screenshot)
@@ -105,12 +105,48 @@ export default function CheckoutPage() {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate processing payment directly or integrating Stripe soon.
-    setTimeout(() => {
+    const shippingAddress = shipDifferent ? {
+        street: shipAddress1 + (shipAddress2 ? `, ${shipAddress2}` : ''),
+        city: shipCity,
+        state: shipState,
+        postalCode: shipZip,
+        country: shipCountry
+    } : {
+        street: address1 + (address2 ? `, ${address2}` : ''),
+        city: city,
+        state: state,
+        postalCode: zip,
+        country: country
+    };
+
+    try {
+        const res = await fetch('/api/checkout/order', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cartItems,
+                shippingAddress,
+                customerName: `${firstName} ${lastName}`.trim(),
+                customerEmail: email,
+                paymentMethod,
+                couponCode: appliedCoupon?.coupon || null
+            })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Checkout failed');
+
+        clearCart();
+
+        if (data.paymentMethod === 'cod') {
+            window.location.href = `/checkout/success?order_id=${data.orderId}`;
+        } else if (data.url) {
+            window.location.href = data.url;
+        }
+    } catch (error: any) {
+        alert(error.message);
         setLoading(false);
-        // Add actual stripe/gateway integration here as needed
-        alert('Proceeding to payment gateway...');
-    }, 1500);
+    }
   };
 
   if (cartItems.length === 0) {

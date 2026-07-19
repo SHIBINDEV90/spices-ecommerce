@@ -12,8 +12,8 @@ export const metadata = {
 export default async function BulkEnquiryPage() {
   await dbConnect();
 
-  // Only permit bulk enquiry requests for valid export-grade spices
-  const docs = await Product.find({ isBulkAvailable: true }).select('_id name');
+  // Only permit bulk enquiry requests for valid export-grade spices that are approved
+  const docs = await Product.find({ isBulkAvailable: true, approvalStatus: 'Approved' }).select('_id name');
   const availableProducts = JSON.parse(JSON.stringify(docs));
 
   return (

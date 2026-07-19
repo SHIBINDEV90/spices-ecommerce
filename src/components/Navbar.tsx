@@ -58,6 +58,26 @@ export default function Navbar() {
               <Link href="/certifications" className="text-foreground/80 font-medium hover:text-primary transition-colors">Certifications</Link>
               <Link href="/blog" className="text-foreground/80 font-medium hover:text-primary transition-colors">Journal</Link>
               <Link href="/contact" className="text-foreground/80 font-medium hover:text-primary transition-colors">Contact</Link>
+              <div className="relative group">
+                <button className="text-foreground/80 font-medium hover:text-primary transition-colors py-4 flex items-center gap-1">
+                  Vendors
+                  <ChevronDown size={16} className="transition-transform duration-200 group-hover:-rotate-180" />
+                </button>
+                <div className="absolute top-full left-0 w-48 bg-surface rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
+                  <Link 
+                    href="/vendor/login"
+                    className="px-4 py-2 text-sm text-foreground/80 hover:text-primary hover:bg-foreground/5 transition-colors"
+                  >
+                    Vendor Login
+                  </Link>
+                  <Link 
+                    href="/vendor/register"
+                    className="px-4 py-2 text-sm text-foreground/80 hover:text-primary hover:bg-foreground/5 transition-colors"
+                  >
+                    Vendor Sign Up
+                  </Link>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center space-x-3 md:space-x-4">
@@ -120,6 +140,12 @@ export default function Navbar() {
                 <Link href="/certifications" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Certifications</Link>
                 <Link href="/blog" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Journal</Link>
                 <Link href="/contact" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Contact</Link>
+                
+                <div className="flex flex-col space-y-3">
+                  <span className="text-foreground/90 font-bold text-lg">Vendors</span>
+                  <Link href="/vendor/login" onClick={closeMobileMenu} className="pl-4 text-foreground/80 hover:text-primary transition-colors text-lg">Vendor Login</Link>
+                  <Link href="/vendor/register" onClick={closeMobileMenu} className="pl-4 text-foreground/80 hover:text-primary transition-colors text-lg">Vendor Sign Up</Link>
+                </div>
                 
                 <div className="pt-6 border-t border-black/10 dark:border-white/10 flex flex-col space-y-4">
                   {session && (session.user as any)?.role === 'Customer' ? (
