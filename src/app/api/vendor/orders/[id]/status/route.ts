@@ -17,7 +17,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     await dbConnect();
     
     // Find vendor profile
-    const vendor = await Vendor.findOne({ userId: session.user.id });
+    const vendor = await Vendor.findOne({ userId: (session.user as any).id });
     if (!vendor) {
         return NextResponse.json({ error: 'Vendor profile not found' }, { status: 404 });
     }

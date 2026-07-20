@@ -15,7 +15,7 @@ export async function GET(req: Request) {
 
     await dbConnect();
     
-    const vendor = await Vendor.findOne({ userId: session.user.id });
+    const vendor = await Vendor.findOne({ userId: (session.user as any).id });
     if (!vendor) return NextResponse.json({ error: 'Vendor profile not found' }, { status: 404 });
 
     const reviews = await Review.find({ vendorId: vendor._id })
@@ -39,7 +39,7 @@ export async function PATCH(req: Request) {
 
     await dbConnect();
     
-    const vendor = await Vendor.findOne({ userId: session.user.id });
+    const vendor = await Vendor.findOne({ userId: (session.user as any).id });
     if (!vendor) return NextResponse.json({ error: 'Vendor profile not found' }, { status: 404 });
 
     const { reviewId, vendorReply } = await req.json();

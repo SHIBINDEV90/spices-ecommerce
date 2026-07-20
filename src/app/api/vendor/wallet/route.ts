@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     await dbConnect();
     
-    const vendor = await Vendor.findOne({ userId: session.user.id });
+    const vendor = await Vendor.findOne({ userId: (session.user as any).id });
     if (!vendor) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
 
     let wallet = await Wallet.findOne({ vendorId: vendor._id });
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
     await dbConnect();
     
-    const vendor = await Vendor.findOne({ userId: session.user.id });
+    const vendor = await Vendor.findOne({ userId: (session.user as any).id });
     if (!vendor) return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
 
     const { amount, bankDetails } = await req.json();
