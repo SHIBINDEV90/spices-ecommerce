@@ -10,14 +10,14 @@ export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || (session.user as any).role !== 'Vendor') {
+    if (!session || !session.user || (session.user as any).role !== 'Vendor') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await dbConnect();
     
     // Find vendor profile
-    const vendor = await Vendor.findOne({ userId: session.user.id });
+    const vendor = await Vendor.findOne({ userId: (session.user as any).id });
     if (!vendor) {
         return NextResponse.json({ error: 'Vendor profile not found' }, { status: 404 });
     }

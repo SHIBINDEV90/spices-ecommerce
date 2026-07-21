@@ -7,6 +7,39 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const NAVBAR_PRODUCTS = ['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'];
 
+const COUNTRIES = [
+  'India',
+  'United States',
+  'United Arab Emirates',
+  'United Kingdom',
+  'Saudi Arabia',
+  'Qatar',
+  'Oman',
+  'Kuwait',
+  'Bahrain',
+  'Singapore',
+  'Malaysia',
+  'Australia',
+  'Canada',
+  'Germany',
+  'France',
+  'Netherlands',
+  'Japan',
+  'South Korea',
+  'South Africa',
+  'Spain',
+  'Italy',
+  'Vietnam',
+  'Thailand',
+  'Indonesia',
+  'Egypt',
+  'Sri Lanka',
+  'New Zealand',
+  'Brazil',
+  'Mexico',
+  'Other'
+];
+
 export default function BulkEnquiryForm({ products }: { products: any[] }) {
   const searchParams = useSearchParams();
   const preselectedProductId = searchParams.get('product') || '';
@@ -63,7 +96,7 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
         <CheckCircle className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
         <h2 className="text-3xl font-bold text-white mb-4">Request Received</h2>
         <p className="text-gray-400 text-lg max-w-md mx-auto">
-          Our international trade team has been notified. We will review your cargo requirements and respond via email within 24 hours.
+          Our trade team has been notified. We will review your cargo requirements and respond via email within 24 hours.
         </p>
       </motion.div>
     );
@@ -153,14 +186,25 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300 ml-1">Destination Country *</label>
-            <input
-              required
-              name="country"
-              value={formData.country}
-              onChange={handleChange}
-              placeholder="United States, Japan, etc."
-              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-            />
+            <div className="relative">
+              <select
+                required
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-4 pr-10 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none font-semibold"
+              >
+                <option value="" disabled>Select Destination Country</option>
+                {COUNTRIES.map(c => (
+                  <option key={c} value={c} className="bg-gray-800 text-white">
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                <ChevronDown className="w-5 h-5 text-gray-400" />
+              </div>
+            </div>
           </div>
         </div>
 

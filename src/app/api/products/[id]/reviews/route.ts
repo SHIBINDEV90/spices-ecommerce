@@ -37,7 +37,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const review = await Review.create({
         productId: product._id,
         vendorId: product.vendorId, // Important: linking review to vendor!
-        customerId: session.user.id,
+        customerId: (session.user as any).id,
         customerName: session.user.name || 'Anonymous',
         rating,
         comment

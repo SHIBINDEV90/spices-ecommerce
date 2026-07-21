@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FiCheck, FiX, FiClock, FiDollarSign } from 'react-icons/fi';
+import { Check, X, Clock, DollarSign } from 'lucide-react';
 
 export default function AdminWithdrawals() {
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
@@ -89,9 +89,9 @@ export default function AdminWithdrawals() {
                         w.status === 'Rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
                         'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
                       }`}>
-                        {w.status === 'Approved' && <FiCheck />}
-                        {w.status === 'Rejected' && <FiX />}
-                        {w.status === 'Pending' && <FiClock />}
+                        {w.status === 'Approved' && <Check className="w-3.5 h-3.5" />}
+                        {w.status === 'Rejected' && <X className="w-3.5 h-3.5" />}
+                        {w.status === 'Pending' && <Clock className="w-3.5 h-3.5" />}
                         {w.status}
                       </span>
                     </td>
@@ -100,17 +100,17 @@ export default function AdminWithdrawals() {
                         <div className="flex items-center justify-end gap-2">
                           <button 
                             onClick={() => processWithdrawal(w._id, 'Approved')}
-                            className="p-2 text-green-400 hover:bg-green-500/20 hover:text-white rounded-lg transition-colors flex items-center gap-1"
+                            className="p-2 text-green-400 hover:bg-green-500/20 hover:text-white rounded-lg transition-colors flex items-center gap-1 text-sm"
                             title="Approve Payout"
                           >
-                            <FiCheck className="w-4 h-4" /> Approve
+                            <Check className="w-4 h-4" /> Approve
                           </button>
                           <button 
                             onClick={() => processWithdrawal(w._id, 'Rejected')}
-                            className="p-2 text-red-400 hover:bg-red-500/20 hover:text-white rounded-lg transition-colors flex items-center gap-1"
+                            className="p-2 text-red-400 hover:bg-red-500/20 hover:text-white rounded-lg transition-colors flex items-center gap-1 text-sm"
                             title="Reject Payout"
                           >
-                            <FiX className="w-4 h-4" /> Reject
+                            <X className="w-4 h-4" /> Reject
                           </button>
                         </div>
                       ) : (
