@@ -34,11 +34,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         return NextResponse.json({ error: 'Invalid rating or comment' }, { status: 400 });
     }
 
+    const user = session.user as any;
     const review = await Review.create({
         productId: product._id,
         vendorId: product.vendorId, // Important: linking review to vendor!
+<<<<<<< HEAD
         customerId: (session.user as any).id,
         customerName: session.user.name || 'Anonymous',
+=======
+        customerId: user.id,
+        customerName: user.name || 'Anonymous',
+>>>>>>> 89326febbbaf9f85f1d183d943e6396e99ab8103
         rating,
         comment
     });
