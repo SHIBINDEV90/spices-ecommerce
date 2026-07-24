@@ -133,7 +133,7 @@ export default function ProductTableClient({ initialProducts }: ProductTableClie
                         </span>
                       </td>
                       <td className="p-4 font-medium text-orange-400">
-                        ${product.price?.toFixed(2)}
+                        ₹{product.price?.toFixed(2)}
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import Product from '@/lib/models/Product';
 import Order from '@/lib/models/Order';
 import Enquiry from '@/lib/models/Enquiry';
 import DashboardCharts from '@/components/admin/DashboardCharts';
-import { Package, ShoppingCart, MessageSquare, Users, DollarSign } from 'lucide-react';
+import { Package, ShoppingCart, MessageSquare, Users, IndianRupee } from 'lucide-react';
 import Link from 'next/link';
 
 // Mock data builder for charts for now
@@ -64,7 +64,7 @@ export default async function AdminDashboardPage() {
           { label: 'Total Orders', value: totalOrders, icon: ShoppingCart, color: 'text-orange-400' },
           { label: 'Total Enquiries', value: totalEnquiries, icon: MessageSquare, color: 'text-amber-400' },
           { label: 'Total Customers', value: uniqueCustomers.length, icon: Users, color: 'text-green-400' },
-          { label: 'Total Revenue', value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: 'text-emerald-400' },
+          { label: 'Total Revenue', value: `₹${totalRevenue.toLocaleString()}`, icon: IndianRupee, color: 'text-emerald-400' },
         ].map((metric, idx) => {
           const Icon = metric.icon;
           return (
@@ -104,13 +104,13 @@ export default async function AdminDashboardPage() {
               </thead>
               <tbody>
                 {recentOrders.length === 0 ? (
-                  <tr><td colSpan={4} className="p-4 text-center text-gray-500">No recent orders.</td></tr>
+                   <tr><td colSpan={4} className="p-4 text-center text-gray-500">No recent orders.</td></tr>
                 ) : (
                   recentOrders.map(order => (
                     <tr key={order._id.toString()} className="border-b border-white/5 hover:bg-white/5">
                       <td className="p-4 font-mono text-xs">{order._id.toString().substring(0,8)}</td>
                       <td className="p-4">{order.customerName}</td>
-                      <td className="p-4 font-medium text-emerald-400">${order.totalAmount}</td>
+                      <td className="p-4 font-medium text-emerald-400">₹{order.totalAmount}</td>
                       <td className="p-4">
                         <span className={`px-2 py-1 rounded-md text-xs font-medium ${
                           order.orderStatus === 'Pending' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 

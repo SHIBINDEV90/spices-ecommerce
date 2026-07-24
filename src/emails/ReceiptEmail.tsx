@@ -20,14 +20,14 @@ interface ReceiptEmailProps {
 }
 
 export const ReceiptEmail = ({ customerName = 'Customer', orderTotal = 0, discountAmount = 0, couponCode = '' }: ReceiptEmailProps) => {
-  const formattedTotal = new Intl.NumberFormat('en-US', {
+  const formattedTotal = new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
   }).format(orderTotal);
   
-  const formattedDiscount = new Intl.NumberFormat('en-US', {
+  const formattedDiscount = new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
   }).format(discountAmount);
 
   return (
