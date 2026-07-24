@@ -2,6 +2,39 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// Helper to construct absolute URLs using the public domain under a reverse proxy.
+function getPublicUrl(targetUrlOrPath: string, request: NextRequest): string {
+  let baseUrl = process.env.NEXTAUTH_URL;
+
+  // Fallback to forwarded headers if NEXTAUTH_URL is not set
+  if (!baseUrl) {
+    const forwardedHost = request.headers.get('x-forwarded-host');
+    const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
+    if (forwardedHost) {
+      baseUrl = `${forwardedProto}://${forwardedHost}`;
+    }
+  }
+
+  if (baseUrl) {
+    try {
+      const baseParsed = new URL(baseUrl);
+      if (targetUrlOrPath.startsWith('http://') || targetUrlOrPath.startsWith('https://')) {
+        const targetParsed = new URL(targetUrlOrPath);
+        targetParsed.protocol = baseParsed.protocol;
+        targetParsed.host = baseParsed.host;
+        return targetParsed.toString();
+      } else {
+        return new URL(targetUrlOrPath, baseParsed).toString();
+      }
+    } catch (e) {
+      // Ignore and fallback
+    }
+  }
+
+  // Fallback to request.url
+  return new URL(targetUrlOrPath, request.url).toString();
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -10,15 +43,15 @@ export async function middleware(request: NextRequest) {
   // Protect all /admin routes, but allow access to /admin/login
   if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
     if (!token) {
-      const url = new URL('/admin/login', request.url);
-      url.searchParams.set('callbackUrl', encodeURI(request.url));
+      const url = new URL(getPublicUrl('/admin/login', request));
+      url.searchParams.set('callbackUrl', getPublicUrl(request.url, request));
       return NextResponse.redirect(url);
     }
 
     // Role-based protection: Only Admins can access /admin
     if (token.role !== 'Admin') {
-      const url = new URL('/admin/login', request.url);
-      url.searchParams.set('callbackUrl', encodeURI(request.url));
+      const url = new URL(getPublicUrl('/admin/login', request));
+      url.searchParams.set('callbackUrl', getPublicUrl(request.url, request));
       return NextResponse.redirect(url);
     }
   }
@@ -29,8 +62,8 @@ export async function middleware(request: NextRequest) {
       if (pathname.startsWith('/api/')) {
         return NextResponse.json({ error: 'Unauthorized. Please log in to continue.' }, { status: 401 });
       }
-      const url = new URL('/login', request.url);
-      url.searchParams.set('callbackUrl', encodeURI(request.url));
+      const url = new URL(getPublicUrl('/login', request));
+      url.searchParams.set('callbackUrl', getPublicUrl(request.url, request));
       return NextResponse.redirect(url);
     }
   }
