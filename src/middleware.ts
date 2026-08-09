@@ -4,14 +4,21 @@ import { getToken } from 'next-auth/jwt';
 
 // Helper to construct absolute URLs using the public domain under a reverse proxy.
 function getPublicUrl(targetUrlOrPath: string, request: NextRequest): string {
-  let baseUrl = process.env.NEXTAUTH_URL;
+  const host = request.headers.get('host') || '';
+  const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
 
-  // Fallback to forwarded headers if NEXTAUTH_URL is not set
+  // If running locally, bypass NEXTAUTH_URL unless we are behind a proxy that sets x-forwarded-host
+  let baseUrl = isLocal ? null : process.env.NEXTAUTH_URL;
+
+  // Fallback to forwarded headers if NEXTAUTH_URL is not set or we are running locally
   if (!baseUrl) {
     const forwardedHost = request.headers.get('x-forwarded-host');
     const forwardedProto = request.headers.get('x-forwarded-proto') || 'https';
     if (forwardedHost) {
       baseUrl = `${forwardedProto}://${forwardedHost}`;
+    } else {
+      const proto = request.headers.get('x-forwarded-proto') || (request.nextUrl.protocol.replace(':', ''));
+      baseUrl = `${proto}://${host}`;
     }
   }
 
