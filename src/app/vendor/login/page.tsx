@@ -63,7 +63,12 @@ export default function VendorLoginPage() {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-1">Password</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="block text-sm font-medium text-neutral-700">Password</label>
+              <Link href="/forgot-password?role=vendor" className="text-xs font-semibold text-primary hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
             <input 
               required 
               type="password" 

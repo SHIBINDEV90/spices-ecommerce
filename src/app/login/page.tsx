@@ -5,12 +5,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { motion } from 'framer-motion';
-import { Phone, Lock, Loader2, LogIn, ArrowRight } from 'lucide-react';
+import { Phone, Lock, Loader2, LogIn, ArrowRight, Mail } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const [loginMode, setLoginMode] = useState<'otp' | 'password'>('otp');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -19,11 +22,11 @@ export default function LoginPage() {
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (step === 2 && timeLeft > 0) {
+    if (loginMode === 'otp' && step === 2 && timeLeft > 0) {
       timer = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
     }
     return () => clearTimeout(timer);
-  }, [step, timeLeft]);
+  }, [step, timeLeft, loginMode]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -86,6 +89,44 @@ export default function LoginPage() {
     }
   };
 
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await signIn('customer-password-credentials', {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (res?.error) {
+        setError(res.error);
+        setLoading(false);
+      } else {
+        router.push('/products');
+        router.refresh();
+      }
+    } catch (err) {
+      setError('An error occurred during sign in');
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginMode === 'otp') {
+      if (step === 1) {
+        handleRequestOtp();
+      } else {
+        handleVerifyOtp(e);
+      }
+    } else {
+      handlePasswordLogin(e);
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden pt-20">
       {/* Cinematic Background */}
@@ -132,75 +173,135 @@ export default function LoginPage() {
               <p className="text-foreground/60 text-sm">Enter your details to access your account</p>
             </div>
 
-            <form onSubmit={step === 1 ? handleRequestOtp : handleVerifyOtp} className="space-y-6 relative z-10">
+            {/* Login Mode Toggle */}
+            <div className="flex bg-background/50 border border-foreground/10 rounded-xl p-1 mb-6 relative z-10">
+              <button
+                type="button"
+                onClick={() => { setLoginMode('otp'); setError(''); }}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${loginMode === 'otp' ? 'bg-primary text-black' : 'text-foreground/60 hover:text-foreground'}`}
+              >
+                Sign In with OTP
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLoginMode('password'); setError(''); }}
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${loginMode === 'password' ? 'bg-primary text-black' : 'text-foreground/60 hover:text-foreground'}`}
+              >
+                Sign In with Password
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-sm p-3 rounded-xl mb-4 text-center">
                   {error}
                 </div>
               )}
-              {successMessage && step === 2 && (
+              {successMessage && loginMode === 'otp' && step === 2 && (
                 <div className="bg-green-500/10 border border-green-500/20 text-green-500 text-sm p-3 rounded-xl mb-4 text-center">
                   {successMessage}
                 </div>
               )}
 
-              {step === 1 ? (
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground/80 ml-1">Mobile Number</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
-                      <Phone className="w-5 h-5" />
+              {loginMode === 'otp' ? (
+                step === 1 ? (
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground/80 ml-1">Mobile Number</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
+                        <Phone className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
+                        placeholder="Enter registered mobile number"
+                      />
                     </div>
-                    <input
-                      type="tel"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
-                      placeholder="Enter registered mobile number"
-                    />
                   </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center ml-1">
-                    <label className="text-sm font-semibold text-foreground/80">Enter OTP</label>
-                    <button 
-                      type="button" 
-                      onClick={() => { setStep(1); setOtp(''); setSuccessMessage(''); }}
-                      className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
-                    >
-                      Change Number
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all tracking-[0.5em] text-center font-bold placeholder:tracking-normal placeholder:font-normal placeholder:text-foreground/30 disabled:opacity-50"
-                      placeholder="Enter 6-digit OTP"
-                      maxLength={6}
-                      disabled={timeLeft === 0}
-                    />
-                  </div>
-                  <div className="flex justify-between items-center mt-2 px-1">
-                    <span className={`text-xs font-medium ${timeLeft > 0 ? 'text-foreground/60' : 'text-red-500'}`}>
-                      {timeLeft > 0 ? `OTP expires in ${formatTime(timeLeft)}` : 'OTP has expired'}
-                    </span>
-                    {timeLeft === 0 && (
-                      <button
-                        type="button"
-                        onClick={handleRequestOtp}
-                        className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center ml-1">
+                      <label className="text-sm font-semibold text-foreground/80">Enter OTP</label>
+                      <button 
+                        type="button" 
+                        onClick={() => { setStep(1); setOtp(''); setSuccessMessage(''); }}
+                        className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
                       >
-                        Resend OTP
+                        Change Number
                       </button>
-                    )}
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
+                        <Lock className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="text"
+                        required
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all tracking-[0.5em] text-center font-bold placeholder:tracking-normal placeholder:font-normal placeholder:text-foreground/30 disabled:opacity-50"
+                        placeholder="Enter 6-digit OTP"
+                        maxLength={6}
+                        disabled={timeLeft === 0}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center mt-2 px-1">
+                      <span className={`text-xs font-medium ${timeLeft > 0 ? 'text-foreground/60' : 'text-red-500'}`}>
+                        {timeLeft > 0 ? `OTP expires in ${formatTime(timeLeft)}` : 'OTP has expired'}
+                      </span>
+                      {timeLeft === 0 && (
+                        <button
+                          type="button"
+                          onClick={handleRequestOtp}
+                          className="text-xs font-bold text-primary hover:text-primary/80 transition-colors cursor-pointer"
+                        >
+                          Resend OTP
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground/80 ml-1">Email Address</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
+                        <Mail className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
+                        placeholder="hello@example.com"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center ml-1">
+                      <label className="text-sm font-semibold text-foreground/80">Password</label>
+                      <Link href="/forgot-password" className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
+                        Forgot Password?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-foreground/40">
+                        <Lock className="w-5 h-5" />
+                      </div>
+                      <input
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-background/50 border border-foreground/10 rounded-xl pl-12 pr-4 py-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-foreground/30"
+                        placeholder="••••••••"
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -209,12 +310,12 @@ export default function LoginPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
-                disabled={loading || (step === 2 && timeLeft === 0)}
-                className="w-full py-4 bg-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 disabled:opacity-70"
+                disabled={loading || (loginMode === 'otp' && step === 2 && timeLeft === 0)}
+                className="w-full py-4 bg-primary text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/25 disabled:opacity-70 cursor-pointer"
               >
                 {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                   <>
-                    {step === 1 ? 'Request OTP' : 'Verify & Sign In'}
+                    {loginMode === 'otp' ? (step === 1 ? 'Request OTP' : 'Verify & Sign In') : 'Sign In'}
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}

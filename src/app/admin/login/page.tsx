@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { ShieldCheck, Lock, Mail, Loader2 } from 'lucide-react';
 
 export default function AdminLogin() {
@@ -78,7 +79,12 @@ export default function AdminLogin() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-300 ml-1">Master Password</label>
+              <div className="flex justify-between items-center ml-1">
+                <label className="text-sm font-medium text-gray-300">Master Password</label>
+                <Link href="/forgot-password?role=admin" className="text-xs font-semibold text-orange-500 hover:text-orange-400 hover:underline transition-colors">
+                  Forgot Password?
+                </Link>
+              </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
                   <Lock className="w-5 h-5" />

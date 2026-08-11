@@ -8,6 +8,8 @@ export interface IUser extends Document {
   otp?: string;
   otpExpiry?: Date;
   role: 'Admin' | 'Customer' | 'Vendor' | 'Delivery';
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,6 +22,8 @@ const UserSchema: Schema = new Schema({
   otp: { type: String, select: false }, // Store OTP temporarily
   otpExpiry: { type: Date, select: false },
   role: { type: String, enum: ['Admin', 'Customer', 'Vendor', 'Delivery'], default: 'Customer' },
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date }
 }, { timestamps: true });
 
 delete mongoose.models.User;

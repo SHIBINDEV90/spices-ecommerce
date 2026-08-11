@@ -165,6 +165,48 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
         };
       }
+    }),
+    CredentialsProvider({
+      id: "customer-password-credentials",
+      name: "Customer Password Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Please enter an email and password');
+        }
+
+        await dbConnect();
+
+        const user = await User.findOne({ email: credentials.email.toLowerCase() }).select('+password');
+
+        if (!user) {
+          throw new Error('No user found with this email');
+        }
+
+        if (user.role !== 'Customer') {
+          throw new Error('Access denied. Customer role required.');
+        }
+
+        if (!user.password) {
+          throw new Error('User has no password configured.');
+        }
+
+        const isPasswordMatch = await bcrypt.compare(credentials.password, user.password);
+
+        if (!isPasswordMatch) {
+          throw new Error('Invalid credentials');
+        }
+
+        return {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
+      }
     })
   ],
   callbacks: {
