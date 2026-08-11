@@ -34,9 +34,9 @@ export default function ResetPasswordPage({ params }: ResetPasswordProps) {
       return;
     }
 
-    // Validate password policy: min 6 chars, 1 uppercase, 1 digit, no special chars
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    // Validate password policy: min 5 chars, 1 uppercase, 1 digit, no special chars
+    if (password.length < 5) {
+      setError('Password must be at least 5 characters long.');
       setLoading(false);
       return;
     }
@@ -173,6 +173,9 @@ export default function ResetPasswordPage({ params }: ResetPasswordProps) {
                     placeholder="••••••••"
                   />
                 </div>
+                <p className="text-xs text-foreground/50 mt-1 ml-1 leading-relaxed">
+                  Password must be at least 5 characters, contain at least one uppercase letter and one digit, with no special characters.
+                </p>
               </div>
 
               <div className="space-y-2">

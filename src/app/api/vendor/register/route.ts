@@ -30,9 +30,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate password strength: min 6 chars, 1 uppercase, 1 digit, no special chars
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 });
+    // Validate password strength: min 5 chars, 1 uppercase, 1 digit, no special chars
+    if (password.length < 5) {
+      return NextResponse.json({ error: 'Password must be at least 5 characters long' }, { status: 400 });
     }
     if (!/[A-Z]/.test(password)) {
       return NextResponse.json({ error: 'Password must contain at least one uppercase letter' }, { status: 400 });

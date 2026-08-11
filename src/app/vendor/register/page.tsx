@@ -48,9 +48,9 @@ export default function VendorRegisterPage() {
     setError('');
     setLoading(true);
 
-    // Validate password policy: min 6 chars, 1 uppercase, 1 digit, no special chars
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    // Validate password policy: min 5 chars, 1 uppercase, 1 digit, no special chars
+    if (formData.password.length < 5) {
+      setError('Password must be at least 5 characters long.');
       setLoading(false);
       return;
     }
@@ -170,6 +170,9 @@ export default function VendorRegisterPage() {
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Password *</label>
                   <input required type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
+                    Password must be at least 5 characters, contain at least one uppercase letter and one digit, with no special characters.
+                  </p>
                 </div>
               </div>
             </div>
