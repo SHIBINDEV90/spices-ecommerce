@@ -48,6 +48,28 @@ export default function VendorRegisterPage() {
     setError('');
     setLoading(true);
 
+    // Validate password policy: min 6 chars, 1 uppercase, 1 digit, no special chars
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long.');
+      setLoading(false);
+      return;
+    }
+    if (!/[A-Z]/.test(formData.password)) {
+      setError('Password must contain at least one uppercase letter.');
+      setLoading(false);
+      return;
+    }
+    if (!/[0-9]/.test(formData.password)) {
+      setError('Password must contain at least one digit.');
+      setLoading(false);
+      return;
+    }
+    if (!/^[A-Za-z0-9]+$/.test(formData.password)) {
+      setError('Password must not contain any special characters (only letters and numbers are allowed).');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('/api/vendor/register', {
         method: 'POST',

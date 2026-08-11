@@ -30,6 +30,20 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate password strength: min 6 chars, 1 uppercase, 1 digit, no special chars
+    if (password.length < 6) {
+      return NextResponse.json({ error: 'Password must be at least 6 characters long' }, { status: 400 });
+    }
+    if (!/[A-Z]/.test(password)) {
+      return NextResponse.json({ error: 'Password must contain at least one uppercase letter' }, { status: 400 });
+    }
+    if (!/[0-9]/.test(password)) {
+      return NextResponse.json({ error: 'Password must contain at least one digit' }, { status: 400 });
+    }
+    if (!/^[A-Za-z0-9]+$/.test(password)) {
+      return NextResponse.json({ error: 'Password must not contain any special characters (only letters and numbers are allowed)' }, { status: 400 });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
