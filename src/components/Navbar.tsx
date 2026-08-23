@@ -28,7 +28,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-surface/80 backdrop-blur-md p-4 sticky top-0 z-40 shadow-sm border-b border-black/5 dark:border-white/10 transition-all duration-300">
+      <nav className="bg-surface/80 dark:bg-zinc-900/80 backdrop-blur-md p-4 sticky top-0 z-40 shadow-sm border-b border-black/5 dark:border-white/10 transition-all duration-300">
         <div className="container mx-auto flex justify-between items-center relative">
           <Link href="/" className="flex items-center hover:opacity-90 transition-opacity" onClick={closeMobileMenu}>
             <Image src="/images/logo.jpeg" alt="Spicewizz Logo" width={240} height={72} className="object-cover h-16 w-auto rounded shadow-sm" priority />
@@ -43,7 +43,7 @@ export default function Navbar() {
                   Products
                   <ChevronDown size={16} className="transition-transform duration-200 group-hover:-rotate-180" />
                 </Link>
-                <div className="absolute top-full left-0 w-48 bg-surface rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
+                <div className="absolute top-full left-0 w-48 bg-surface dark:bg-zinc-900 rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
                   {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
                     <Link 
                       key={item} 
@@ -63,7 +63,7 @@ export default function Navbar() {
                   Vendors
                   <ChevronDown size={16} className="transition-transform duration-200 group-hover:-rotate-180" />
                 </button>
-                <div className="absolute top-full left-0 w-48 bg-surface rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
+                <div className="absolute top-full left-0 w-48 bg-surface dark:bg-zinc-900 rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
                   <Link 
                     href="/vendor/login"
                     className="px-4 py-2 text-sm text-foreground/80 hover:text-primary hover:bg-foreground/5 transition-colors"
@@ -128,10 +128,11 @@ export default function Navbar() {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden absolute top-full left-0 right-0 bg-surface border-b border-black/5 dark:border-white/5 shadow-xl overflow-hidden flex flex-col z-30"
+              initial={{ opacity: 0, y: -15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="md:hidden absolute top-full left-0 right-0 bg-surface dark:bg-zinc-900 border-b border-black/5 dark:border-white/5 shadow-xl flex flex-col z-30"
             >
               <div className="flex flex-col p-6 space-y-5">
                 <Link href="/" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Home</Link>
