@@ -14,6 +14,7 @@ export default function Navbar() {
   const { cartItems, isCartOpen, setIsCartOpen } = useCart();
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
   const pathname = usePathname();
 
   // Hide the standard user navbar completely on all admin routes
@@ -24,7 +25,10 @@ export default function Navbar() {
   // Calculate total items
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+    setIsMobileProductsOpen(false);
+  };
 
   return (
     <>
@@ -137,7 +141,37 @@ export default function Navbar() {
               <div className="flex flex-col p-6 space-y-5">
                 <Link href="/" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Home</Link>
                 <Link href="/about" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">About</Link>
-                <Link href="/products" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Products</Link>
+                <div>
+                  <button 
+                    onClick={() => setIsMobileProductsOpen(!isMobileProductsOpen)}
+                    className="w-full flex items-center justify-between text-foreground/90 font-medium hover:text-primary transition-colors text-lg"
+                  >
+                    <span>Products</span>
+                    <ChevronDown size={20} className={`transform transition-transform duration-200 ${isMobileProductsOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {isMobileProductsOpen && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden flex flex-col pl-4 mt-2 space-y-3 border-l border-black/10 dark:border-white/10"
+                      >
+                        {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
+                          <Link 
+                            key={item} 
+                            href={`/products?filter=${encodeURIComponent(item.toLowerCase())}`}
+                            onClick={closeMobileMenu}
+                            className="text-foreground/80 hover:text-primary transition-colors text-base"
+                          >
+                            {item}
+                          </Link>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
                 <Link href="/certifications" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Certifications</Link>
                 <Link href="/blog" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Journal</Link>
                 <Link href="/contact" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Contact</Link>
