@@ -63,7 +63,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-body-lg text-body-lg text-surface-variant max-w-2xl mb-10"
+            className="font-body-lg text-body-lg text-white md:text-surface-variant max-w-2xl mb-10"
           >
             Sourced directly from the lush farms of Kerala. We deliver the authentic, pure, and sustainably sourced magic of Indian spices to modern kitchens worldwide.
           </motion.p>
