@@ -210,6 +210,31 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) {
+        return `${baseUrl}${url}`;
+      }
+      
+      try {
+        const parsedUrl = new URL(url);
+        const parsedBase = new URL(baseUrl);
+        
+        // Allows callback URLs on the same origin
+        if (parsedUrl.origin === parsedBase.origin) {
+          return url;
+        }
+        
+        // Also allow local URLs (localhost / 127.0.0.1) for local development/testing
+        if (parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1') {
+          return url;
+        }
+      } catch (e) {
+        // Ignore and fallback
+      }
+      
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role;
