@@ -20,6 +20,8 @@ export interface IProduct extends Document {
   origin?: string;
   exportAvailable?: boolean;
   shippingDays?: number;
+  tax?: number;
+  pricePerGram?: number;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -29,7 +31,7 @@ const ProductSchema: Schema = new Schema({
   price: { type: Number, required: true },
   imageUrl: { type: String, required: true },
   productType: { type: String, required: true, default: 'Spice' },
-  stock: { type: Number, required: true, default: 0 },
+  stock: { type: Number, default: 0 },
   isBulkAvailable: { type: Boolean, default: false },
   isRetailAvailable: { type: Boolean, default: true },
   vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor' },
@@ -37,6 +39,8 @@ const ProductSchema: Schema = new Schema({
   category: { type: String },
   discount: { type: Number, default: 0 },
   sku: { type: String },
+  tax: { type: Number, default: 0 },
+  pricePerGram: { type: Number },
   weight: { type: String },
   packaging: { type: String },
   origin: { type: String },

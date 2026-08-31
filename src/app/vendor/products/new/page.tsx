@@ -14,7 +14,8 @@ export default function AddProductPage() {
     category: '',
     stock: '',
     productType: 'Spice',
-    sku: '',
+    tax: '',
+    pricePerGram: '',
     weight: '',
     packaging: '',
     origin: '',
@@ -136,18 +137,22 @@ export default function AddProductPage() {
         {/* Pricing & Inventory */}
         <div>
           <h3 className="text-lg font-semibold text-neutral-900 mb-4 pb-2 border-b">Pricing & Inventory</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Price (₹) *</label>
               <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Stock Quantity *</label>
-              <input required type="number" name="stock" value={formData.stock} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Price per Gram (₹)</label>
+              <input type="number" step="0.01" name="pricePerGram" value={formData.pricePerGram} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">SKU</label>
-              <input type="text" name="sku" value={formData.sku} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Stock Quantity</label>
+              <input type="number" name="stock" value={formData.stock} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Tax (%)</label>
+              <input type="number" step="0.1" name="tax" value={formData.tax} onChange={handleChange} placeholder="e.g. 18" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
           </div>
         </div>
