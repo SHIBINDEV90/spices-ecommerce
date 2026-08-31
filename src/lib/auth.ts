@@ -222,19 +222,41 @@ export const authOptions: NextAuthOptions = {
         // headers() might throw if not called in request context
       }
 
-      const currentOrigin = host ? `${proto}://${host}` : null;
+      let currentOrigin = host ? `${proto}://${host}` : null;
+      if (currentOrigin) {
+        try {
+          const originUrl = new URL(currentOrigin);
+          // If the hostname is not localhost/127.0.0.1, we strip any custom port
+          if (originUrl.hostname !== 'localhost' && originUrl.hostname !== '127.0.0.1') {
+            currentOrigin = `${originUrl.protocol}//${originUrl.hostname}`;
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
+
+      // Ensure baseUrl does not leak port 3000 in production either
+      let cleanBaseUrl = baseUrl;
+      try {
+        const baseParsed = new URL(baseUrl);
+        if (baseParsed.hostname !== 'localhost' && baseParsed.hostname !== '127.0.0.1') {
+          cleanBaseUrl = `${baseParsed.protocol}//${baseParsed.hostname}`;
+        }
+      } catch (e) {
+        // Ignore
+      }
 
       // Allows relative callback URLs
       if (url.startsWith("/")) {
         if (currentOrigin) {
           return `${currentOrigin}${url}`;
         }
-        return `${baseUrl}${url}`;
+        return `${cleanBaseUrl}${url}`;
       }
       
       try {
         const parsedUrl = new URL(url);
-        const parsedBase = new URL(baseUrl);
+        const parsedBase = new URL(cleanBaseUrl);
         
         // Allows callback URLs on the same origin
         if (parsedUrl.origin === parsedBase.origin) {
@@ -254,7 +276,7 @@ export const authOptions: NextAuthOptions = {
         // Ignore and fallback
       }
       
-      return currentOrigin || baseUrl;
+      return currentOrigin || cleanBaseUrl;
     },
     async jwt({ token, user }) {
       if (user) {

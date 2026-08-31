@@ -25,6 +25,18 @@ function getPublicUrl(targetUrlOrPath: string, request: NextRequest): string {
   if (baseUrl) {
     try {
       const baseParsed = new URL(baseUrl);
+      // Strip ports for production domains
+      if (baseParsed.hostname !== 'localhost' && baseParsed.hostname !== '127.0.0.1') {
+        baseUrl = `${baseParsed.protocol}//${baseParsed.hostname}`;
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
+
+  if (baseUrl) {
+    try {
+      const baseParsed = new URL(baseUrl);
       if (targetUrlOrPath.startsWith('http://') || targetUrlOrPath.startsWith('https://')) {
         const targetParsed = new URL(targetUrlOrPath);
         targetParsed.protocol = baseParsed.protocol;
