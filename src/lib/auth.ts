@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/db";
 import User from "@/lib/models/User";
 import Vendor from "@/lib/models/Vendor";
+import { headers } from "next/headers";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -211,8 +212,23 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
+      let host = "";
+      let proto = "http";
+      try {
+        const headersList = headers();
+        host = headersList.get("host") || "";
+        proto = headersList.get("x-forwarded-proto") || "http";
+      } catch (e) {
+        // headers() might throw if not called in request context
+      }
+
+      const currentOrigin = host ? `${proto}://${host}` : null;
+
       // Allows relative callback URLs
       if (url.startsWith("/")) {
+        if (currentOrigin) {
+          return `${currentOrigin}${url}`;
+        }
         return `${baseUrl}${url}`;
       }
       
@@ -229,11 +245,16 @@ export const authOptions: NextAuthOptions = {
         if (parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1') {
           return url;
         }
+
+        // Allow current origin if set
+        if (currentOrigin && parsedUrl.origin === currentOrigin) {
+          return url;
+        }
       } catch (e) {
         // Ignore and fallback
       }
       
-      return baseUrl;
+      return currentOrigin || baseUrl;
     },
     async jwt({ token, user }) {
       if (user) {
