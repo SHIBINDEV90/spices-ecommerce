@@ -32,7 +32,28 @@ export default function AdminLogin() {
       setError(res.error);
       setLoading(false);
     } else if (res?.ok) {
-      window.location.href = callbackUrl;
+      let targetUrl = callbackUrl;
+      try {
+        if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+          const parsed = new URL(targetUrl);
+          if (parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
+            targetUrl = `${parsed.protocol}//${parsed.hostname}${parsed.pathname}${parsed.search}${parsed.hash}`;
+          }
+        }
+      } catch (err) {
+        // Ignore
+      }
+
+      try {
+        const parsed = new URL(targetUrl, window.location.origin);
+        if (parsed.pathname === '/admin' || parsed.pathname === '/admin/') {
+          targetUrl = '/admin/dashboard';
+        }
+      } catch (err) {
+        // Ignore
+      }
+
+      window.location.href = targetUrl;
     }
   };
 
