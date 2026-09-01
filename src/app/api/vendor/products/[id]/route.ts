@@ -85,19 +85,30 @@ export async function PUT(
       imageUrl = `/uploads/products/${filename}`;
     }
 
+    const parseNumber = (val: any, defaultVal: number): number => {
+      if (val === null || val === undefined || val === '') return defaultVal;
+      if (typeof val === 'number') return isNaN(val) ? defaultVal : val;
+      const match = String(val).match(/[-+]?[0-9]*\.?[0-9]+/);
+      if (match) {
+        const parsed = parseFloat(match[0]);
+        return isNaN(parsed) ? defaultVal : parsed;
+      }
+      return defaultVal;
+    };
+
     const name = formData.get('name') as string || existingProduct.name;
     const slug = formData.get('slug') as string || existingProduct.slug;
     const description = formData.get('description') as string || existingProduct.description;
-    const price = formData.get('price') ? Number(formData.get('price')) : existingProduct.price;
+    const price = formData.has('price') ? parseNumber(formData.get('price'), existingProduct.price) : existingProduct.price;
     const category = formData.get('category') as string || existingProduct.category;
     const productType = formData.get('productType') as string || existingProduct.productType;
-    const stock = formData.get('stock') !== null ? Number(formData.get('stock')) : existingProduct.stock;
-    const tax = formData.get('tax') !== null ? Number(formData.get('tax')) : existingProduct.tax;
-    const pricePerGram = formData.get('pricePerGram') ? Number(formData.get('pricePerGram')) : existingProduct.pricePerGram;
+    const stock = formData.has('stock') ? parseNumber(formData.get('stock'), existingProduct.stock) : existingProduct.stock;
+    const tax = formData.has('tax') ? parseNumber(formData.get('tax'), existingProduct.tax || 0) : existingProduct.tax;
+    const pricePerGram = formData.has('pricePerGram') ? parseNumber(formData.get('pricePerGram'), existingProduct.pricePerGram || 0) : existingProduct.pricePerGram;
     const weight = formData.get('weight') as string || existingProduct.weight;
     const packaging = formData.get('packaging') as string || existingProduct.packaging;
     const origin = formData.get('origin') as string || existingProduct.origin;
-    const shippingDays = formData.get('shippingDays') ? Number(formData.get('shippingDays')) : existingProduct.shippingDays;
+    const shippingDays = formData.has('shippingDays') ? parseNumber(formData.get('shippingDays'), existingProduct.shippingDays || 0) : existingProduct.shippingDays;
     const isBulkAvailable = formData.has('isBulkAvailable') ? formData.get('isBulkAvailable') === 'true' : existingProduct.isBulkAvailable;
     const isRetailAvailable = formData.has('isRetailAvailable') ? formData.get('isRetailAvailable') === 'true' : existingProduct.isRetailAvailable;
 

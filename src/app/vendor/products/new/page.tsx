@@ -140,19 +140,19 @@ export default function AddProductPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Price (₹) *</label>
-              <input required type="number" name="price" value={formData.price} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+              <input required type="text" name="price" value={formData.price} onChange={handleChange} placeholder="e.g. 500" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Price per Gram (₹)</label>
-              <input type="number" step="0.01" name="pricePerGram" value={formData.pricePerGram} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+              <input type="text" name="pricePerGram" value={formData.pricePerGram} onChange={handleChange} placeholder="e.g. 0.50" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Stock Quantity</label>
-              <input type="number" name="stock" value={formData.stock} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+              <input type="text" name="stock" value={formData.stock} onChange={handleChange} placeholder="e.g. 100" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Tax (%)</label>
-              <input type="number" step="0.1" name="tax" value={formData.tax} onChange={handleChange} placeholder="e.g. 18" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+              <input type="text" name="tax" value={formData.tax} onChange={handleChange} placeholder="e.g. 18" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
           </div>
         </div>

@@ -75,20 +75,34 @@ export async function POST(req: Request) {
       imageUrl = `/uploads/products/${filename}`;
     }
 
+    const parseNumber = (val: any, defaultVal = 0): number => {
+      if (val === null || val === undefined || val === '') return defaultVal;
+      if (typeof val === 'number') return isNaN(val) ? defaultVal : val;
+      const match = String(val).match(/[-+]?[0-9]*\.?[0-9]+/);
+      if (match) {
+        const parsed = parseFloat(match[0]);
+        return isNaN(parsed) ? defaultVal : parsed;
+      }
+      return defaultVal;
+    };
+
+    const rawPricePerGram = formData.get('pricePerGram');
+    const rawShippingDays = formData.get('shippingDays');
+
     const payload = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
       description: formData.get('description') as string,
-      price: Number(formData.get('price')),
+      price: parseNumber(formData.get('price'), 0),
       category: formData.get('category') as string,
       productType: formData.get('productType') as string,
-      stock: formData.get('stock') ? Number(formData.get('stock')) : 0,
-      tax: formData.get('tax') ? Number(formData.get('tax')) : 0,
-      pricePerGram: formData.get('pricePerGram') ? Number(formData.get('pricePerGram')) : undefined,
+      stock: parseNumber(formData.get('stock'), 0),
+      tax: parseNumber(formData.get('tax'), 0),
+      pricePerGram: rawPricePerGram ? parseNumber(rawPricePerGram, 0) : undefined,
       weight: formData.get('weight') as string,
       packaging: formData.get('packaging') as string,
       origin: formData.get('origin') as string,
-      shippingDays: formData.get('shippingDays') ? Number(formData.get('shippingDays')) : undefined,
+      shippingDays: rawShippingDays ? parseNumber(rawShippingDays, 0) : undefined,
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
       isRetailAvailable: formData.get('isRetailAvailable') === 'true',
       imageUrl,
