@@ -193,6 +193,22 @@ export default function VendorProducts() {
     fetchProducts();
   }, []);
 
+  const handleDeleteProduct = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/vendor/products/${id}`, {
+        method: 'DELETE',
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to delete product');
+      }
+      setProducts(prev => prev.filter(p => p._id !== id));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   if (loading) return <div className="text-neutral-500">Loading products...</div>;
   if (error) return <div className="text-red-500">{error}</div>;
 
@@ -246,10 +262,18 @@ export default function VendorProducts() {
                     >
                       <Share2 className="w-4 h-4 inline" />
                     </button>
-                    <button className="text-neutral-400 hover:text-primary transition-colors cursor-pointer">
+                    <Link 
+                      href={`/vendor/products/${product._id}/edit`}
+                      className="text-neutral-400 hover:text-primary transition-colors cursor-pointer inline-block"
+                      title="Edit Product"
+                    >
                       <Edit className="w-4 h-4 inline" />
-                    </button>
-                    <button className="text-neutral-400 hover:text-red-600 transition-colors cursor-pointer">
+                    </Link>
+                    <button 
+                      onClick={() => handleDeleteProduct(product._id, product.name)}
+                      className="text-neutral-400 hover:text-red-600 transition-colors cursor-pointer"
+                      title="Delete Product"
+                    >
                       <Trash className="w-4 h-4 inline" />
                     </button>
                   </td>
