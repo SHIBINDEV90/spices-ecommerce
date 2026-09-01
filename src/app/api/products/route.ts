@@ -4,11 +4,15 @@ import Product from '../../../lib/models/Product';
 import path from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 
+import Vendor from '../../../lib/models/Vendor';
+
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   await connectToDatabase();
-  const products = await Product.find({ approvalStatus: 'Approved' });
+  // Ensure Vendor model is registered for populate
+  if (!Vendor) {}
+  const products = await Product.find({ approvalStatus: 'Approved' }).populate('vendorId', 'businessName ownerName vendorType businessAddress status');
   return NextResponse.json(products);
 }
 

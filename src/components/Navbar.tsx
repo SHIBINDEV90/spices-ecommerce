@@ -67,18 +67,25 @@ export default function Navbar() {
                   Vendors
                   <ChevronDown size={16} className="transition-transform duration-200 group-hover:-rotate-180" />
                 </button>
-                <div className="absolute top-full left-0 w-48 bg-surface dark:bg-zinc-900 rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
+                <div className="absolute top-full left-0 w-52 bg-surface dark:bg-zinc-900 rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
+                  <Link 
+                    href="/vendors"
+                    className="px-4 py-2 text-sm text-foreground/80 hover:text-primary hover:bg-foreground/5 transition-colors font-bold text-emerald-600 dark:text-emerald-400"
+                  >
+                    Browse Vendor Marketplace
+                  </Link>
+                  <div className="border-t border-black/5 dark:border-white/5 my-1" />
                   <Link 
                     href="/vendor/login"
                     className="px-4 py-2 text-sm text-foreground/80 hover:text-primary hover:bg-foreground/5 transition-colors"
                   >
-                    Vendor Login
+                    Vendor Portal Login
                   </Link>
                   <Link 
                     href="/vendor/register"
                     className="px-4 py-2 text-sm text-foreground/80 hover:text-primary hover:bg-foreground/5 transition-colors"
                   >
-                    Vendor Sign Up
+                    Register as Vendor / Farmer
                   </Link>
                 </div>
               </div>
@@ -178,6 +185,7 @@ export default function Navbar() {
                 
                 <div className="flex flex-col space-y-3">
                   <span className="text-foreground/90 font-bold text-lg">Vendors</span>
+                  <Link href="/vendors" onClick={closeMobileMenu} className="pl-4 text-emerald-600 dark:text-emerald-400 font-bold transition-colors text-lg">Browse Vendor Marketplace</Link>
                   <Link href="/vendor/login" onClick={closeMobileMenu} className="pl-4 text-foreground/80 hover:text-primary transition-colors text-lg">Vendor Login</Link>
                   <Link href="/vendor/register" onClick={closeMobileMenu} className="pl-4 text-foreground/80 hover:text-primary transition-colors text-lg">Vendor Sign Up</Link>
                 </div>

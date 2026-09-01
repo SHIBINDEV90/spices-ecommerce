@@ -4,7 +4,7 @@ import type { Product } from '@/types/product';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ShoppingBag, Check, Star } from 'lucide-react';
+import { ArrowRight, ShoppingBag, Check, Star, Store, Tractor, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import QuickViewModal from './QuickViewModal';
@@ -39,6 +39,8 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const productImage = product.imageUrl || '/images/Cardamom.jpg';
   const isUploadedImage = productImage.startsWith('/uploads/');
 
+  const vendor = typeof product.vendorId === 'object' && product.vendorId !== null ? product.vendorId : null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -56,12 +58,25 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
           unoptimized={isUploadedImage}
         />
         
-        {/* Featured Badge */}
-        {featured && (
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur text-foreground text-[10px] font-bold px-3 py-1 rounded-md shadow-sm z-10 border border-black/5">
-            Featured
-          </div>
-        )}
+        {/* Source / Featured Badge */}
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+          {vendor ? (
+            <span className="bg-emerald-700/90 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-md backdrop-blur-sm flex items-center gap-1">
+              {vendor.vendorType === 'Farmer' ? <Tractor size={11} /> : <Store size={11} />}
+              {vendor.vendorType || 'Vendor'} Product
+            </span>
+          ) : (
+            <span className="bg-primary/90 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-md shadow-md backdrop-blur-sm flex items-center gap-1">
+              <ShieldCheck size={11} /> Direct Store
+            </span>
+          )}
+
+          {featured && (
+            <span className="bg-white/90 backdrop-blur text-foreground text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm border border-black/5 ml-auto">
+              Featured
+            </span>
+          )}
+        </div>
 
         {/* Hover Quick View Overlay */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm z-20">
@@ -79,6 +94,19 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
       </Link>
       
       <div className="p-3 flex flex-col flex-grow">
+        {/* Vendor/Store Label */}
+        {vendor ? (
+          <Link href={`/vendors/${vendor._id}`} className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-bold hover:underline mb-1">
+            {vendor.vendorType === 'Farmer' ? <Tractor size={12} /> : <Store size={12} />}
+            <span className="truncate">Sold by {vendor.businessName}</span>
+          </Link>
+        ) : (
+          <div className="inline-flex items-center gap-1 text-[11px] text-foreground/50 font-medium mb-1">
+            <ShieldCheck size={12} className="text-primary" />
+            <span>Spicewizz Official</span>
+          </div>
+        )}
+
         <Link href={`/products/${product._id || product.slug}`}>
           <h3 className="font-semibold text-[15px] leading-tight text-foreground group-hover:text-primary transition-colors line-clamp-2 cursor-pointer mb-2 min-h-[36px]">
             {product.name}
