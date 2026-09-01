@@ -89,8 +89,8 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    key={item._id} 
-                    className="flex gap-4 p-4 bg-white relative group"
+                    key={item.cartItemId || item._id} 
+                    className="flex gap-4 p-4 bg-white relative group border border-neutral-100 rounded-xl shadow-sm"
                   >
                     <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
                       <Image 
@@ -102,20 +102,24 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       />
                     </div>
                     <div className="flex flex-col flex-grow">
-                      <h4 className="text-[15px] text-foreground pr-4 mb-0.5 line-clamp-1">{item.name}</h4>
-                      <p className="text-sm text-neutral-500 mb-3">100g</p>
+                      <h4 className="text-[15px] font-semibold text-foreground pr-4 mb-0.5 line-clamp-1">{item.name}</h4>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          {item.selectedWeight || item.weight || '1kg'}
+                        </span>
+                      </div>
                       
                       <div className="flex items-center justify-between mt-auto">
                         <div className="flex items-center border border-neutral-200 rounded-lg">
                           <button 
-                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.cartItemId || item._id, item.quantity - 1)}
                             className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 transition-colors"
                           >
                             <span className="text-xl leading-none -mt-1">-</span>
                           </button>
                           <span className="w-8 text-center text-[15px] font-medium">{item.quantity}</span>
                           <button 
-                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.cartItemId || item._id, item.quantity + 1)}
                             className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 transition-colors"
                           >
                             <span className="text-xl leading-none -mt-0.5">+</span>
@@ -124,7 +128,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <div className="flex items-center gap-4">
                           <span className="font-bold text-foreground">₹{((item.price || 500) * item.quantity).toFixed(0)}</span>
                           <button 
-                            onClick={() => removeFromCart(item._id)}
+                            onClick={() => removeFromCart(item.cartItemId || item._id)}
                             className="text-neutral-400 hover:text-neutral-600 transition-colors flex items-center"
                           >
                             <Trash2 size={18} />

@@ -15,14 +15,12 @@ interface QuickViewModalProps {
 }
 
 const WEIGHT_OPTIONS = [
-  { label: '100g', value: 100 },
-  { label: '250g', value: 250 },
   { label: '500g', value: 500 },
   { label: '1kg', value: 1000 },
 ];
 
 export default function QuickViewModal({ isOpen, onClose, product }: QuickViewModalProps) {
-  const [selectedWeight, setSelectedWeight] = useState(WEIGHT_OPTIONS[0]);
+  const [selectedWeight, setSelectedWeight] = useState(WEIGHT_OPTIONS[1]);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
@@ -34,7 +32,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   // Reset state when a new product is loaded
   useEffect(() => {
     if (isOpen) {
-      setSelectedWeight(WEIGHT_OPTIONS[0]);
+      setSelectedWeight(WEIGHT_OPTIONS[1]);
       setQuantity(1);
       setIsAdded(false);
       setActiveImage(0);
@@ -51,8 +49,18 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   ];
   const isUploadedImage = (src: string) => src.startsWith('/uploads/');
 
+  // Base calculations
+  const basePrice = Number(product.price) || 0;
+  const perGramPrice = product.pricePerGram && Number(product.pricePerGram) > 0
+    ? Number(product.pricePerGram)
+    : (basePrice > 0 ? basePrice / 1000 : 0.5);
+
+  const currentPrice = Math.round(perGramPrice * selectedWeight.value);
+  const originalPrice = Math.round(currentPrice * 1.15);
+  const usp = perGramPrice.toFixed(2);
+
   const handleAddToCart = () => {
-    addToCart({ ...product, selectedWeight: selectedWeight.label, quantity });
+    addToCart({ ...product, price: currentPrice, selectedWeight: selectedWeight.label, quantity });
     setIsAdded(true);
     setIsCartOpen(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -60,7 +68,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   const handleBuyNow = () => {
     setIsBuying(true);
-    addToCart({ ...product, selectedWeight: selectedWeight.label, quantity });
+    addToCart({ ...product, price: currentPrice, selectedWeight: selectedWeight.label, quantity });
     onClose();
     router.push('/checkout');
     setIsBuying(false);
@@ -68,14 +76,6 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   const rating = 5;
   const reviewCount = (product.name.length * 13) % 200 + 10;
-  
-  // Base calculations
-  const basePrice = product.price || 500;
-  // Calculate price based on weight modifier (assuming basePrice is for 100g or 1kg? Let's say basePrice is 100g for now)
-  const priceMultiplier = selectedWeight.value / 100;
-  const currentPrice = Math.round(basePrice * priceMultiplier);
-  const originalPrice = Math.round(currentPrice * 1.15);
-  const usp = (basePrice / 100).toFixed(2);
 
   return (
     <AnimatePresence>

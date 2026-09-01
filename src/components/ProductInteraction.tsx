@@ -1,7 +1,7 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, PackageOpen, Loader2 } from 'lucide-react';
+import { ShoppingCart, PackageOpen, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -9,24 +9,47 @@ import { motion } from 'framer-motion';
 export default function ProductInteraction({ product }: { product: any }) {
   const { addToCart, setIsCartOpen } = useCart();
   const [added, setAdded] = useState(false);
+  const [selectedWeight, setSelectedWeight] = useState<'500g' | '1kg'>('1kg');
 
-  // Since we modified context to expect a product directly instead of just _id
-  // The original context addToCart takes only one argument `product`! The context manages quantity natively internally (always +1 or array map logic).
+  // Calculate per gram price
+  const basePrice = Number(product.price) || 0;
+  const perGramPrice = product.pricePerGram && Number(product.pricePerGram) > 0
+    ? Number(product.pricePerGram)
+    : (basePrice > 0 ? basePrice / 1000 : 0.5);
+
+  const grams = selectedWeight === '500g' ? 500 : 1000;
+  const calculatedPrice = Math.round(perGramPrice * grams);
+
+  const weightOptions = [
+    { label: '500g', grams: 500, price: Math.round(perGramPrice * 500) },
+    { label: '1kg', grams: 1000, price: Math.round(perGramPrice * 1000) },
+  ];
+
   const handleAddToCart = () => {
-    addToCart(product);
+    addToCart({
+      ...product,
+      price: calculatedPrice,
+      selectedWeight,
+      quantity: 1,
+    });
     setIsCartOpen(true);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
 
   return (
-    <div className="flex flex-col space-y-6 mt-8 p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
-      <div className="flex justify-between items-end border-b border-white/10 pb-6 mb-2">
+    <div className="flex flex-col space-y-6 mt-6 p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+      {/* Price Header */}
+      <div className="flex justify-between items-end border-b border-white/10 pb-6">
         <div>
-          <p className="text-gray-400 text-sm font-medium uppercase tracking-widest mb-1">Standard Market Price</p>
-          <p className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
-            ₹{product.price.toFixed(2)}
-            <span className="text-sm text-gray-500 font-normal ml-2">/ kg</span>
+          <p className="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-1">
+            Price for {selectedWeight}
+          </p>
+          <p className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
+            ₹{calculatedPrice}
+            <span className="text-xs text-emerald-400 font-normal ml-3">
+              (₹{perGramPrice.toFixed(2)} / gram)
+            </span>
           </p>
         </div>
         {product.stock > 0 && (
@@ -38,7 +61,35 @@ export default function ProductInteraction({ product }: { product: any }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Weight Selector */}
+      <div className="flex flex-col space-y-3">
+        <label className="text-xs font-bold text-gray-300 uppercase tracking-widest">
+          Select Weight
+        </label>
+        <div className="grid grid-cols-2 gap-3">
+          {weightOptions.map((option) => {
+            const isSelected = selectedWeight === option.label;
+            return (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => setSelectedWeight(option.label as '500g' | '1kg')}
+                className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-lg shadow-emerald-500/10 scale-[1.02]'
+                    : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <span className="text-lg font-bold">{option.label}</span>
+                <span className="text-sm font-semibold text-emerald-400 mt-1">₹{option.price}</span>
+                <span className="text-[10px] text-gray-400 mt-0.5">₹{(option.price / option.grams).toFixed(2)}/g</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         {/* Retail Path */}
         <button 
           onClick={handleAddToCart}
@@ -50,9 +101,9 @@ export default function ProductInteraction({ product }: { product: any }) {
           }`}
         >
           {added ? (
-            <>Added to Cargo <ShoppingCart className="w-5 h-5 fill-white" /></>
+            <>Added to Cargo <Check className="w-5 h-5" /></>
           ) : (
-            <>Add to Cart <ShoppingCart className="w-5 h-5" /></>
+            <>Add to Cart ({selectedWeight}) <ShoppingCart className="w-5 h-5" /></>
           )}
         </button>
 
@@ -66,8 +117,8 @@ export default function ProductInteraction({ product }: { product: any }) {
       </div>
       
       {product.isBulkAvailable && (
-         <div className="pt-4 text-center">
-            <p className="text-sm text-amber-500/80 font-medium">✨ This spice scales up! High-volume discounts available for industrial fulfillment.</p>
+         <div className="pt-2 text-center">
+            <p className="text-xs text-amber-500/80 font-medium">✨ High-volume discounts available for bulk export orders.</p>
          </div>
       )}
     </div>

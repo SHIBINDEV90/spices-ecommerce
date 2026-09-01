@@ -20,10 +20,15 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const { addToCart, setIsCartOpen } = useCart();
   const [isQuickViewOpen, setQuickViewOpen] = useState(false);
 
+  const basePrice = Number(product.price) || 500;
+  const perGramPrice = product.pricePerGram && Number(product.pricePerGram) > 0
+    ? Number(product.pricePerGram)
+    : (basePrice > 0 ? basePrice / 1000 : 0.5);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAdded(true);
-    addToCart(product);
+    addToCart({ ...product, price: Math.round(perGramPrice * 1000), selectedWeight: '1kg' });
     setIsCartOpen(true);
     setTimeout(() => {
       setIsAdded(false);
@@ -33,9 +38,8 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   // Display calculations matching the screenshot layout
   const rating = 5;
   const reviewCount = (product.name.length * 13) % 200 + 10; // stable random looking number
-  const basePrice = product.price || 500;
   const originalPrice = Math.round(basePrice * 1.15);
-  const usp = (basePrice / 100).toFixed(2);
+  const usp = perGramPrice.toFixed(2);
   const productImage = product.imageUrl || '/images/Cardamom.jpg';
   const isUploadedImage = productImage.startsWith('/uploads/');
 

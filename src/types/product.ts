@@ -25,7 +25,10 @@ export interface Product {
   isRetailAvailable?: boolean;
   isBulkAvailable?: boolean;
   price?: number;
+  pricePerGram?: number;
   stock?: number;
+  weight?: string;
+  tax?: number;
   bulkPricing?: boolean;
   minOrderQty?: string;
   origin?: string;
