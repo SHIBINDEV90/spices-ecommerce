@@ -143,9 +143,43 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="md:hidden absolute top-full left-0 right-0 bg-surface dark:bg-zinc-900 border-b border-black/5 dark:border-white/5 shadow-xl flex flex-col z-30"
+              className="md:hidden absolute top-full left-0 right-0 bg-surface dark:bg-zinc-900 border-b border-black/5 dark:border-white/5 shadow-xl flex flex-col z-30 max-h-[calc(100dvh-4.5rem)] overflow-y-auto"
             >
-              <div className="flex flex-col p-6 space-y-5">
+              <div className="flex flex-col p-6 space-y-5 pb-8">
+                {/* User action buttons (Login/SignUp or Logout) prominently placed at top of mobile menu */}
+                <div className="pb-4 border-b border-black/10 dark:border-white/10">
+                  {session && (session.user as any)?.role === 'Customer' ? (
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-foreground/90 truncate mr-2">
+                        {(session.user as any)?.name || (session.user as any)?.email}
+                      </span>
+                      <button 
+                        onClick={() => { signOut(); closeMobileMenu(); }} 
+                        className="px-4 py-2 text-sm font-bold text-red-600 border border-red-200 dark:border-red-800 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors shrink-0"
+                      >
+                        Log Out
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-3 w-full">
+                      <Link 
+                        href="/login" 
+                        onClick={closeMobileMenu} 
+                        className="text-center font-bold text-foreground/90 border border-black/15 dark:border-white/15 px-4 py-2.5 rounded-full hover:bg-foreground/5 transition-colors text-base"
+                      >
+                        Log In
+                      </Link>
+                      <Link 
+                        href="/signup" 
+                        onClick={closeMobileMenu} 
+                        className="text-center font-bold bg-primary text-primary-foreground px-4 py-2.5 rounded-full shadow-sm hover:opacity-90 transition-opacity text-base"
+                      >
+                        Sign Up
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
                 <Link href="/" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Home</Link>
                 <Link href="/about" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">About</Link>
                 <div>
@@ -188,17 +222,6 @@ export default function Navbar() {
                   <Link href="/vendors" onClick={closeMobileMenu} className="pl-4 text-emerald-600 dark:text-emerald-400 font-bold transition-colors text-lg">Browse Vendor Marketplace</Link>
                   <Link href="/vendor/login" onClick={closeMobileMenu} className="pl-4 text-foreground/80 hover:text-primary transition-colors text-lg">Vendor Login</Link>
                   <Link href="/vendor/register" onClick={closeMobileMenu} className="pl-4 text-foreground/80 hover:text-primary transition-colors text-lg">Vendor Sign Up</Link>
-                </div>
-                
-                <div className="pt-6 border-t border-black/10 dark:border-white/10 flex flex-col space-y-4">
-                  {session && (session.user as any)?.role === 'Customer' ? (
-                    <button onClick={() => { signOut(); closeMobileMenu(); }} className="text-left font-bold text-foreground/90 hover:text-primary transition-colors text-lg">Log Out</button>
-                  ) : (
-                    <>
-                      <Link href="/login" onClick={closeMobileMenu} className="font-bold text-foreground/90 hover:text-primary transition-colors text-lg">Log In</Link>
-                      <Link href="/signup" onClick={closeMobileMenu} className="font-bold text-center bg-primary text-primary-foreground px-6 py-3 rounded-full shadow-sm hover:opacity-90 transition-opacity text-lg">Sign Up</Link>
-                    </>
-                  )}
                 </div>
               </div>
             </motion.div>
