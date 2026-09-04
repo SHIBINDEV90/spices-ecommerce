@@ -34,12 +34,26 @@ export default function AddProductPage() {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-      
-      // Auto-generate slug from name
-      if (name === 'name' && !formData.slug) {
-        setFormData(prev => ({ ...prev, slug: value.toLowerCase().replace(/[^a-z0-9]+/g, '-') }));
-      }
+      setFormData(prev => {
+        const nextState = { ...prev, [name]: value };
+
+        // Auto-generate slug from name
+        if (name === 'name' && !prev.slug) {
+          nextState.slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        }
+
+        // Auto-calculate pricePerGram when price (base price for 1kg) is entered
+        if (name === 'price') {
+          const numPrice = parseFloat(value);
+          if (!isNaN(numPrice) && numPrice > 0) {
+            nextState.pricePerGram = (numPrice / 1000).toString();
+          } else if (value === '') {
+            nextState.pricePerGram = '';
+          }
+        }
+
+        return nextState;
+      });
     }
   };
 
@@ -136,31 +150,66 @@ export default function AddProductPage() {
         </div>
 
         {/* Pricing & Inventory */}
-        <div>
-          <h3 className="text-lg font-semibold text-neutral-900 mb-4 pb-2 border-b">Pricing & Inventory</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {(() => {
+          const numSelling = parseFloat(formData.price.toString() || '0');
+          const numOriginal = parseFloat(formData.originalPrice.toString() || '0');
+          const computedDiscount = (numOriginal > numSelling && numSelling > 0)
+            ? Math.round(((numOriginal - numSelling) / numOriginal) * 100)
+            : 0;
+          const computedPerGram = (numSelling > 0)
+            ? (numSelling / 1000).toFixed(2)
+            : '0.00';
+
+          return (
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Selling Price (₹) *</label>
-              <input required type="text" name="price" value={formData.price} onChange={handleChange} placeholder="e.g. 500" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+              <h3 className="text-lg font-semibold text-neutral-900 mb-4 pb-2 border-b flex items-center justify-between">
+                <span>Pricing & Inventory</span>
+                {computedDiscount > 0 && (
+                  <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full border border-emerald-300">
+                    🎉 {computedDiscount}% OFF Badge Active
+                  </span>
+                )}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Selling Price (₹) *</label>
+                  <input required type="text" name="price" value={formData.price} onChange={handleChange} placeholder="e.g. 500" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <span className="text-[11px] text-neutral-500 mt-1 block">Base price for 1kg (1000g)</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Original / Offer Price (₹)</label>
+                  <input type="text" name="originalPrice" value={formData.originalPrice} onChange={handleChange} placeholder="Optional e.g. 600" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  {computedDiscount > 0 ? (
+                    <span className="text-[11px] text-emerald-600 font-semibold mt-1 block">
+                      Offer Percentage: <strong className="text-emerald-700">{computedDiscount}% OFF</strong> (Save ₹{numOriginal - numSelling})
+                    </span>
+                  ) : numOriginal > 0 && numOriginal <= numSelling ? (
+                    <span className="text-[11px] text-amber-600 font-medium mt-1 block">
+                      Must be higher than ₹{numSelling} for offer badge.
+                    </span>
+                  ) : (
+                    <span className="text-[11px] text-neutral-500 mt-1 block">MRP / Strikethrough price</span>
+                  )}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Price per Gram (₹)</label>
+                  <input type="text" name="pricePerGram" value={formData.pricePerGram} onChange={handleChange} placeholder="e.g. 0.50" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-neutral-50" />
+                  <span className="text-[11px] text-primary font-medium mt-1 block">
+                    ⚡ Auto-calculated: ₹{computedPerGram}/g
+                  </span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Stock Quantity</label>
+                  <input type="text" name="stock" value={formData.stock} onChange={handleChange} placeholder="e.g. 100" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">Tax (%)</label>
+                  <input type="text" name="tax" value={formData.tax} onChange={handleChange} placeholder="e.g. 18" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Original / Offer Price (₹)</label>
-              <input type="text" name="originalPrice" value={formData.originalPrice} onChange={handleChange} placeholder="Optional e.g. 600" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Price per Gram (₹)</label>
-              <input type="text" name="pricePerGram" value={formData.pricePerGram} onChange={handleChange} placeholder="e.g. 0.50" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Stock Quantity</label>
-              <input type="text" name="stock" value={formData.stock} onChange={handleChange} placeholder="e.g. 100" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Tax (%)</label>
-              <input type="text" name="tax" value={formData.tax} onChange={handleChange} placeholder="e.g. 18" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
-            </div>
-          </div>
-        </div>
+          );
+        })()}
 
         {/* Shipping & Specs */}
         <div>

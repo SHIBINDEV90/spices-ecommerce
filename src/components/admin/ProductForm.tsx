@@ -173,6 +173,11 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
               placeholder="0.00"
             />
+            {Number(formData.price) > 0 && (
+              <span className="text-xs text-emerald-400 block font-medium">
+                ⚡ Per Gram: ₹{(Number(formData.price) / 1000).toFixed(2)}/g
+              </span>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -186,6 +191,11 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
               placeholder="e.g. 3500"
             />
+            {Number(formData.originalPrice) > Number(formData.price) && Number(formData.price) > 0 ? (
+              <span className="text-xs text-emerald-400 block font-bold">
+                🎉 Offer Discount: {Math.round(((Number(formData.originalPrice) - Number(formData.price)) / Number(formData.originalPrice)) * 100)}% OFF
+              </span>
+            ) : null}
           </div>
 
           <div className="space-y-2">
