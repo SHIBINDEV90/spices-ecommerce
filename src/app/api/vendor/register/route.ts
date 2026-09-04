@@ -44,8 +44,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Password must not contain any special characters (only letters and numbers are allowed)' }, { status: 400 });
     }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Check if user already exists (case-insensitive)
+    const existingUser = await User.findOne({ 
+      email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
+    });
     if (existingUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
@@ -59,8 +63,8 @@ export async function POST(req: Request) {
     // Create User
     const user = await User.create({
       name: ownerName,
-      email,
-      phone,
+      email: cleanEmail,
+      phone: phone ? phone.trim() : undefined,
       password: hashedPassword,
       role: 'Vendor'
     });

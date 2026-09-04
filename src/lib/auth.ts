@@ -22,19 +22,22 @@ export const authOptions: NextAuthOptions = {
 
         await dbConnect();
 
-        let user = await User.findOne({ email: credentials.email }).select('+password');
+        const cleanEmail = credentials.email.trim().toLowerCase();
+        let user = await User.findOne({ 
+          email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
+        }).select('+password');
 
         if (!user) {
-          const isAdminEmail = credentials.email === 'admin@malabarcoast.com' || credentials.email === 'admin@spicewizz.com';
+          const isAdminEmail = cleanEmail === 'admin@malabarcoast.com' || cleanEmail === 'admin@spicewizz.com';
           const defaultAdminPassword = process.env.ADMIN_PASSWORD || 'admin';
-          const isMalabarFallback = credentials.email === 'admin@malabarcoast.com' && credentials.password === 'malabar123';
-          const isSpicewizzFallback = credentials.email === 'admin@spicewizz.com' && credentials.password === 'spicewizz123';
+          const isMalabarFallback = cleanEmail === 'admin@malabarcoast.com' && credentials.password === 'malabar123';
+          const isSpicewizzFallback = cleanEmail === 'admin@spicewizz.com' && credentials.password === 'spicewizz123';
 
           if (isAdminEmail && (credentials.password === defaultAdminPassword || isMalabarFallback || isSpicewizzFallback)) {
             const hashedPassword = await bcrypt.hash(credentials.password, 10);
             user = await User.create({
               name: 'Admin',
-              email: credentials.email,
+              email: cleanEmail,
               password: hashedPassword,
               role: 'Admin'
             });
@@ -86,14 +89,17 @@ export const authOptions: NextAuthOptions = {
 
         await dbConnect();
 
-        const user = await User.findOne({ email: credentials.email }).select('+password');
+        const cleanEmail = credentials.email.trim().toLowerCase();
+        const user = await User.findOne({ 
+          email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
+        }).select('+password');
 
         if (!user) {
-          throw new Error('No vendor found with this email');
+          throw new Error('No vendor account found with this email');
         }
 
         if (user.role !== 'Vendor') {
-          throw new Error('Access denied. Vendor role required.');
+          throw new Error(`This email is registered as a ${user.role}, not a Vendor.`);
         }
 
         if (!user.password) {
@@ -111,7 +117,7 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Vendor profile not found.');
         }
         if (vendor.status !== 'Approved') {
-            throw new Error(`Vendor account is ${vendor.status}.`);
+            throw new Error(`Vendor account status is "${vendor.status}". Please wait for admin approval.`);
         }
 
         return {

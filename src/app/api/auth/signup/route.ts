@@ -29,14 +29,18 @@ export async function POST(req: Request) {
 
     await connectToDatabase();
 
+    const cleanEmail = email.trim().toLowerCase();
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ 
+      email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
+    });
     if (existingUser) {
       return NextResponse.json({ error: 'User already exists with this email' }, { status: 409 });
     }
 
     if (phone) {
-      const existingPhone = await User.findOne({ phone });
+      const existingPhone = await User.findOne({ phone: phone.trim() });
       if (existingPhone) {
         return NextResponse.json({ error: 'User already exists with this phone number' }, { status: 409 });
       }
@@ -48,8 +52,8 @@ export async function POST(req: Request) {
     // Create the user
     const newUser = await User.create({
       name,
-      email,
-      phone,
+      email: cleanEmail,
+      phone: phone ? phone.trim() : undefined,
       password: hashedPassword,
       role: 'Customer', // Default role
     });
