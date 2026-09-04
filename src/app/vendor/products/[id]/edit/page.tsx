@@ -12,6 +12,7 @@ export default function EditVendorProductPage({ params }: { params: { id: string
     slug: '',
     description: '',
     price: '',
+    originalPrice: '',
     category: '',
     stock: '',
     productType: 'Spice',
@@ -46,6 +47,7 @@ export default function EditVendorProductPage({ params }: { params: { id: string
           slug: p.slug || '',
           description: p.description || '',
           price: p.price !== undefined ? p.price.toString() : '',
+          originalPrice: p.originalPrice !== undefined ? p.originalPrice.toString() : '',
           category: p.category || '',
           stock: p.stock !== undefined ? p.stock.toString() : '',
           productType: p.productType || 'Spice',
@@ -201,8 +203,12 @@ export default function EditVendorProductPage({ params }: { params: { id: string
           <h3 className="text-lg font-semibold text-neutral-900 mb-4 pb-2 border-b">Pricing & Inventory</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Price (₹) *</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Selling Price (₹) *</label>
               <input required type="text" name="price" value={formData.price} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Original / Offer Price (₹)</label>
+              <input type="text" name="originalPrice" value={formData.originalPrice} onChange={handleChange} placeholder="Optional e.g. 600" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none text-sm" />
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Price per Gram (₹)</label>

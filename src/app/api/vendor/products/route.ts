@@ -88,12 +88,14 @@ export async function POST(req: Request) {
 
     const rawPricePerGram = formData.get('pricePerGram');
     const rawShippingDays = formData.get('shippingDays');
+    const rawOriginalPrice = formData.get('originalPrice');
 
     const payload = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
       description: formData.get('description') as string,
       price: parseNumber(formData.get('price'), 0),
+      originalPrice: rawOriginalPrice ? parseNumber(rawOriginalPrice, 0) : undefined,
       category: formData.get('category') as string,
       productType: formData.get('productType') as string,
       stock: parseNumber(formData.get('stock'), 0),

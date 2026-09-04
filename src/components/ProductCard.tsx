@@ -38,7 +38,8 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   // Display calculations matching the screenshot layout
   const rating = 5;
   const reviewCount = (product.name.length * 13) % 200 + 10; // stable random looking number
-  const originalPrice = Math.round(basePrice * 1.15);
+  const originalPrice = (product.originalPrice && Number(product.originalPrice) > basePrice) ? Number(product.originalPrice) : null;
+  const discountPercent = originalPrice ? Math.round(((originalPrice - basePrice) / originalPrice) * 100) : 0;
   const usp = perGramPrice.toFixed(2);
   const productImage = product.imageUrl || '/images/Cardamom.jpg';
   const isUploadedImage = productImage.startsWith('/uploads/');
@@ -133,9 +134,16 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
             <span className="font-extrabold text-xl text-foreground tracking-tight">
                ₹{basePrice}
             </span>
-            <span className="font-medium text-sm text-foreground/40 line-through decoration-1">
-               ₹{originalPrice}
-            </span>
+            {originalPrice && (
+              <span className="font-medium text-sm text-foreground/40 line-through decoration-1">
+                 ₹{originalPrice}
+              </span>
+            )}
+            {discountPercent > 0 && (
+              <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded ml-1">
+                {discountPercent}% OFF
+              </span>
+            )}
           </div>
           
           <div className="flex flex-col gap-0.5 mb-4">

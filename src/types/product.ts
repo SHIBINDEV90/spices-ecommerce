@@ -25,6 +25,7 @@ export interface Product {
   isRetailAvailable?: boolean;
   isBulkAvailable?: boolean;
   price?: number;
+  originalPrice?: number;
   pricePerGram?: number;
   stock?: number;
   weight?: string;

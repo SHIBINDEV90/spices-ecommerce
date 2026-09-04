@@ -11,6 +11,7 @@ export default function AddProductPage() {
     slug: '',
     description: '',
     price: '',
+    originalPrice: '',
     category: '',
     stock: '',
     productType: 'Spice',
@@ -139,8 +140,12 @@ export default function AddProductPage() {
           <h3 className="text-lg font-semibold text-neutral-900 mb-4 pb-2 border-b">Pricing & Inventory</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1">Price (₹) *</label>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Selling Price (₹) *</label>
               <input required type="text" name="price" value={formData.price} onChange={handleChange} placeholder="e.g. 500" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Original / Offer Price (₹)</label>
+              <input type="text" name="originalPrice" value={formData.originalPrice} onChange={handleChange} placeholder="Optional e.g. 600" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
             </div>
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">Price per Gram (₹)</label>

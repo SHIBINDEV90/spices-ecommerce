@@ -58,7 +58,14 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   const currentPrice = selectedWeight.value === 1000 && basePrice > 0
     ? basePrice
     : Math.round(perGramPrice * selectedWeight.value);
-  const originalPrice = Math.round(currentPrice * 1.15);
+  const hasOriginalPrice = product.originalPrice && Number(product.originalPrice) > basePrice;
+  const originalBasePrice = hasOriginalPrice ? Number(product.originalPrice) : null;
+  const originalPrice = originalBasePrice
+    ? (selectedWeight.value === 1000 ? originalBasePrice : Math.round((originalBasePrice / 1000) * selectedWeight.value))
+    : null;
+  const discountPercent = originalPrice && originalPrice > currentPrice
+    ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+    : 0;
   const usp = perGramPrice.toFixed(2);
 
   const handleAddToCart = () => {
@@ -173,12 +180,16 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                     <span className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">
                       ₹{currentPrice}
                     </span>
-                    <span className="text-lg font-medium text-white/40 line-through decoration-1 mb-1">
-                      ₹{originalPrice}
-                    </span>
-                    <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded ml-2 mb-2">
-                      14% OFF
-                    </span>
+                    {originalPrice && (
+                      <span className="text-lg font-medium text-white/40 line-through decoration-1 mb-1">
+                        ₹{originalPrice}
+                      </span>
+                    )}
+                    {discountPercent > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded ml-2 mb-2">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
                   </div>
                   <span className="text-xs text-white/40 font-medium">Inclusive of all taxes</span>
                   <span className="text-xs text-white/40 font-medium">USP: ₹{usp}/g</span>

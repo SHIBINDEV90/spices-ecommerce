@@ -100,6 +100,7 @@ export async function PUT(
     const slug = formData.get('slug') as string || existingProduct.slug;
     const description = formData.get('description') as string || existingProduct.description;
     const price = formData.has('price') ? parseNumber(formData.get('price'), existingProduct.price) : existingProduct.price;
+    const originalPrice = formData.has('originalPrice') ? parseNumber(formData.get('originalPrice'), existingProduct.originalPrice || 0) : existingProduct.originalPrice;
     const category = formData.get('category') as string || existingProduct.category;
     const productType = formData.get('productType') as string || existingProduct.productType;
     const stock = formData.has('stock') ? parseNumber(formData.get('stock'), existingProduct.stock) : existingProduct.stock;
@@ -119,6 +120,7 @@ export async function PUT(
         slug,
         description,
         price,
+        originalPrice: (originalPrice && originalPrice > 0) ? originalPrice : undefined,
         category,
         productType,
         stock,

@@ -33,12 +33,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   try {
     const formData = await request.formData();
     
-    // Base payload
+    const rawOriginal = formData.get('originalPrice');
     const payload: any = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
       description: formData.get('description') as string,
       price: Number(formData.get('price')),
+      originalPrice: rawOriginal ? Number(rawOriginal) : undefined,
       productType: formData.get('productType') as string,
       stock: Number(formData.get('stock')),
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',

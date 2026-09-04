@@ -22,6 +22,7 @@ export interface IProduct extends Document {
   shippingDays?: number;
   tax?: number;
   pricePerGram?: number;
+  originalPrice?: number;
 }
 
 const ProductSchema: Schema = new Schema({
@@ -29,6 +30,7 @@ const ProductSchema: Schema = new Schema({
   slug: { type: String, required: true, unique: true },
   description: { type: String, required: true },
   price: { type: Number, required: true },
+  originalPrice: { type: Number },
   imageUrl: { type: String, required: true },
   productType: { type: String, required: true, default: 'Spice' },
   stock: { type: Number, default: 0 },

@@ -21,6 +21,7 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     slug: initialData?.slug || '',
     description: initialData?.description || '',
     price: initialData?.price || '',
+    originalPrice: initialData?.originalPrice || '',
     imageUrl: initialData?.imageUrl || '',
     productType: initialData?.productType || 'Spice',
     stock: initialData?.stock || 0,
@@ -38,7 +39,7 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: name === 'price' || name === 'stock' ? Number(value) : value
+        [name]: name === 'price' || name === 'originalPrice' || name === 'stock' ? Number(value) : value
       }));
     }
   };
@@ -57,6 +58,9 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
       payload.append('slug', formData.slug);
       payload.append('description', formData.description);
       payload.append('price', formData.price.toString());
+      if (formData.originalPrice) {
+        payload.append('originalPrice', formData.originalPrice.toString());
+      }
       payload.append('productType', formData.productType);
       payload.append('stock', formData.stock.toString());
       payload.append('isBulkAvailable', formData.isBulkAvailable.toString());
@@ -158,7 +162,7 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Price (₹)</label>
+            <label className="text-sm font-medium text-gray-300">Selling Price (₹)</label>
             <input
               required
               type="number"
@@ -168,6 +172,19 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
               onChange={handleChange}
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
               placeholder="0.00"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-300">Original / MRP Price (₹) <span className="text-xs text-gray-500 font-normal">(Optional for offer badge)</span></label>
+            <input
+              type="number"
+              step="0.01"
+              name="originalPrice"
+              value={formData.originalPrice}
+              onChange={handleChange}
+              className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
+              placeholder="e.g. 3500"
             />
           </div>
 
