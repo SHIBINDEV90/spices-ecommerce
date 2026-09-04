@@ -51,11 +51,13 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   // Base calculations
   const basePrice = Number(product.price) || 0;
-  const perGramPrice = product.pricePerGram && Number(product.pricePerGram) > 0
-    ? Number(product.pricePerGram)
-    : (basePrice > 0 ? basePrice / 1000 : 0.5);
+  const perGramPrice = basePrice > 0
+    ? basePrice / 1000
+    : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
-  const currentPrice = Math.round(perGramPrice * selectedWeight.value);
+  const currentPrice = selectedWeight.value === 1000 && basePrice > 0
+    ? basePrice
+    : Math.round(perGramPrice * selectedWeight.value);
   const originalPrice = Math.round(currentPrice * 1.15);
   const usp = perGramPrice.toFixed(2);
 

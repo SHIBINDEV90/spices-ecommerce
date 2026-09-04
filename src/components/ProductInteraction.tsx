@@ -13,16 +13,18 @@ export default function ProductInteraction({ product }: { product: any }) {
 
   // Calculate per gram price
   const basePrice = Number(product.price) || 0;
-  const perGramPrice = product.pricePerGram && Number(product.pricePerGram) > 0
-    ? Number(product.pricePerGram)
-    : (basePrice > 0 ? basePrice / 1000 : 0.5);
+  const perGramPrice = basePrice > 0
+    ? basePrice / 1000
+    : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
   const grams = selectedWeight === '500g' ? 500 : 1000;
-  const calculatedPrice = Math.round(perGramPrice * grams);
+  const calculatedPrice = selectedWeight === '1kg' && basePrice > 0
+    ? basePrice
+    : Math.round(perGramPrice * grams);
 
   const weightOptions = [
     { label: '500g', grams: 500, price: Math.round(perGramPrice * 500) },
-    { label: '1kg', grams: 1000, price: Math.round(perGramPrice * 1000) },
+    { label: '1kg', grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
   ];
 
   const handleAddToCart = () => {

@@ -40,7 +40,22 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
     if (storedCart) {
-      setCartItems(JSON.parse(storedCart));
+      try {
+        const parsedCart: CartItem[] = JSON.parse(storedCart);
+        const sanitizedCart = parsedCart.map((item) => {
+          // If price was erroneously multiplied by 1000 in legacy state (e.g. 300000)
+          if (item.price && item.price >= 100000) {
+            const base = Number((item as any).pricePerGram) > 0 
+              ? Math.round(item.price / 100) 
+              : Math.round(item.price / 1000);
+            return { ...item, price: base > 0 ? base : item.price };
+          }
+          return item;
+        });
+        setCartItems(sanitizedCart);
+      } catch (err) {
+        console.error('Failed to parse stored cart:', err);
+      }
     }
   }, []);
 

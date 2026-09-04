@@ -21,14 +21,14 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const [isQuickViewOpen, setQuickViewOpen] = useState(false);
 
   const basePrice = Number(product.price) || 500;
-  const perGramPrice = product.pricePerGram && Number(product.pricePerGram) > 0
-    ? Number(product.pricePerGram)
-    : (basePrice > 0 ? basePrice / 1000 : 0.5);
+  const perGramPrice = basePrice > 0
+    ? basePrice / 1000
+    : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAdded(true);
-    addToCart({ ...product, price: Math.round(perGramPrice * 1000), selectedWeight: '1kg' });
+    addToCart({ ...product, price: basePrice, selectedWeight: '1kg' });
     setIsCartOpen(true);
     setTimeout(() => {
       setIsAdded(false);
