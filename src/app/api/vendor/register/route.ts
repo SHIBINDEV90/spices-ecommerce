@@ -49,6 +49,7 @@ export async function POST(req: Request) {
     // Check if user already exists (case-insensitive)
     // Check if user already exists
     const existingUser = await User.findOne({ 
+    const existingUser: any = await User.findOne({ 
       email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
     });
     if (existingUser) {
@@ -61,6 +62,7 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     let user;
+    let user: any;
 
     // Create User
     const user = await User.create({

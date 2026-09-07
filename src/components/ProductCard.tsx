@@ -41,8 +41,6 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const originalPrice = (product.originalPrice && Number(product.originalPrice) > basePrice) ? Number(product.originalPrice) : null;
   const discountPercent = originalPrice ? Math.round(((originalPrice - basePrice) / originalPrice) * 100) : 0;
   const usp = perGramPrice.toFixed(2);
-  const productImage = product.imageUrl || '/images/Cardamom.jpg';
-  const isUploadedImage = productImage.startsWith('/uploads/');
   const [imgSrc, setImgSrc] = useState(product.imageUrl || '/images/Cardamom.jpg');
   const isUploadedImage = typeof imgSrc === 'string' && imgSrc.startsWith('/uploads/');
 
@@ -58,7 +56,6 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
     >
       <Link href={`/products/${product._id || product.slug}`} className="relative block h-40 w-full overflow-hidden bg-neutral-100 flex-shrink-0 cursor-pointer">
         <Image
-          src={productImage}
           src={imgSrc}
           alt={product.name}
           fill

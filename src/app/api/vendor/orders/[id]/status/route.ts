@@ -61,6 +61,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     );
 
     // If transitioned to Delivered, add funds to Wallet
+    // If transitioned to Delivered, shift from pending to available (if paid online) or add to available (if COD)
     if (status === 'Delivered' && currentStatus !== 'Delivered') {
         const vendorTotal = vendorProducts.reduce((sum: number, p: any) => sum + (p.price * p.quantity), 0);
         const commission = vendorTotal * 0.10; // 10% Admin Commission
@@ -71,6 +72,24 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
             { $inc: { availableBalance: payoutAmount } },
             { upsert: true, new: true }
         );
+        if (currentOrder.paymentStatus === 'paid') {
+            await Wallet.findOneAndUpdate(
+                { vendorId: vendor._id },
+                { 
+                    $inc: { 
+                        availableBalance: payoutAmount,
+                        pendingBalance: -payoutAmount 
+                    } 
+                },
+                { upsert: true, new: true }
+            );
+        } else {
+            await Wallet.findOneAndUpdate(
+                { vendorId: vendor._id },
+                { $inc: { availableBalance: payoutAmount } },
+                { upsert: true, new: true }
+            );
+        }
     }
 
     return NextResponse.json({ message: 'Order status updated successfully', status });

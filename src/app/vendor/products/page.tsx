@@ -103,12 +103,6 @@ Thank you!`;
         {/* Body */}
         <div className="p-6 space-y-5 overflow-y-auto max-h-[70vh]">
           {/* Product details preview card */}
-          <div className="bg-neutral-50 rounded-xl p-4 border border-neutral-100 flex flex-col gap-1">
-            <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Product Info</span>
-            <span className="font-bold text-neutral-900 text-base">{product.name}</span>
-            <span className="text-sm font-semibold text-primary">
-              ₹{product.price.toLocaleString('en-IN')}{product.weight ? ` / ${product.weight}` : ''}
-            </span>
           <div className="bg-neutral-50 rounded-xl p-4 border border-neutral-100 flex items-center gap-4">
             <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-neutral-200 flex-shrink-0 border border-neutral-200">
               <Image
@@ -312,7 +306,6 @@ export default function VendorProducts() {
               ))}
               {products.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
                   <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
                     You haven't added any products yet.
                   </td>

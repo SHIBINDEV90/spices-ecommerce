@@ -90,13 +90,11 @@ export const authOptions: NextAuthOptions = {
         await dbConnect();
 
         const cleanEmail = credentials.email.trim().toLowerCase();
-        const user = await User.findOne({ 
         let user = await User.findOne({ 
           email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
         }).select('+password');
 
         if (!user) {
-          throw new Error('No vendor account found with this email');
           // Check if a vendor profile exists with this email or owner
           const vendorByEmail = await Vendor.findOne({
             $or: [
@@ -119,7 +117,6 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (user.role !== 'Vendor') {
-          throw new Error(`This email is registered as a ${user.role}, not a Vendor.`);
           // Check if there is an approved vendor linked to this user or email
           const linkedVendor = await Vendor.findOne({
             $or: [{ userId: user._id }, { email: cleanEmail }]
@@ -142,28 +139,23 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!user.password) {
-          throw new Error('Vendor has no password configured.');
           throw new Error('Vendor has no password configured. Please use Forgot Password to set one.');
         }
 
         const isPasswordMatch = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordMatch) {
-          throw new Error('Invalid credentials');
           throw new Error('Invalid email or password.');
         }
 
-        const vendor = await Vendor.findOne({ userId: user._id });
         const vendor = await Vendor.findOne({ 
           $or: [{ userId: user._id }, { email: cleanEmail }] 
         });
 
         if (!vendor) {
-            throw new Error('Vendor profile not found.');
           throw new Error('Vendor profile not found. Please contact support.');
         }
         if (vendor.status !== 'Approved') {
-            throw new Error(`Vendor account status is "${vendor.status}". Please wait for admin approval.`);
           throw new Error(`Vendor account status is "${vendor.status}". Please wait for admin approval.`);
         }
 

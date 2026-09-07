@@ -4,6 +4,7 @@ import Order from '@/lib/models/Order';
 import Product from '@/lib/models/Product';
 import Coupon from '@/lib/models/Coupon';
 import Stripe from 'stripe';
+import { getRazorpayClient } from '@/lib/razorpay';
 
 function getStripeClient(): Stripe {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -25,11 +26,16 @@ export async function POST(req: Request) {
         customerName, 
         customerEmail, 
         paymentMethod,
+        paymentMethod = 'razorpay',
         couponCode
     } = body;
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
+    }
+
+    if (!customerName || !customerEmail || !shippingAddress?.street || !shippingAddress?.city) {
+      return NextResponse.json({ error: 'Missing required shipping or customer details' }, { status: 400 });
     }
 
     await dbConnect();
@@ -74,6 +80,7 @@ export async function POST(req: Request) {
     }
 
     const totalAmount = subtotal - discountAmount + deliveryFee + codFee;
+    const totalAmount = Math.max(0, subtotal - discountAmount + deliveryFee + codFee);
 
     // Create Order in DB
     const order = await Order.create({
@@ -86,13 +93,63 @@ export async function POST(req: Request) {
         discountAmount,
         paymentStatus: 'pending',
         orderStatus: 'Pending',
+        paymentMethod: paymentMethod === 'cod' ? 'cod' : (paymentMethod === 'stripe' ? 'stripe' : 'razorpay'),
     });
 
+    // 1. CASH ON DELIVERY
     if (paymentMethod === 'cod') {
         return NextResponse.json({ success: true, orderId: order._id, paymentMethod: 'cod' });
+        return NextResponse.json({ 
+          success: true, 
+          orderId: order._id.toString(), 
+          paymentMethod: 'cod',
+          totalAmount 
+        });
     }
 
     // Process Stripe Online Payment
+    // 2. RAZORPAY (UPI / QR / Indian Cards / Net Banking)
+    if (paymentMethod === 'razorpay' || paymentMethod === 'upi') {
+        try {
+          const razorpay = getRazorpayClient();
+          const amountInPaisa = Math.round(totalAmount * 100);
+
+          const razorpayOrder = await razorpay.orders.create({
+            amount: amountInPaisa,
+            currency: 'INR',
+            receipt: order._id.toString(),
+            notes: {
+              orderId: order._id.toString(),
+              customerEmail,
+              customerName,
+            }
+          });
+
+          order.paymentGatewayId = razorpayOrder.id;
+          order.paymentMethod = 'razorpay';
+          await order.save();
+
+          const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+
+          return NextResponse.json({
+            success: true,
+            orderId: order._id.toString(),
+            razorpayOrderId: razorpayOrder.id,
+            amount: razorpayOrder.amount,
+            currency: razorpayOrder.currency,
+            key,
+            paymentMethod: 'razorpay',
+          });
+        } catch (rzpErr: any) {
+          console.error('Razorpay Order Creation Error:', rzpErr);
+          return NextResponse.json(
+            { error: `Razorpay Error: ${rzpErr.message || 'Failed to create payment order'}` },
+            { status: 500 }
+          );
+        }
+    }
+
+    // 3. STRIPE (International Online Card Payment)
     const stripe = getStripeClient();
 
     const lineItems = orderProducts.map(item => ({
@@ -131,6 +188,7 @@ export async function POST(req: Request) {
             price_data: {
                 currency: 'inr',
                 product_data: { name: `Order from Malabar Coast (Includes Discount)` },
+                product_data: { name: `Order from Malabar Coast Spices (Discount Applied)` },
                 unit_amount: Math.round(totalAmount * 100),
             },
             quantity: 1,
@@ -142,6 +200,7 @@ export async function POST(req: Request) {
       customer_email: customerEmail,
       metadata: {
         orderId: order._id.toString(), // Store order ID to fulfill later
+        orderId: order._id.toString(),
       },
       line_items: finalLineItems,
       mode: 'payment',
@@ -151,12 +210,63 @@ export async function POST(req: Request) {
 
     // Save Stripe session ID to order
     order.paymentGatewayId = session.id;
+    order.paymentMethod = 'stripe';
     await order.save();
 
     return NextResponse.json({ url: session.url, paymentMethod: 'online' });
+    return NextResponse.json({ 
+      success: true,
+      url: session.url, 
+      paymentMethod: 'stripe',
+      orderId: order._id.toString() 
+    });
 
   } catch (error: any) {
     console.error('Checkout Order Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const orderId = searchParams.get('orderId');
+    const sessionId = searchParams.get('sessionId');
+
+    await dbConnect();
+
+    let order = null;
+    if (orderId) {
+      order = await Order.findById(orderId).populate('products.productId');
+    } else if (sessionId) {
+      order = await Order.findOne({ paymentGatewayId: sessionId }).populate('products.productId');
+    }
+
+    if (!order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      order: {
+        id: order._id.toString(),
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        shippingAddress: order.shippingAddress,
+        products: order.products,
+        totalAmount: order.totalAmount,
+        discountAmount: order.discountAmount,
+        paymentStatus: order.paymentStatus,
+        orderStatus: order.orderStatus,
+        paymentMethod: order.paymentMethod,
+        paymentGatewayId: order.paymentGatewayId,
+        paymentId: order.paymentId,
+        createdAt: order.createdAt,
+      }
+    });
+  } catch (error: any) {
+    console.error('Get Order Error:', error);
+    return NextResponse.json({ error: error.message || 'Failed to get order' }, { status: 500 });
   }
 }

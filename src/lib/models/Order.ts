@@ -30,6 +30,9 @@ export interface IOrder extends Document {
   paymentStatus: 'pending' | 'paid' | 'failed';
   orderStatus: 'Pending' | 'Paid' | 'Shipped' | 'Delivered';
   paymentGatewayId?: string; // To store Razorpay/Stripe order ID
+  paymentMethod?: 'razorpay' | 'stripe' | 'cod';
+  paymentGatewayId?: string; // To store Razorpay order ID or Stripe session ID
+  paymentId?: string; // To store Razorpay payment ID for auditing
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,7 +71,12 @@ const OrderSchema = new Schema<IOrder>(
       enum: ['Pending', 'Paid', 'Shipped', 'Delivered'],
       default: 'Pending',
     },
+    paymentMethod: {
+      type: String,
+      enum: ['razorpay', 'stripe', 'cod'],
+    },
     paymentGatewayId: { type: String },
+    paymentId: { type: String },
   },
   { timestamps: true }
 );

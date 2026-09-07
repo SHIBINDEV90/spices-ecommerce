@@ -58,3 +58,4 @@ export async function GET(request: Request, { params }: { params: { path: string
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
+

@@ -48,6 +48,8 @@ export async function POST(req: Request) {
   return NextResponse.json({ received: true });
 }
 
+import { fulfillOrder as handleOrderFulfillment } from '@/lib/order-fulfillment';
+
 async function fulfillOrder(session: Stripe.Checkout.Session) {
   await dbConnect();
 
@@ -59,6 +61,10 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
         const order = await Order.findByIdAndUpdate(orderId, {
             paymentStatus: 'paid',
             paymentGatewayId: session.id,
+        await handleOrderFulfillment({
+          orderId,
+          paymentGatewayId: session.id,
+          paymentMethod: 'stripe',
         });
 
         if (order && order.couponCode) {
@@ -69,6 +75,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
         }
 
         console.log(`[Webhook] Marked Order ${orderId} as Paid`);
+        console.log(`[Webhook] Marked Order ${orderId} as Paid via Stripe`);
       }
       return;
     }
