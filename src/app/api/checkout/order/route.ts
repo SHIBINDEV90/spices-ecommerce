@@ -20,15 +20,21 @@ function getStripeClient(): Stripe {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { 
-        cartItems, 
-        shippingAddress, 
-        customerName, 
-        customerEmail, 
-        paymentMethod,
-        paymentMethod = 'razorpay',
-        couponCode
+    const {
+      cartItems,
+      shippingAddress,
+      customerName,
+      customerEmail,
+      paymentMethod = 'stripe',
+      couponCode,
     } = body;
+
+    const normalizedPaymentMethod =
+      paymentMethod === 'upi'
+        ? 'razorpay'
+        : paymentMethod === 'cod' || paymentMethod === 'razorpay' || paymentMethod === 'stripe'
+          ? paymentMethod
+          : 'stripe';
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
@@ -61,8 +67,8 @@ export async function POST(req: Request) {
       });
     }
 
-    const deliveryFee = subtotal > 500 ? 0 : 50; 
-    const codFee = paymentMethod === 'cod' ? 75 : 0;
+    const deliveryFee = subtotal > 500 ? 0 : 50;
+    const codFee = normalizedPaymentMethod === 'cod' ? 75 : 0;
 
     let discountAmount = 0;
     if (couponCode) {
@@ -79,7 +85,6 @@ export async function POST(req: Request) {
         }
     }
 
-    const totalAmount = subtotal - discountAmount + deliveryFee + codFee;
     const totalAmount = Math.max(0, subtotal - discountAmount + deliveryFee + codFee);
 
     // Create Order in DB
@@ -93,23 +98,22 @@ export async function POST(req: Request) {
         discountAmount,
         paymentStatus: 'pending',
         orderStatus: 'Pending',
-        paymentMethod: paymentMethod === 'cod' ? 'cod' : (paymentMethod === 'stripe' ? 'stripe' : 'razorpay'),
+        paymentMethod: normalizedPaymentMethod,
     });
 
     // 1. CASH ON DELIVERY
-    if (paymentMethod === 'cod') {
-        return NextResponse.json({ success: true, orderId: order._id, paymentMethod: 'cod' });
-        return NextResponse.json({ 
-          success: true, 
-          orderId: order._id.toString(), 
+    if (normalizedPaymentMethod === 'cod') {
+        return NextResponse.json({
+          success: true,
+          orderId: order._id.toString(),
           paymentMethod: 'cod',
-          totalAmount 
+          totalAmount
         });
     }
 
     // Process Stripe Online Payment
     // 2. RAZORPAY (UPI / QR / Indian Cards / Net Banking)
-    if (paymentMethod === 'razorpay' || paymentMethod === 'upi') {
+    if (normalizedPaymentMethod === 'razorpay') {
         try {
           const razorpay = getRazorpayClient();
           const amountInPaisa = Math.round(totalAmount * 100);
@@ -187,7 +191,6 @@ export async function POST(req: Request) {
         ? [{
             price_data: {
                 currency: 'inr',
-                product_data: { name: `Order from Malabar Coast (Includes Discount)` },
                 product_data: { name: `Order from Malabar Coast Spices (Discount Applied)` },
                 unit_amount: Math.round(totalAmount * 100),
             },
@@ -200,7 +203,6 @@ export async function POST(req: Request) {
       customer_email: customerEmail,
       metadata: {
         orderId: order._id.toString(), // Store order ID to fulfill later
-        orderId: order._id.toString(),
       },
       line_items: finalLineItems,
       mode: 'payment',
@@ -213,17 +215,15 @@ export async function POST(req: Request) {
     order.paymentMethod = 'stripe';
     await order.save();
 
-    return NextResponse.json({ url: session.url, paymentMethod: 'online' });
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      url: session.url, 
+      url: session.url,
       paymentMethod: 'stripe',
-      orderId: order._id.toString() 
+      orderId: order._id.toString()
     });
 
   } catch (error: any) {
     console.error('Checkout Order Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }

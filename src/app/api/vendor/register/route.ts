@@ -45,52 +45,39 @@ export async function POST(req: Request) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const escapedEmail = cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     // Check if user already exists (case-insensitive)
-    // Check if user already exists
-    const existingUser = await User.findOne({ 
-    const existingUser: any = await User.findOne({ 
-      email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
+    const existingUser: any = await User.findOne({
+      email: { $regex: new RegExp(`^${escapedEmail}$`, 'i') }
     });
-    if (existingUser) {
+
+    const existingVendor = await Vendor.findOne({
+      $or: [
+        { email: { $regex: new RegExp(`^${escapedEmail}$`, 'i') } },
+        ...(existingUser ? [{ userId: existingUser._id }] : []),
+      ]
+    });
+
+    if (existingVendor) {
+      if (existingVendor.status === 'Pending') {
+        return NextResponse.json(
+          { error: 'An application with this email is already submitted and pending admin approval.' },
+          { status: 409 }
+        );
+      }
+
       return NextResponse.json(
-        { error: 'User with this email already exists' },
+        { error: 'A vendor account with this email already exists. Please login instead.' },
         { status: 409 }
       );
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    let user;
     let user: any;
 
-    // Create User
-    const user = await User.create({
-      name: ownerName,
-      email: cleanEmail,
-      phone: phone ? phone.trim() : undefined,
-      password: hashedPassword,
-      role: 'Vendor'
-    });
     if (existingUser) {
-      const existingVendor = await Vendor.findOne({
-        $or: [{ userId: existingUser._id }, { email: cleanEmail }]
-      });
-
-    // Create Vendor Profile
-      if (existingVendor) {
-        if (existingVendor.status === 'Pending') {
-          return NextResponse.json(
-            { error: 'An application with this email is already submitted and pending admin approval.' },
-            { status: 409 }
-          );
-        }
-        return NextResponse.json(
-          { error: 'A vendor account with this email already exists. Please login instead.' },
-          { status: 409 }
-        );
-      }
-
       // If user was Customer, update password and link new vendor application
       existingUser.password = hashedPassword;
       existingUser.name = ownerName;
