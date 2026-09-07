@@ -66,6 +66,13 @@ export default function VendorReviews() {
                 <div className="w-full md:w-48 flex-shrink-0 flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-neutral-100 border border-neutral-200">
                     <Image src={review.productId?.imageUrl || '/images/Cardamom.jpg'} alt="Product" fill className="object-cover" />
+                    <Image 
+                      src={review.productId?.imageUrl || '/images/Cardamom.jpg'} 
+                      alt="Product" 
+                      fill 
+                      className="object-cover" 
+                      unoptimized={typeof review.productId?.imageUrl === 'string' && review.productId.imageUrl.startsWith('/uploads/')}
+                    />
                   </div>
                   <div className="text-sm font-medium text-neutral-900 line-clamp-2">
                     {review.productId?.name || 'Unknown Product'}

@@ -137,6 +137,7 @@ export default function Home() {
                       alt={product.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      unoptimized={typeof product.imageUrl === 'string' && product.imageUrl.startsWith('/uploads/')}
                     />
                     <div className="absolute top-4 left-4 bg-moss-deep text-surface-container-lowest font-label-md text-xs px-3 py-1 rounded uppercase tracking-wider z-10">
                       Export Grade

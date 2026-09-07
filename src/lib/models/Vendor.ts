@@ -18,6 +18,8 @@ export interface IVendor extends Document {
     documentType: string;
     url: string;
   }[];
+  email?: string;
+  phone?: string;
   status: 'Pending' | 'Approved' | 'Rejected';
   profileImage?: string;
   createdAt: Date;
@@ -26,6 +28,8 @@ export interface IVendor extends Document {
 
 const VendorSchema: Schema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  email: { type: String, lowercase: true, trim: true, index: true },
+  phone: { type: String, trim: true },
   businessName: { type: String, required: true },
   ownerName: { type: String, required: true },
   businessAddress: {

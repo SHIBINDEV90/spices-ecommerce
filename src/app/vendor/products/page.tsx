@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Plus, Edit, Trash, Share2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -13,6 +14,7 @@ type Product = {
   stock: number;
   approvalStatus: string;
   weight?: string;
+  imageUrl?: string;
 };
 
 // Share Product Modal Component
@@ -107,6 +109,23 @@ Thank you!`;
             <span className="text-sm font-semibold text-primary">
               ₹{product.price.toLocaleString('en-IN')}{product.weight ? ` / ${product.weight}` : ''}
             </span>
+          <div className="bg-neutral-50 rounded-xl p-4 border border-neutral-100 flex items-center gap-4">
+            <div className="relative w-14 h-14 rounded-lg overflow-hidden bg-neutral-200 flex-shrink-0 border border-neutral-200">
+              <Image
+                src={product.imageUrl || '/images/Cardamom.jpg'}
+                alt={product.name}
+                fill
+                className="object-cover"
+                unoptimized={typeof product.imageUrl === 'string' && product.imageUrl.startsWith('/uploads/')}
+              />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Product Info</span>
+              <span className="font-bold text-neutral-900 text-base">{product.name}</span>
+              <span className="text-sm font-semibold text-primary">
+                ₹{product.price.toLocaleString('en-IN')}{product.weight ? ` / ${product.weight}` : ''}
+              </span>
+            </div>
           </div>
 
           {/* Phone input */}
@@ -230,6 +249,7 @@ export default function VendorProducts() {
           <table className="w-full text-left text-sm text-neutral-600">
             <thead className="bg-neutral-50 border-b border-neutral-200">
               <tr>
+                <th className="px-6 py-4 font-semibold text-neutral-900">Image</th>
                 <th className="px-6 py-4 font-semibold text-neutral-900">Product Name</th>
                 <th className="px-6 py-4 font-semibold text-neutral-900">Category</th>
                 <th className="px-6 py-4 font-semibold text-neutral-900">Price</th>
@@ -241,6 +261,17 @@ export default function VendorProducts() {
             <tbody className="divide-y divide-neutral-200">
               {products.map((product) => (
                 <tr key={product._id} className="hover:bg-neutral-50">
+                  <td className="px-6 py-4">
+                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-neutral-100 border border-neutral-200 flex-shrink-0">
+                      <Image
+                        src={product.imageUrl || '/images/Cardamom.jpg'}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        unoptimized={typeof product.imageUrl === 'string' && product.imageUrl.startsWith('/uploads/')}
+                      />
+                    </div>
+                  </td>
                   <td className="px-6 py-4 font-medium text-neutral-900">{product.name}</td>
                   <td className="px-6 py-4">{product.category || 'N/A'}</td>
                   <td className="px-6 py-4">₹{product.price}</td>
@@ -282,6 +313,7 @@ export default function VendorProducts() {
               {products.length === 0 && (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-neutral-500">
+                  <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
                     You haven't added any products yet.
                   </td>
                 </tr>

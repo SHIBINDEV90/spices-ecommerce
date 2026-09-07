@@ -185,6 +185,13 @@ export default function VendorSettings() {
             <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-neutral-100 flex items-center justify-center relative">
               {profileImage ? (
                 <Image src={profileImage} alt="Profile" fill className="object-cover" />
+                <Image 
+                  src={profileImage} 
+                  alt="Profile" 
+                  fill 
+                  className="object-cover" 
+                  unoptimized={profileImage.startsWith('/uploads/')} 
+                />
               ) : (
                 <ImageIcon className="w-12 h-12 text-neutral-300" />
               )}

@@ -57,6 +57,10 @@ export async function POST(req: Request) {
       
       const filename = `vendor-${vendor._id}-${Date.now()}-${image.name.replace(/\s/g, '_')}`;
       const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'vendors');
+      const safeName = (image.name || 'profile.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+      const filename = `vendor-${vendor._id}-${Date.now()}-${safeName}`;
+      const baseUploads = process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads');
+      const uploadDir = path.join(baseUploads, 'vendors');
       
       try {
         await mkdir(uploadDir, { recursive: true });

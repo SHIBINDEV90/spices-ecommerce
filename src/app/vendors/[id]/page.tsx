@@ -66,9 +66,23 @@ export default async function VendorStorefrontPage({ params }: { params: { id: s
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-start gap-5">
               <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-white shadow-xl flex-shrink-0 ${
+              <div className={`w-20 h-20 rounded-3xl flex items-center justify-center text-white shadow-xl flex-shrink-0 relative overflow-hidden ${
                 vendor.vendorType === 'Farmer' ? 'bg-emerald-600' : 'bg-amber-600'
               }`}>
                 {vendor.vendorType === 'Farmer' ? <Tractor size={36} /> : <Store size={36} />}
+                {vendor.profileImage ? (
+                  <Image
+                    src={vendor.profileImage}
+                    alt={vendor.businessName}
+                    fill
+                    className="object-cover"
+                    unoptimized={typeof vendor.profileImage === 'string' && vendor.profileImage.startsWith('/uploads/')}
+                  />
+                ) : vendor.vendorType === 'Farmer' ? (
+                  <Tractor size={36} />
+                ) : (
+                  <Store size={36} />
+                )}
               </div>
 
               <div>

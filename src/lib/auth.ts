@@ -91,33 +91,87 @@ export const authOptions: NextAuthOptions = {
 
         const cleanEmail = credentials.email.trim().toLowerCase();
         const user = await User.findOne({ 
+        let user = await User.findOne({ 
           email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
         }).select('+password');
 
         if (!user) {
           throw new Error('No vendor account found with this email');
+          // Check if a vendor profile exists with this email or owner
+          const vendorByEmail = await Vendor.findOne({
+            $or: [
+              { email: cleanEmail },
+              { email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } }
+            ]
+          });
+
+          if (vendorByEmail) {
+            if (vendorByEmail.status === 'Pending') {
+              throw new Error('Your vendor application is currently pending admin approval.');
+            }
+            if (vendorByEmail.status === 'Rejected') {
+              throw new Error('Your vendor application was not approved. Please contact admin support.');
+            }
+            throw new Error('Vendor profile exists, but user account was not found. Please use Forgot Password or contact support.');
+          }
+
+          throw new Error('No vendor account found with this email.');
         }
 
         if (user.role !== 'Vendor') {
           throw new Error(`This email is registered as a ${user.role}, not a Vendor.`);
+          // Check if there is an approved vendor linked to this user or email
+          const linkedVendor = await Vendor.findOne({
+            $or: [{ userId: user._id }, { email: cleanEmail }]
+          });
+
+          if (linkedVendor && linkedVendor.status === 'Approved') {
+            user.role = 'Vendor';
+            if (!linkedVendor.userId || linkedVendor.userId.toString() !== user._id.toString()) {
+              linkedVendor.userId = user._id;
+              await linkedVendor.save();
+            }
+            await user.save();
+          } else if (linkedVendor && linkedVendor.status === 'Pending') {
+            throw new Error('Your vendor application is currently pending admin approval.');
+          } else if (linkedVendor && linkedVendor.status === 'Rejected') {
+            throw new Error('Your vendor application was not approved. Please contact admin support.');
+          } else {
+            throw new Error(`This email is registered as a ${user.role}, not a Vendor.`);
+          }
         }
 
         if (!user.password) {
           throw new Error('Vendor has no password configured.');
+          throw new Error('Vendor has no password configured. Please use Forgot Password to set one.');
         }
 
         const isPasswordMatch = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordMatch) {
           throw new Error('Invalid credentials');
+          throw new Error('Invalid email or password.');
         }
 
         const vendor = await Vendor.findOne({ userId: user._id });
+        const vendor = await Vendor.findOne({ 
+          $or: [{ userId: user._id }, { email: cleanEmail }] 
+        });
+
         if (!vendor) {
             throw new Error('Vendor profile not found.');
+          throw new Error('Vendor profile not found. Please contact support.');
         }
         if (vendor.status !== 'Approved') {
             throw new Error(`Vendor account status is "${vendor.status}". Please wait for admin approval.`);
+          throw new Error(`Vendor account status is "${vendor.status}". Please wait for admin approval.`);
+        }
+
+        // Keep vendor record synced with user ID and email
+        if (!vendor.userId || vendor.userId.toString() !== user._id.toString() || !vendor.email) {
+          vendor.userId = user._id;
+          if (!vendor.email) vendor.email = cleanEmail;
+          await vendor.save();
         }
 
         return {

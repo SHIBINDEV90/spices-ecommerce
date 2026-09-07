@@ -47,6 +47,7 @@ export async function POST(req: Request) {
     const cleanEmail = email.trim().toLowerCase();
 
     // Check if user already exists (case-insensitive)
+    // Check if user already exists
     const existingUser = await User.findOne({ 
       email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
     });
@@ -59,6 +60,7 @@ export async function POST(req: Request) {
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+    let user;
 
     // Create User
     const user = await User.create({
@@ -68,10 +70,47 @@ export async function POST(req: Request) {
       password: hashedPassword,
       role: 'Vendor'
     });
+    if (existingUser) {
+      const existingVendor = await Vendor.findOne({
+        $or: [{ userId: existingUser._id }, { email: cleanEmail }]
+      });
 
     // Create Vendor Profile
+      if (existingVendor) {
+        if (existingVendor.status === 'Pending') {
+          return NextResponse.json(
+            { error: 'An application with this email is already submitted and pending admin approval.' },
+            { status: 409 }
+          );
+        }
+        return NextResponse.json(
+          { error: 'A vendor account with this email already exists. Please login instead.' },
+          { status: 409 }
+        );
+      }
+
+      // If user was Customer, update password and link new vendor application
+      existingUser.password = hashedPassword;
+      existingUser.name = ownerName;
+      if (phone) existingUser.phone = phone.trim();
+      await existingUser.save();
+      user = existingUser;
+    } else {
+      // Create User
+      user = await User.create({
+        name: ownerName,
+        email: cleanEmail,
+        phone: phone ? phone.trim() : undefined,
+        password: hashedPassword,
+        role: 'Vendor'
+      });
+    }
+
+    // Create Vendor Profile with email and phone stored
     const vendor = await Vendor.create({
       userId: user._id,
+      email: cleanEmail,
+      phone: phone ? phone.trim() : undefined,
       businessName,
       ownerName,
       businessAddress,

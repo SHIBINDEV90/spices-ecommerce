@@ -43,6 +43,8 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const usp = perGramPrice.toFixed(2);
   const productImage = product.imageUrl || '/images/Cardamom.jpg';
   const isUploadedImage = productImage.startsWith('/uploads/');
+  const [imgSrc, setImgSrc] = useState(product.imageUrl || '/images/Cardamom.jpg');
+  const isUploadedImage = typeof imgSrc === 'string' && imgSrc.startsWith('/uploads/');
 
   const vendor = typeof product.vendorId === 'object' && product.vendorId !== null ? product.vendorId : null;
 
@@ -57,10 +59,12 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
       <Link href={`/products/${product._id || product.slug}`} className="relative block h-40 w-full overflow-hidden bg-neutral-100 flex-shrink-0 cursor-pointer">
         <Image
           src={productImage}
+          src={imgSrc}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-1000 group-hover:scale-105"
           unoptimized={isUploadedImage}
+          onError={() => setImgSrc('/images/Cardamom.jpg')}
         />
         
         {/* Source / Featured Badge */}
