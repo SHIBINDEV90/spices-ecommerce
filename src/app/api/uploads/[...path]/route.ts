@@ -4,10 +4,8 @@ import path from 'path';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request, { params }: { params: { path: string[] } }) {
+export async function GET(_request: Request, { params }: { params: { path: string[] } }) {
   try {
-    // Construct the absolute path to the requested file
-    const filePath = path.join(process.cwd(), 'public', 'uploads', ...params.path);
     const rawSegments = Array.isArray(params?.path) ? params.path : [params?.path].filter(Boolean);
     const decodedSegments = rawSegments.map((segment) => {
       try {
@@ -21,10 +19,8 @@ export async function GET(request: Request, { params }: { params: { path: string
     // Primary upload directory
     const uploadsDir = process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads');
     let filePath = path.join(uploadsDir, ...decodedSegments);
-
     // Fallback if custom UPLOADS_DIR is set but file is in public/uploads
     if (!existsSync(filePath)) {
-      return new NextResponse('File not found', { status: 404 });
       const fallbackPath = path.join(process.cwd(), 'public', 'uploads', ...decodedSegments);
       if (existsSync(fallbackPath)) {
         filePath = fallbackPath;
@@ -49,7 +45,6 @@ export async function GET(request: Request, { params }: { params: { path: string
     return new NextResponse(fileBuffer, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
         'Cache-Control': 'public, max-age=86400, stale-while-revalidate=604800',
       },
     });
@@ -58,4 +53,3 @@ export async function GET(request: Request, { params }: { params: { path: string
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }
-

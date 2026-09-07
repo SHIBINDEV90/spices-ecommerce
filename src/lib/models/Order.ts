@@ -29,7 +29,6 @@ export interface IOrder extends Document {
   discountAmount?: number;
   paymentStatus: 'pending' | 'paid' | 'failed';
   orderStatus: 'Pending' | 'Paid' | 'Shipped' | 'Delivered';
-  paymentGatewayId?: string; // To store Razorpay/Stripe order ID
   paymentMethod?: 'razorpay' | 'stripe' | 'cod';
   paymentGatewayId?: string; // To store Razorpay order ID or Stripe session ID
   paymentId?: string; // To store Razorpay payment ID for auditing

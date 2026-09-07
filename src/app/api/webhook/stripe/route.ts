@@ -4,6 +4,7 @@ import Order from '@/lib/models/Order';
 import Coupon from '@/lib/models/Coupon';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
+import { fulfillOrder as handleOrderFulfillment } from '@/lib/order-fulfillment';
 
 function getStripeClient(): Stripe {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -47,9 +48,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true });
 }
-
-import { fulfillOrder as handleOrderFulfillment } from '@/lib/order-fulfillment';
-
 async function fulfillOrder(session: Stripe.Checkout.Session) {
   await dbConnect();
 
@@ -58,23 +56,11 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
     
     if (orderId) {
       if (session.payment_status === 'paid') {
-        const order = await Order.findByIdAndUpdate(orderId, {
-            paymentStatus: 'paid',
-            paymentGatewayId: session.id,
         await handleOrderFulfillment({
           orderId,
           paymentGatewayId: session.id,
           paymentMethod: 'stripe',
         });
-
-        if (order && order.couponCode) {
-            await Coupon.findOneAndUpdate(
-              { code: order.couponCode },
-              { $inc: { usedCount: 1 } }
-            );
-        }
-
-        console.log(`[Webhook] Marked Order ${orderId} as Paid`);
         console.log(`[Webhook] Marked Order ${orderId} as Paid via Stripe`);
       }
       return;
