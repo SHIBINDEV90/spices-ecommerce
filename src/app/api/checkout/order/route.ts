@@ -25,6 +25,8 @@ export async function POST(req: Request) {
         shippingAddress, 
         customerName, 
         customerEmail, 
+        customerPhone,
+        orderNote,
         paymentMethod = 'razorpay',
         couponCode
     } = body;
@@ -84,6 +86,8 @@ export async function POST(req: Request) {
     const order = await Order.create({
         customerName,
         customerEmail,
+        customerPhone,
+        orderNote,
         shippingAddress,
         products: orderProducts,
         totalAmount,
@@ -237,6 +241,8 @@ export async function GET(req: Request) {
         id: order._id.toString(),
         customerName: order.customerName,
         customerEmail: order.customerEmail,
+        customerPhone: order.customerPhone,
+        orderNote: order.orderNote,
         shippingAddress: order.shippingAddress,
         products: order.products,
         totalAmount: order.totalAmount,

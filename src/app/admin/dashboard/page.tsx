@@ -98,19 +98,27 @@ export default async function AdminDashboardPage() {
                 <tr className="bg-black/40 text-gray-400 text-sm">
                   <th className="p-4 font-medium">Order ID</th>
                   <th className="p-4 font-medium">Customer</th>
+                  <th className="p-4 font-medium">Destination</th>
                   <th className="p-4 font-medium">Amount</th>
                   <th className="p-4 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {recentOrders.length === 0 ? (
-                   <tr><td colSpan={4} className="p-4 text-center text-gray-500">No recent orders.</td></tr>
+                   <tr><td colSpan={5} className="p-4 text-center text-gray-500">No recent orders.</td></tr>
                 ) : (
                   recentOrders.map(order => (
                     <tr key={order._id.toString()} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="p-4 font-mono text-xs">{order._id.toString().substring(0,8)}</td>
-                      <td className="p-4">{order.customerName}</td>
-                      <td className="p-4 font-medium text-emerald-400">₹{order.totalAmount}</td>
+                      <td className="p-4 font-mono text-xs text-orange-400">#{order._id.toString().substring(order._id.toString().length - 8).toUpperCase()}</td>
+                      <td className="p-4">
+                        <p className="font-medium text-white">{order.customerName}</p>
+                        <p className="text-xs text-gray-400">{order.customerEmail}</p>
+                      </td>
+                      <td className="p-4 text-xs text-gray-300">
+                        <p className="font-medium text-white">{order.shippingAddress?.city || 'N/A'}, {order.shippingAddress?.state || ''}</p>
+                        <p className="text-gray-400 text-[11px] truncate max-w-[180px]">{order.shippingAddress?.street}</p>
+                      </td>
+                      <td className="p-4 font-bold text-emerald-400">₹{order.totalAmount?.toLocaleString('en-IN')}</td>
                       <td className="p-4">
                         <span className={`px-2 py-1 rounded-md text-xs font-medium ${
                           order.orderStatus === 'Pending' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 

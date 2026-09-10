@@ -139,6 +139,8 @@ export default function CheckoutPage() {
                 shippingAddress,
                 customerName: `${firstName} ${lastName}`.trim(),
                 customerEmail: email,
+                customerPhone: contactNo,
+                orderNote: orderNote,
                 paymentMethod,
                 couponCode: appliedCoupon?.coupon || null
             })
