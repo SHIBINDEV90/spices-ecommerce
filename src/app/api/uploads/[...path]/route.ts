@@ -15,7 +15,6 @@ export async function GET(_request: Request, { params }: { params: { path: strin
       }
     });
 
-    // Check if file exists to prevent errors
     // Primary upload directory
     const uploadsDir = process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads');
     let filePath = path.join(uploadsDir, ...decodedSegments);

@@ -7,6 +7,7 @@ import Vendor from '@/lib/models/Vendor';
 export async function POST(req: Request) {
   try {
     await dbConnect();
+
     const body = await req.json();
 
     const {
@@ -15,27 +16,36 @@ export async function POST(req: Request) {
       email,
       phone,
       password,
+      businessAddress,
       gstNumber,
       iecNumber,
       vendorType,
-      businessAddress,
       documents
     } = body;
 
     // Validate required fields
-    if (!businessName || !ownerName || !email || !password || !vendorType || !businessAddress) {
+    if (!businessName || !ownerName || !email || !password || !businessAddress || !vendorType) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Validate password strength: min 5 chars, 1 uppercase, 1 digit, no special chars
-    if (password.length < 5) {
-      return NextResponse.json({ error: 'Password must be at least 5 characters long' }, { status: 400 });
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 });
+    }
+
+    // Password validation: min 8 characters, uppercase, lowercase, digit, alphanumeric only
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters long' }, { status: 400 });
     }
     if (!/[A-Z]/.test(password)) {
       return NextResponse.json({ error: 'Password must contain at least one uppercase letter' }, { status: 400 });
+    }
+    if (!/[a-z]/.test(password)) {
+      return NextResponse.json({ error: 'Password must contain at least one lowercase letter' }, { status: 400 });
     }
     if (!/[0-9]/.test(password)) {
       return NextResponse.json({ error: 'Password must contain at least one digit' }, { status: 400 });
@@ -45,39 +55,34 @@ export async function POST(req: Request) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const escapedEmail = cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 
     // Check if user already exists (case-insensitive)
-    const existingUser: any = await User.findOne({
-      email: { $regex: new RegExp(`^${escapedEmail}$`, 'i') }
+    const existingUser: any = await User.findOne({ 
+      email: { $regex: new RegExp(`^${cleanEmail.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } 
     });
-
-    const existingVendor = await Vendor.findOne({
-      $or: [
-        { email: { $regex: new RegExp(`^${escapedEmail}$`, 'i') } },
-        ...(existingUser ? [{ userId: existingUser._id }] : []),
-      ]
-    });
-
-    if (existingVendor) {
-      if (existingVendor.status === 'Pending') {
-        return NextResponse.json(
-          { error: 'An application with this email is already submitted and pending admin approval.' },
-          { status: 409 }
-        );
-      }
-
-      return NextResponse.json(
-        { error: 'A vendor account with this email already exists. Please login instead.' },
-        { status: 409 }
-      );
-    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     let user: any;
 
     if (existingUser) {
+      const existingVendor = await Vendor.findOne({
+        $or: [{ userId: existingUser._id }, { email: cleanEmail }]
+      });
+
+      if (existingVendor) {
+        if (existingVendor.status === 'Pending') {
+          return NextResponse.json(
+            { error: 'An application with this email is already submitted and pending admin approval.' },
+            { status: 409 }
+          );
+        }
+        return NextResponse.json(
+          { error: 'A vendor account with this email already exists. Please login instead.' },
+          { status: 409 }
+        );
+      }
+
       // If user was Customer, update password and link new vendor application
       existingUser.password = hashedPassword;
       existingUser.name = ownerName;

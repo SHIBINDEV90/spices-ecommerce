@@ -1,61 +1,58 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
-import {
-  ArrowRight,
-  CheckCircle,
+import { 
+  CheckCircle, 
+  ShoppingBag, 
+  Truck, 
+  ShieldCheck, 
+  ArrowRight, 
   Loader2,
   PackageCheck,
-  Receipt,
-  ShieldCheck,
-  ShoppingBag,
-  Truck,
+  Receipt
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const orderId = searchParams.get('order_id');
   const paymentId = searchParams.get('payment_id');
+
   const { clearCart } = useCart();
   const [cleared, setCleared] = useState(false);
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if ((sessionId || orderId) && !cleared) {
+    // Clear cart once landing on success
+    if (!cleared) {
       clearCart();
       setCleared(true);
     }
-  }, [sessionId, orderId, cleared, clearCart]);
+  }, [cleared, clearCart]);
 
   useEffect(() => {
     async function fetchOrderDetails() {
       try {
         let url = '';
-
         if (orderId) {
           url = `/api/checkout/order?orderId=${encodeURIComponent(orderId)}`;
         } else if (sessionId) {
           url = `/api/checkout/order?sessionId=${encodeURIComponent(sessionId)}`;
         }
 
-        if (!url) {
-          return;
-        }
-
-        const res = await fetch(url);
-        if (!res.ok) {
-          return;
-        }
-
-        const data = await res.json();
-        if (data.success && data.order) {
-          setOrder(data.order);
+        if (url) {
+          const res = await fetch(url);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.success && data.order) {
+              setOrder(data.order);
+            }
+          }
         }
       } catch (err) {
         console.error('Failed to fetch order details:', err);
@@ -71,29 +68,18 @@ export default function CheckoutSuccessPage() {
     }
   }, [orderId, sessionId]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#faf9f5] flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-[#317a26]" />
-      </div>
-    );
-  }
-
-  if (!sessionId && !orderId) {
-    return null;
-  }
-
   const displayId = orderId || order?.id || sessionId;
-  const isCod = order?.paymentMethod === 'cod' || (!!orderId && !sessionId);
+  const isCod = order?.paymentMethod === 'cod';
 
   return (
     <div className="min-h-screen bg-[#faf9f5] pt-24 pb-24 text-neutral-800 font-sans flex items-center justify-center p-4">
-      <motion.div
+      <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-2xl bg-white border border-neutral-200/80 rounded-2xl shadow-xl overflow-hidden"
       >
+        {/* Header Banner */}
         <div className="bg-gradient-to-r from-[#2a6821] to-[#317a26] text-white p-8 text-center relative">
           <div className="inline-flex items-center justify-center p-3.5 bg-white/10 backdrop-blur-md rounded-full mb-4 border border-white/20">
             <CheckCircle className="w-12 h-12 text-white" strokeWidth={2.5} />
@@ -102,13 +88,17 @@ export default function CheckoutSuccessPage() {
             {isCod ? 'Order Placed Successfully!' : 'Payment Successful!'}
           </h1>
           <p className="text-emerald-100 text-[15px] mt-1.5 max-w-md mx-auto">
-            {isCod
+            {isCod 
               ? 'Thank you for your order. We are preparing it for shipment. Please keep cash ready upon delivery.'
-              : 'Thank you! Your transaction has been securely verified and your spices are being prepared for dispatch.'}
+              : 'Thank you! Your transaction has been securely verified and your spices are being prepared for dispatch.'
+            }
           </p>
         </div>
 
+        {/* Content Body */}
         <div className="p-6 md:p-8 space-y-6">
+          
+          {/* Reference & Status Card */}
           <div className="bg-[#fcfbf9] border border-neutral-200 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
             <div>
               <span className="text-neutral-500 block text-xs uppercase tracking-wider font-semibold">Order Reference</span>
@@ -119,7 +109,9 @@ export default function CheckoutSuccessPage() {
             {paymentId && (
               <div>
                 <span className="text-neutral-500 block text-xs uppercase tracking-wider font-semibold">Payment ID</span>
-                <span className="font-mono text-xs text-neutral-700 font-medium">{paymentId}</span>
+                <span className="font-mono text-xs text-neutral-700 font-medium">
+                  {paymentId}
+                </span>
               </div>
             )}
             <div>
@@ -131,6 +123,7 @@ export default function CheckoutSuccessPage() {
             </div>
           </div>
 
+          {/* Details & Items */}
           {order && (
             <div className="space-y-4">
               <div className="border border-neutral-200 rounded-xl p-4 space-y-3">
@@ -158,6 +151,7 @@ export default function CheckoutSuccessPage() {
                 </div>
               </div>
 
+              {/* Shipping Address */}
               {order.shippingAddress && (
                 <div className="bg-[#faf9f5] border border-neutral-200 rounded-xl p-4 text-sm">
                   <div className="flex items-center gap-2 font-semibold text-neutral-800 mb-1.5">
@@ -165,8 +159,7 @@ export default function CheckoutSuccessPage() {
                     <span>Shipping Destination</span>
                   </div>
                   <p className="text-neutral-600">
-                    {order.customerName} &bull; {order.customerEmail}
-                    <br />
+                    {order.customerName} &bull; {order.customerEmail}<br />
                     {order.shippingAddress.street}, {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}, {order.shippingAddress.country}
                   </p>
                 </div>
@@ -174,6 +167,7 @@ export default function CheckoutSuccessPage() {
             </div>
           )}
 
+          {/* What happens next */}
           <div className="border border-emerald-100 bg-emerald-50/50 rounded-xl p-4 text-sm flex gap-3 items-start">
             <PackageCheck className="w-5 h-5 text-[#317a26] flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
@@ -184,24 +178,38 @@ export default function CheckoutSuccessPage() {
             </div>
           </div>
 
+          {/* Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <Link
-              href="/products"
+            <Link 
+              href="/products" 
               className="py-3 px-5 rounded-lg border border-neutral-300 text-neutral-700 font-semibold text-sm hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-center"
             >
               <ShoppingBag className="w-4 h-4" />
               <span>Explore More Spices</span>
             </Link>
-            <Link
-              href="/"
+            <Link 
+              href="/" 
               className="py-3 px-5 rounded-lg bg-[#317a26] hover:bg-[#235e1c] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 text-center shadow-sm"
             >
               <span>Return to Home</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
+
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#faf9f5] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#317a26]" />
+      </div>
+    }>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }

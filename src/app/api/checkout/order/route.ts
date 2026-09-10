@@ -20,21 +20,14 @@ function getStripeClient(): Stripe {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const {
-      cartItems,
-      shippingAddress,
-      customerName,
-      customerEmail,
-      paymentMethod = 'stripe',
-      couponCode,
+    const { 
+        cartItems, 
+        shippingAddress, 
+        customerName, 
+        customerEmail, 
+        paymentMethod = 'razorpay',
+        couponCode
     } = body;
-
-    const normalizedPaymentMethod =
-      paymentMethod === 'upi'
-        ? 'razorpay'
-        : paymentMethod === 'cod' || paymentMethod === 'razorpay' || paymentMethod === 'stripe'
-          ? paymentMethod
-          : 'stripe';
 
     if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ error: 'Cart is empty' }, { status: 400 });
@@ -67,8 +60,8 @@ export async function POST(req: Request) {
       });
     }
 
-    const deliveryFee = subtotal > 500 ? 0 : 50;
-    const codFee = normalizedPaymentMethod === 'cod' ? 75 : 0;
+    const deliveryFee = subtotal > 500 ? 0 : 50; 
+    const codFee = paymentMethod === 'cod' ? 75 : 0;
 
     let discountAmount = 0;
     if (couponCode) {
@@ -98,22 +91,21 @@ export async function POST(req: Request) {
         discountAmount,
         paymentStatus: 'pending',
         orderStatus: 'Pending',
-        paymentMethod: normalizedPaymentMethod,
+        paymentMethod: paymentMethod === 'cod' ? 'cod' : (paymentMethod === 'stripe' ? 'stripe' : 'razorpay'),
     });
 
     // 1. CASH ON DELIVERY
-    if (normalizedPaymentMethod === 'cod') {
-        return NextResponse.json({
-          success: true,
-          orderId: order._id.toString(),
+    if (paymentMethod === 'cod') {
+        return NextResponse.json({ 
+          success: true, 
+          orderId: order._id.toString(), 
           paymentMethod: 'cod',
-          totalAmount
+          totalAmount 
         });
     }
 
-    // Process Stripe Online Payment
     // 2. RAZORPAY (UPI / QR / Indian Cards / Net Banking)
-    if (normalizedPaymentMethod === 'razorpay') {
+    if (paymentMethod === 'razorpay' || paymentMethod === 'upi') {
         try {
           const razorpay = getRazorpayClient();
           const amountInPaisa = Math.round(totalAmount * 100);
@@ -179,14 +171,6 @@ export async function POST(req: Request) {
         });
     }
 
-    // Calculate Stripe Discount (Stripe doesn't allow negative line items easily, 
-    // we use coupons in Stripe, but since we already calculated total, we can just pass a single line item if it's complex.
-    // For simplicity, since Stripe expects positive amounts, let's just pass the final total as one line item if there's a discount.
-    // Actually, passing individual items is better for receipts. Stripe has a `discounts` array, but you need to create a Stripe Coupon first.
-    // Alternatively, just adjust the unit amount of the items proportionally, or add a negative line item if supported (it's not).
-    // The easiest robust way for custom discounts is to create the session with a single "Order Total" line item if there's a custom discount, OR create a temporary Stripe Coupon.
-    // Let's use the individual items and let's assume we won't pass the discount to Stripe UI visually, or we just pass a single line item.
-    // Let's just pass the line items and ignore the DB calculated discount for a moment, OR pass a single line item for the discounted total.
     const finalLineItems = discountAmount > 0 
         ? [{
             price_data: {
@@ -202,7 +186,7 @@ export async function POST(req: Request) {
       payment_method_types: ['card'],
       customer_email: customerEmail,
       metadata: {
-        orderId: order._id.toString(), // Store order ID to fulfill later
+        orderId: order._id.toString(),
       },
       line_items: finalLineItems,
       mode: 'payment',
@@ -215,11 +199,11 @@ export async function POST(req: Request) {
     order.paymentMethod = 'stripe';
     await order.save();
 
-    return NextResponse.json({
-      success: true,
-      url: session.url,
+    return NextResponse.json({ 
+      success: true, 
+      url: session.url, 
       paymentMethod: 'stripe',
-      orderId: order._id.toString()
+      orderId: order._id.toString() 
     });
 
   } catch (error: any) {

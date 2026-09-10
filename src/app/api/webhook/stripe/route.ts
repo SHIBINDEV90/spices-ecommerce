@@ -13,7 +13,7 @@ function getStripeClient(): Stripe {
   }
 
   return new Stripe(secretKey, {
-    apiVersion: '2026-03-25.dahlia',
+    apiVersion: '2026-03-25.dahlia' as any,
   });
 }
 
@@ -25,14 +25,12 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
-    // Only verify webhook signature if the secret is deliberately provided
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     
     if (webhookSecret) {
        const stripe = getStripeClient();
        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } else {
-       // Gracefully fall back to insecure payload parsing if DEV hasn't hooked up CLI secret yet
        event = JSON.parse(body) as Stripe.Event;
     }
   } catch (error: any) {
@@ -40,7 +38,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Webhook Error: ${error.message}` }, { status: 400 });
   }
 
-  // Handle the specific payment intent / checkout session events
+  // Handle checkout session completed
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     await fulfillOrder(session);
@@ -48,6 +46,7 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true });
 }
+
 async function fulfillOrder(session: Stripe.Checkout.Session) {
   await dbConnect();
 
@@ -66,7 +65,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
       return;
     }
 
-    // Fallback for old sessions without orderId
+    // Fallback for sessions without orderId
     const totalAmount = (session.amount_total || 0) / 100;
     const couponCode = session.metadata?.couponCode;
     const discountAmount = session.metadata?.discountAmount ? parseFloat(session.metadata.discountAmount) : 0;
@@ -94,6 +93,7 @@ async function fulfillOrder(session: Stripe.Checkout.Session) {
       discountAmount: discountAmount || 0,
       paymentStatus: session.payment_status === 'paid' ? 'paid' : 'failed',
       orderStatus: 'Pending',
+      paymentMethod: 'stripe',
       paymentGatewayId: session.id,
     });
     
