@@ -6,7 +6,7 @@ services:
     container_name: spices-mongodb
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     environment:
       MONGO_INITDB_DATABASE: spices_ecommerce
     volumes:
@@ -30,6 +30,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      UPLOADS_DIR: /app/public/uploads
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:4300}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-me-in-production}
       MONGODB_URI: ${MONGODB_URI:-mongodb://mongodb:27017/spices_ecommerce}
@@ -47,4 +48,3 @@ services:
 
 volumes:
   mongo_data:
-  app_uploads:
