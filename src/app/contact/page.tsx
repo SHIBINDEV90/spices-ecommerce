@@ -1,8 +1,60 @@
 "use client";
 
-import { MapPin, Mail, Phone, Send, ShieldCheck, Leaf, Award, ClipboardCheck } from "lucide-react";
+import { useState } from "react";
+import { 
+  MapPin, 
+  Mail, 
+  Phone, 
+  Send, 
+  ShieldCheck, 
+  Leaf, 
+  Award, 
+  ClipboardCheck, 
+  ExternalLink, 
+  Building2, 
+  Compass, 
+  Globe2 
+} from "lucide-react";
+
+const OFFICE_LOCATIONS = [
+  {
+    id: "wayanad",
+    title: "Spicewizz - Vythiri, Wayanad",
+    role: "Plantation & Origin Hub",
+    shortTitle: "Wayanad Office",
+    address: "Spicewizz, Vythiri, Wayanad, Kerala - 673576, India",
+    pinCode: "673576",
+    shortAddress: "Vythiri, Wayanad (PIN: 673576)",
+    embedUrl: "https://maps.google.com/maps?q=Vythiri%2C%20Wayanad%2C%20Kerala%20673576&t=&z=14&ie=UTF8&iwloc=&output=embed",
+    directionsUrl: "https://www.google.com/maps/search/?api=1&query=Vythiri+Wayanad+Kerala+673576",
+    badge: "Origin & Sourcing Hub",
+    tagColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    phone: "+91 98765 43210",
+    email: "wayanad@spicewizz.com",
+    features: ["Spice Processing & Quality Grading", "Farmer Procurement Center", "Direct Origin Sourcing"]
+  },
+  {
+    id: "calicut",
+    title: "Spicewizz - Calicut",
+    role: "Corporate & Tech Hub",
+    shortTitle: "Calicut Office",
+    address: "Spicewizz, Near Cyber Park, Thondayad, Calicut (Kozhikode), Kerala, India",
+    pinCode: "673016",
+    shortAddress: "Near Cyber Park, Thondayad, Calicut",
+    embedUrl: "https://maps.google.com/maps?q=Cyberpark%2C%20Thondayad%2C%20Calicut%2C%20Kerala&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    directionsUrl: "https://www.google.com/maps/search/?api=1&query=Cyber+Park+Thondayad+Calicut",
+    badge: "Corporate & Export Office",
+    tagColor: "bg-amber-100 text-amber-800 border-amber-200",
+    phone: "+91 (484) 2345 6789",
+    email: "calicut@spicewizz.com",
+    features: ["Global Export Logistics Desk", "B2B International Trade Desk", "Tech & Supply Chain Management"]
+  }
+];
 
 export default function ContactPage() {
+  const [activeLocationId, setActiveLocationId] = useState<"wayanad" | "calicut">("wayanad");
+  const activeOffice = OFFICE_LOCATIONS.find((loc) => loc.id === activeLocationId) || OFFICE_LOCATIONS[0];
+
   return (
     <div className="flex flex-col min-h-screen font-body-md overflow-x-hidden">
       {/* Hero Section */}
@@ -35,38 +87,102 @@ export default function ContactPage() {
           <div className="lg:col-span-1 space-y-gutter">
             <h2 className="font-headline-md text-headline-md text-primary mb-8 border-l-4 border-saffron-glow pl-6">General Inquiries</h2>
             
-            <div className="bg-surface border border-outline-variant p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            {/* Wayanad Office Card */}
+            <div className="bg-surface border border-outline-variant p-6 rounded-lg shadow-sm hover:shadow-md transition-all hover:border-secondary/40">
               <div className="flex items-start gap-4">
-                <MapPin className="text-secondary w-8 h-8 flex-shrink-0" />
-                <div>
-                  <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink">Office Headquarters</h3>
-                  <p className="text-on-surface-variant font-body-md leading-relaxed">
-                    Spicewizz Export India,<br />
-                    Marine Drive Tower, Kochi,<br />
-                    Kerala 682031, India
+                <MapPin className="text-secondary w-7 h-7 flex-shrink-0 mt-1" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h3 className="font-title-lg text-title-lg text-slate-ink font-semibold">Wayanad Office</h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">PIN: 673576</span>
+                  </div>
+                  <p className="text-slate-800 font-semibold text-sm">Spicewizz</p>
+                  <p className="text-on-surface-variant font-body-md text-sm leading-relaxed mt-0.5">
+                    Vythiri, Wayanad,<br />
+                    Kerala - 673576, India
                   </p>
+                  <div className="flex items-center gap-3 mt-3 pt-2 border-t border-outline-variant/40">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveLocationId("wayanad");
+                        document.getElementById("office-locations-map")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="text-xs font-semibold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
+                    >
+                      <Compass className="w-3.5 h-3.5" /> View on Map
+                    </button>
+                    <span className="text-neutral-300">•</span>
+                    <a
+                      href={OFFICE_LOCATIONS[0].directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-neutral-600 hover:text-secondary flex items-center gap-1 transition-colors"
+                    >
+                      Directions <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-surface border border-outline-variant p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            {/* Calicut Office Card */}
+            <div className="bg-surface border border-outline-variant p-6 rounded-lg shadow-sm hover:shadow-md transition-all hover:border-secondary/40">
               <div className="flex items-start gap-4">
-                <Mail className="text-secondary w-8 h-8 flex-shrink-0" />
-                <div>
-                  <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink">Email Us</h3>
-                  <p className="text-on-surface-variant font-body-md">exports@spicewizz.com</p>
-                  <p className="text-on-surface-variant font-body-md">support@spicewizz.com</p>
+                <MapPin className="text-secondary w-7 h-7 flex-shrink-0 mt-1" />
+                <div className="flex-1">
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <h3 className="font-title-lg text-title-lg text-slate-ink font-semibold">Calicut Office</h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Cyber Park</span>
+                  </div>
+                  <p className="text-slate-800 font-semibold text-sm">Spicewizz</p>
+                  <p className="text-on-surface-variant font-body-md text-sm leading-relaxed mt-0.5">
+                    Near Cyber Park, Thondayad,<br />
+                    Calicut (Kozhikode), Kerala, India
+                  </p>
+                  <div className="flex items-center gap-3 mt-3 pt-2 border-t border-outline-variant/40">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveLocationId("calicut");
+                        document.getElementById("office-locations-map")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                      className="text-xs font-semibold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
+                    >
+                      <Compass className="w-3.5 h-3.5" /> View on Map
+                    </button>
+                    <span className="text-neutral-300">•</span>
+                    <a
+                      href={OFFICE_LOCATIONS[1].directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-neutral-600 hover:text-secondary flex items-center gap-1 transition-colors"
+                    >
+                      Directions <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-surface border border-outline-variant p-8 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <div className="bg-surface border border-outline-variant p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-start gap-4">
-                <Phone className="text-secondary w-8 h-8 flex-shrink-0" />
+                <Mail className="text-secondary w-7 h-7 flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink">Call Us</h3>
-                  <p className="text-on-surface-variant font-body-md">+91 (484) 2345 6789</p>
-                  <p className="text-on-surface-variant font-body-md">+91 98765 43210</p>
+                  <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink font-semibold">Email Us</h3>
+                  <p className="text-on-surface-variant font-body-md text-sm">exports@spicewizz.com</p>
+                  <p className="text-on-surface-variant font-body-md text-sm">support@spicewizz.com</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-surface border border-outline-variant p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start gap-4">
+                <Phone className="text-secondary w-7 h-7 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink font-semibold">Call Us</h3>
+                  <p className="text-on-surface-variant font-body-md text-sm">+91 98765 43210 (Wayanad)</p>
+                  <p className="text-on-surface-variant font-body-md text-sm">+91 (484) 2345 6789 (Calicut)</p>
                 </div>
               </div>
             </div>
@@ -146,49 +262,185 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Global Presence Section */}
-      <section className="py-24 bg-surface-container-highest">
+      {/* Office Locations & Interactive Map Section */}
+      <section id="office-locations-map" className="py-24 bg-surface-container-highest scroll-mt-16">
         <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="text-center mb-16">
-            <h2 className="font-headline-md text-headline-md text-primary mb-4">Our Global Footprint</h2>
-            <p className="text-on-surface-variant max-w-xl mx-auto">Exporting heritage across 5 continents, serving over 32 countries with ISO-certified logistics.</p>
+          <div className="text-center mb-10">
+            <span className="font-label-md text-label-md text-secondary uppercase tracking-widest block mb-2 font-semibold">
+              Our Locations
+            </span>
+            <h2 className="font-headline-md text-headline-md text-primary mb-3">
+              Visit Our Offices
+            </h2>
+            <p className="text-on-surface-variant max-w-xl mx-auto text-sm md:text-base">
+              Experience authentic Malabar spices at our source origin in Wayanad or coordinate commercial exports at our Calicut corporate hub.
+            </p>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Google Map */}
-            <div className="bg-surface h-96 rounded-xl border border-outline-variant overflow-hidden relative shadow-inner">
-              <iframe
-                src="https://maps.google.com/maps?q=Marine%20Drive%20Tower,%20Kochi,%20Kerala%20682031,%20India&t=&z=13&ie=UTF8&iwloc=&output=embed"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
-              <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded shadow-sm pointer-events-none">
-                <p className="font-label-md text-label-md text-primary flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-saffron-glow animate-pulse" /> Headquarters Location
-                </p>
+
+          {/* Interactive Office Switcher Buttons */}
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4 mb-8">
+            {OFFICE_LOCATIONS.map((loc) => {
+              const isActive = activeLocationId === loc.id;
+              return (
+                <button
+                  key={loc.id}
+                  type="button"
+                  onClick={() => setActiveLocationId(loc.id as "wayanad" | "calicut")}
+                  className={`flex items-center gap-3 px-5 py-3.5 rounded-xl font-medium transition-all text-sm md:text-base border shadow-sm ${
+                    isActive
+                      ? "bg-secondary text-white border-secondary ring-4 ring-secondary/20 shadow-md transform -translate-y-0.5"
+                      : "bg-white text-slate-700 border-outline-variant hover:border-secondary/60 hover:bg-slate-50"
+                  }`}
+                >
+                  <MapPin className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-saffron-glow" : "text-secondary"}`} />
+                  <div className="text-left">
+                    <div className="font-semibold text-sm md:text-base leading-tight">
+                      {loc.title}
+                    </div>
+                    <div className={`text-xs ${isActive ? "text-white/80" : "text-neutral-500"}`}>
+                      {loc.shortAddress}
+                    </div>
+                  </div>
+                  {isActive ? (
+                    <span className="w-2.5 h-2.5 rounded-full bg-saffron-glow animate-pulse ml-1" />
+                  ) : null}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Map Display & Details Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            {/* Google Map Display (7 cols) */}
+            <div className="lg:col-span-7 bg-surface rounded-2xl border border-outline-variant overflow-hidden relative shadow-lg min-h-[440px] flex flex-col">
+              <div className="relative flex-1 w-full min-h-[440px]">
+                <iframe
+                  key={activeOffice.id}
+                  src={activeOffice.embedUrl}
+                  width="100%"
+                  height="100%"
+                  className="w-full h-full min-h-[440px] absolute inset-0"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={`Google Map - ${activeOffice.title}`}
+                ></iframe>
+
+                {/* Map Floating Badge */}
+                <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-md bg-white/95 backdrop-blur-md p-4 rounded-xl border border-neutral-200/80 shadow-xl pointer-events-auto">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-secondary">
+                          {activeOffice.badge}
+                        </span>
+                      </div>
+                      <h4 className="font-title-lg font-bold text-slate-ink text-base">
+                        {activeOffice.title}
+                      </h4>
+                      <p className="text-xs text-neutral-600 mt-1 leading-relaxed">
+                        {activeOffice.address}
+                      </p>
+                    </div>
+                    <a
+                      href={activeOffice.directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-white text-xs font-semibold hover:bg-secondary/90 shadow transition-colors flex-shrink-0 mt-1"
+                      title="Open in Google Maps"
+                    >
+                      <span>Directions</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            {/* Region Lists (Bento Style) */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-6 bg-white border border-outline-variant rounded-lg hover:border-primary transition-colors cursor-default">
-                <h4 className="font-title-lg text-secondary mb-2">Middle East</h4>
-                <p className="text-on-surface-variant text-sm">UAE, Saudi Arabia, Qatar, Kuwait</p>
-              </div>
-              <div className="p-6 bg-white border border-outline-variant rounded-lg hover:border-primary transition-colors cursor-default">
-                <h4 className="font-title-lg text-secondary mb-2">Europe</h4>
-                <p className="text-on-surface-variant text-sm">Germany, Netherlands, France, UK</p>
-              </div>
-              <div className="p-6 bg-white border border-outline-variant rounded-lg hover:border-primary transition-colors cursor-default">
-                <h4 className="font-title-lg text-secondary mb-2">Americas</h4>
-                <p className="text-on-surface-variant text-sm">USA, Canada, Mexico, Brazil</p>
-              </div>
-              <div className="p-6 bg-white border border-outline-variant rounded-lg hover:border-primary transition-colors cursor-default">
-                <h4 className="font-title-lg text-secondary mb-2">Asia-Pacific</h4>
-                <p className="text-on-surface-variant text-sm">Japan, South Korea, Australia, Singapore</p>
+
+            {/* Office Cards & Global Reach (5 cols) */}
+            <div className="lg:col-span-5 flex flex-col justify-between gap-4">
+              {OFFICE_LOCATIONS.map((loc) => {
+                const isActive = activeLocationId === loc.id;
+                return (
+                  <div
+                    key={loc.id}
+                    onClick={() => setActiveLocationId(loc.id as "wayanad" | "calicut")}
+                    className={`p-6 rounded-2xl border transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-white border-secondary shadow-md ring-2 ring-secondary/20"
+                        : "bg-white/80 border-outline-variant hover:border-secondary/50 hover:bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2.5 rounded-xl ${isActive ? "bg-secondary text-white" : "bg-slate-100 text-secondary"}`}>
+                          <Building2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-ink text-base">{loc.title}</h4>
+                          <span className="text-xs text-secondary font-medium">{loc.role}</span>
+                        </div>
+                      </div>
+                      <span className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${loc.tagColor}`}>
+                        {loc.badge}
+                      </span>
+                    </div>
+
+                    <p className="text-xs md:text-sm text-neutral-600 mb-3 pl-11 leading-relaxed">
+                      {loc.address}
+                    </p>
+
+                    <div className="pl-11 mb-3">
+                      <ul className="grid grid-cols-1 gap-1 text-[11px] text-neutral-500">
+                        {loc.features.map((feat, idx) => (
+                          <li key={idx} className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-secondary/60" />
+                            {feat}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-neutral-100 pl-11">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveLocationId(loc.id as "wayanad" | "calicut");
+                        }}
+                        className={`text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                          isActive ? "text-secondary font-bold" : "text-neutral-600 hover:text-secondary"
+                        }`}
+                      >
+                        <Compass className="w-4 h-4" />
+                        {isActive ? "Currently on Map" : "Show on Map"}
+                      </button>
+
+                      <a
+                        href={loc.directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs font-semibold text-secondary hover:text-primary flex items-center gap-1 hover:underline"
+                      >
+                        Directions <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Global Reach Card */}
+              <div className="p-5 bg-white/70 border border-outline-variant/70 rounded-2xl">
+                <div className="flex items-center gap-2 mb-2 text-secondary font-semibold text-xs uppercase tracking-wider">
+                  <Globe2 className="w-4 h-4" />
+                  <span>Global Export Reach</span>
+                </div>
+                <p className="text-xs text-neutral-600 leading-relaxed">
+                  Exporting Malabar heritage to 32+ nations across the Middle East, Europe, Americas, and Asia-Pacific with ISO 22000 & Fairtrade logistics.
+                </p>
               </div>
             </div>
           </div>
