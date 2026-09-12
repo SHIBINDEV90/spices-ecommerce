@@ -5,7 +5,7 @@ import dbConnect from '@/lib/db';
 import Product from '@/lib/models/Product';
 import Vendor from '@/lib/models/Vendor';
 import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
+import { saveUploadedFiles } from '@/lib/upload';
 
 export async function GET(req: Request) {
   try {
@@ -54,28 +54,27 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     
     // Vendor products require admin approval
-    const image = formData.get('image') as File | null;
-    let imageUrl = '';
+    // Gather all uploaded files from 'images' and 'image' fields
+    const filesFromImages = formData.getAll('images') as File[];
+    const filesFromImage = formData.getAll('image') as File[];
+    const allFiles = [...filesFromImages, ...filesFromImage].filter(
+      (f) => f && typeof f === 'object' && typeof (f as any).size === 'number' && f.size > 0
+    );
 
-    if (image) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      const safeName = (image.name || 'image.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
-      const filename = `vendor-${vendor._id}-${Date.now()}-${safeName}`;
-      const baseUploads = process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads');
-      const uploadDir = path.join(baseUploads, 'products');
-      
+    let existingImages: string[] = [];
+    const existingRaw = formData.get('existingImages');
+    if (existingRaw && typeof existingRaw === 'string') {
       try {
-        await mkdir(uploadDir, { recursive: true });
-      } catch(e) {
-        // Ignore if exists
+        const parsed = JSON.parse(existingRaw);
+        if (Array.isArray(parsed)) existingImages = parsed;
+      } catch {
+        existingImages = [existingRaw];
       }
-      
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      imageUrl = `/uploads/products/${filename}`;
     }
+
+    const uploadedUrls = await saveUploadedFiles(allFiles, `vendor-${vendor._id}`);
+    const images = [...existingImages, ...uploadedUrls];
+    const imageUrl = images[0] || (formData.get('imageUrl') as string) || '';
 
     const parseNumber = (val: any, defaultVal = 0): number => {
       if (val === null || val === undefined || val === '') return defaultVal;
@@ -110,6 +109,7 @@ export async function POST(req: Request) {
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
       isRetailAvailable: formData.get('isRetailAvailable') === 'true',
       imageUrl,
+      images,
       vendorId: vendor._id,
       approvalStatus: 'Pending', 
     };

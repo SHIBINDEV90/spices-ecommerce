@@ -41,13 +41,11 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   if (!product) return null;
 
-  // Use dummy thumbs if product only has 1 image
-  const images = [
-    product.imageUrl || '/images/Cardamom.jpg',
-    product.imageUrl || '/images/Cardamom.jpg',
-    product.imageUrl || '/images/Cardamom.jpg',
-  ];
-  const isUploadedImage = (src: string) => src.startsWith('/uploads/');
+  // Use product images if available, otherwise fallback to single image
+  const images = (product.images && product.images.length > 0)
+    ? product.images
+    : [product.imageUrl || '/images/Cardamom.jpg'];
+  const isUploadedImage = (src: string) => typeof src === 'string' && src.startsWith('/uploads/');
 
   // Base calculations
   const basePrice = Number(product.price) || 0;
@@ -133,17 +131,19 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                 </div>
                 
                 {/* Thumbnails */}
-                <div className="flex gap-3 justify-center mt-auto">
-                  {images.map((img, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveImage(idx)}
-                      className={`relative w-20 h-20 rounded-xl overflow-hidden border-2 transition-all duration-300 ${activeImage === idx ? 'border-primary scale-105' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`}
-                    >
-                      <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-cover" unoptimized={isUploadedImage(img)} />
-                    </button>
-                  ))}
-                </div>
+                {images.length > 1 && (
+                  <div className="flex gap-3 justify-center mt-auto overflow-x-auto pb-1">
+                    {images.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveImage(idx)}
+                        className={`relative w-16 h-16 rounded-xl overflow-hidden border-2 transition-all duration-300 flex-shrink-0 cursor-pointer ${activeImage === idx ? 'border-primary scale-105 shadow-md' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`}
+                      >
+                        <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-cover" unoptimized={isUploadedImage(img)} />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Right Column - Product Details */}

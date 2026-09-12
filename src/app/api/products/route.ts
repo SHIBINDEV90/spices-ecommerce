@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server';
 import connectToDatabase from '../../../lib/db';
 import Product from '../../../lib/models/Product';
-import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
-
 import Vendor from '../../../lib/models/Vendor';
+import { saveUploadedFiles } from '../../../lib/upload';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,27 +19,29 @@ export async function POST(request: Request) {
   
   try {
     const formData = await request.formData();
-    const image = formData.get('image') as File | null;
-    let imageUrl = '';
+    
+    // Gather all uploaded files from 'images' and 'image' fields
+    const filesFromImages = formData.getAll('images') as File[];
+    const filesFromImage = formData.getAll('image') as File[];
+    const allFiles = [...filesFromImages, ...filesFromImage].filter(
+      (f) => f && typeof f === 'object' && typeof (f as any).size === 'number' && f.size > 0
+    );
 
-    if (image) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      const filename = `${Date.now()}-${image.name.replace(/\s/g, '_')}`;
-      const baseUploads = process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads');
-      const uploadDir = path.join(baseUploads, 'products');
-      
+    // Existing images (if passed as JSON array or single string)
+    let existingImages: string[] = [];
+    const existingRaw = formData.get('existingImages');
+    if (existingRaw && typeof existingRaw === 'string') {
       try {
-        await mkdir(uploadDir, { recursive: true });
-      } catch(e) {
-        // Ignore if exists
+        const parsed = JSON.parse(existingRaw);
+        if (Array.isArray(parsed)) existingImages = parsed;
+      } catch {
+        existingImages = [existingRaw];
       }
-      
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      imageUrl = `/uploads/products/${filename}`;
     }
+
+    const uploadedUrls = await saveUploadedFiles(allFiles, 'product');
+    const images = [...existingImages, ...uploadedUrls];
+    const imageUrl = images[0] || (formData.get('imageUrl') as string) || '';
 
     const rawOriginal = formData.get('originalPrice');
     const payload = {
@@ -53,7 +53,8 @@ export async function POST(request: Request) {
       productType: formData.get('productType') as string,
       stock: Number(formData.get('stock')),
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
-      imageUrl: imageUrl || '',
+      imageUrl,
+      images,
     };
 
     const product = await Product.create(payload);

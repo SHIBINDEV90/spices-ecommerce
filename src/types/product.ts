@@ -20,6 +20,7 @@ export interface Product {
   name: string;
   slug: string;
   imageUrl: string;
+  images?: string[];
   description: string;
   productType: ProductType | string;
   isRetailAvailable?: boolean;

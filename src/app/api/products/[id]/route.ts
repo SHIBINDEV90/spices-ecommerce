@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import connectToDatabase from '../../../../lib/db';
 import Product from '../../../../lib/models/Product';
 import mongoose from 'mongoose';
-import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
+import { saveUploadedFiles } from '../../../../lib/upload';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,25 +44,31 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
     };
 
-    // If an image file was supplied, save it
-    const image = formData.get('image') as File | null;
-    if (image) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      const filename = `${Date.now()}-${image.name.replace(/\s/g, '_')}`;
-      const baseUploads = process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads');
-      const uploadDir = path.join(baseUploads, 'products');
-      
+    // Gather all uploaded files from 'images' and 'image' fields
+    const filesFromImages = formData.getAll('images') as File[];
+    const filesFromImage = formData.getAll('image') as File[];
+    const allFiles = [...filesFromImages, ...filesFromImage].filter(
+      (f) => f && typeof f === 'object' && typeof (f as any).size === 'number' && f.size > 0
+    );
+
+    let existingImages: string[] | null = null;
+    const existingRaw = formData.get('existingImages');
+    if (existingRaw !== null && typeof existingRaw === 'string') {
       try {
-        await mkdir(uploadDir, { recursive: true });
-      } catch(e) {}
-      
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      payload.imageUrl = `/uploads/products/${filename}`;
+        const parsed = JSON.parse(existingRaw);
+        if (Array.isArray(parsed)) existingImages = parsed;
+      } catch {
+        existingImages = [existingRaw];
+      }
+    }
+
+    const uploadedUrls = await saveUploadedFiles(allFiles, 'product');
+
+    if (existingImages !== null || uploadedUrls.length > 0) {
+      const combined = [...(existingImages || []), ...uploadedUrls];
+      payload.images = combined;
+      payload.imageUrl = combined[0] || (formData.get('imageUrl') as string) || '';
     } else {
-      // If no new image, we might receive the old imageUrl as a string fallback
       const oldImageUrl = formData.get('imageUrl') as string | null;
       if (oldImageUrl) {
         payload.imageUrl = oldImageUrl;

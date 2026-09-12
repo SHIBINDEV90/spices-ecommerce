@@ -5,7 +5,7 @@ import dbConnect from '@/lib/db';
 import Product from '@/lib/models/Product';
 import Vendor from '@/lib/models/Vendor';
 import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
+import { saveUploadedFiles } from '@/lib/upload';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,27 +64,35 @@ export async function PUT(
     }
 
     const formData = await req.formData();
-    const image = formData.get('image') as File | null;
-    let imageUrl = existingProduct.imageUrl;
+    
+    // Gather all uploaded files from 'images' and 'image' fields
+    const filesFromImages = formData.getAll('images') as File[];
+    const filesFromImage = formData.getAll('image') as File[];
+    const allFiles = [...filesFromImages, ...filesFromImage].filter(
+      (f) => f && typeof f === 'object' && typeof (f as any).size === 'number' && f.size > 0
+    );
 
-    if (image && typeof image === 'object' && image.name) {
-      const bytes = await image.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      
-      const safeName = (image.name || 'image.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
-      const filename = `vendor-${vendor._id}-${Date.now()}-${safeName}`;
-      const baseUploads = process.env.UPLOADS_DIR || path.join(process.cwd(), 'public', 'uploads');
-      const uploadDir = path.join(baseUploads, 'products');
-      
+    let existingImages: string[] | null = null;
+    const existingRaw = formData.get('existingImages');
+    if (existingRaw !== null && typeof existingRaw === 'string') {
       try {
-        await mkdir(uploadDir, { recursive: true });
-      } catch (e) {
-        // Ignore if directory exists
+        const parsed = JSON.parse(existingRaw);
+        if (Array.isArray(parsed)) existingImages = parsed;
+      } catch {
+        existingImages = [existingRaw];
       }
-      
-      const filepath = path.join(uploadDir, filename);
-      await writeFile(filepath, buffer);
-      imageUrl = `/uploads/products/${filename}`;
+    }
+
+    const uploadedUrls = await saveUploadedFiles(allFiles, `vendor-${vendor._id}`);
+
+    let imageUrl = existingProduct.imageUrl;
+    let images: string[] = existingProduct.images && existingProduct.images.length > 0
+      ? existingProduct.images
+      : (existingProduct.imageUrl ? [existingProduct.imageUrl] : []);
+
+    if (existingImages !== null || uploadedUrls.length > 0) {
+      images = [...(existingImages || []), ...uploadedUrls];
+      imageUrl = images[0] || '';
     }
 
     const parseNumber = (val: any, defaultVal: number): number => {
@@ -135,6 +143,7 @@ export async function PUT(
         isBulkAvailable,
         isRetailAvailable,
         imageUrl,
+        images,
       },
       { new: true }
     );

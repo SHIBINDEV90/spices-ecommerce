@@ -3,6 +3,7 @@ import Product from '@/lib/models/Product';
 import Vendor from '@/lib/models/Vendor';
 import Link from 'next/link';
 import Image from 'next/image';
+import ProductImageGallery from '@/components/ProductImageGallery';
 import ProductInteraction from '@/components/ProductInteraction';
 import { ArrowLeft, MapPin, Tag, Activity, Tractor, Store, ShieldCheck, ChevronRight } from 'lucide-react';
 import { notFound } from 'next/navigation';
@@ -31,8 +32,10 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
     notFound();
   }
 
-  const isUploadedImage = typeof product.imageUrl === 'string' && product.imageUrl.startsWith('/uploads/');
   const vendor = typeof product.vendorId === 'object' && product.vendorId !== null ? product.vendorId : null;
+  const productImages = product.images && Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : (product.imageUrl ? [product.imageUrl] : ['/images/Cardamom.jpg']);
 
   return (
     <div className="min-h-screen bg-black text-white pb-32">
@@ -46,28 +49,13 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           
-          {/* Image Container */}
-          <div className="relative w-full aspect-square rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl group bg-white/5">
-            <Image
-              src={product.imageUrl}
-              alt={`Image of ${product.name}`}
-              fill
-              className="object-cover transition-transform duration-700 hover:scale-105"
-              unoptimized={isUploadedImage}
-            />
-            {product.isBulkAvailable && (
-              <div className="absolute top-6 left-6 bg-amber-500 text-black px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-xl">
-                Wholesale Valid
-              </div>
-            )}
-            
-            {vendor && (
-              <div className="absolute top-6 right-6 bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-xl">
-                {vendor.vendorType === 'Farmer' ? <Tractor size={14} /> : <Store size={14} />}
-                {vendor.vendorType || 'Vendor'} Direct
-              </div>
-            )}
-          </div>
+          {/* Multi-Image Gallery */}
+          <ProductImageGallery
+            images={productImages}
+            productName={product.name}
+            isBulkAvailable={product.isBulkAvailable}
+            vendor={vendor}
+          />
 
           {/* Details Container */}
           <div className="flex flex-col">

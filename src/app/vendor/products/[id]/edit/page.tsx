@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { UploadCloud, Star, Trash2, Image as ImageIcon } from 'lucide-react';
+
+type ImageEntry = 
+  | { type: 'existing'; url: string; id: string }
+  | { type: 'new'; file: File; preview: string; id: string };
 
 export default function EditVendorProductPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -25,8 +30,7 @@ export default function EditVendorProductPage({ params }: { params: { id: string
     isBulkAvailable: false,
     isRetailAvailable: true,
   });
-  const [currentImageUrl, setCurrentImageUrl] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [images, setImages] = useState<ImageEntry[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -61,9 +65,15 @@ export default function EditVendorProductPage({ params }: { params: { id: string
           isRetailAvailable: p.isRetailAvailable !== undefined ? !!p.isRetailAvailable : true,
         });
 
-        if (p.imageUrl) {
-          setCurrentImageUrl(p.imageUrl);
+        const list: ImageEntry[] = [];
+        if (p.images && Array.isArray(p.images) && p.images.length > 0) {
+          p.images.forEach((url: string, idx: number) => {
+            if (url) list.push({ type: 'existing', url, id: `existing-${idx}-${url}` });
+          });
+        } else if (p.imageUrl) {
+          list.push({ type: 'existing', url: p.imageUrl, id: `existing-0-${p.imageUrl}` });
         }
+        setImages(list);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -98,14 +108,45 @@ export default function EditVendorProductPage({ params }: { params: { id: string
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilesAdded = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setImageFile(e.target.files[0]);
+      const newEntries: ImageEntry[] = Array.from(e.target.files).map(file => ({
+        type: 'new',
+        file,
+        preview: URL.createObjectURL(file),
+        id: `new-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      }));
+      setImages(prev => [...prev, ...newEntries]);
+      e.target.value = '';
     }
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setImages(prev => {
+      const item = prev.find(img => img.id === id);
+      if (item && item.type === 'new') {
+        URL.revokeObjectURL(item.preview);
+      }
+      return prev.filter(img => img.id !== id);
+    });
+  };
+
+  const handleSetPrimary = (index: number) => {
+    if (index === 0) return;
+    setImages(prev => {
+      const copy = [...prev];
+      const [item] = copy.splice(index, 1);
+      return [item, ...copy];
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (images.length === 0) {
+      setError('Please keep or upload at least one product image');
+      return;
+    }
+
     setSubmitting(true);
     setError('');
 
@@ -114,8 +155,19 @@ export default function EditVendorProductPage({ params }: { params: { id: string
       Object.entries(formData).forEach(([key, value]) => {
         data.append(key, value.toString());
       });
-      if (imageFile) {
-        data.append('image', imageFile);
+
+      const existingImages: string[] = [];
+      images.forEach(img => {
+        if (img.type === 'existing') {
+          existingImages.push(img.url);
+        } else {
+          data.append('images', img.file);
+        }
+      });
+
+      data.append('existingImages', JSON.stringify(existingImages));
+      if (images[0].type === 'existing') {
+        data.append('primaryImageUrl', images[0].url);
       }
 
       const res = await fetch(`/api/vendor/products/${params.id}`, {
@@ -189,25 +241,114 @@ export default function EditVendorProductPage({ params }: { params: { id: string
               <textarea required name="description" rows={4} value={formData.description} onChange={handleChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none text-sm"></textarea>
             </div>
             
-            {/* Image Preview & Upload */}
+            {/* Multi-Image Gallery & Upload */}
             <div className="md:col-span-2 space-y-3">
-              <label className="block text-sm font-medium text-neutral-700">Product Image</label>
-              {currentImageUrl && !imageFile && (
-                <div className="flex items-center gap-4 p-3 bg-neutral-50 rounded-lg border border-neutral-200 w-fit">
-                  <div className="relative w-16 h-16 rounded overflow-hidden">
-                    <Image
-                      src={currentImageUrl}
-                      alt="Current Product Image"
-                      fill
-                      className="object-cover"
-                      unoptimized={currentImageUrl.startsWith('/uploads/')}
-                    />
-                  </div>
-                  <span className="text-xs text-neutral-500">Current product image</span>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-700 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-primary" />
+                  <span>Product Images</span>
+                  <span className="text-xs text-neutral-400 font-normal">
+                    ({images.length} {images.length === 1 ? 'image' : 'images'})
+                  </span>
+                </label>
+                <span className="text-xs text-primary font-medium">
+                  ★ First image is the Primary Cover
+                </span>
+              </div>
+
+              {/* Upload Dropzone */}
+              <label
+                htmlFor="vendor-edit-images"
+                className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-neutral-300 hover:border-primary/70 rounded-xl bg-neutral-50 hover:bg-neutral-100/70 transition-all cursor-pointer group text-center"
+              >
+                <input
+                  id="vendor-edit-images"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleFilesAdded}
+                  className="hidden"
+                />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform mb-2">
+                  <UploadCloud className="w-6 h-6" />
+                </div>
+                <p className="text-sm font-semibold text-neutral-800 group-hover:text-primary transition-colors">
+                  Click to browse or drag & drop to add more images
+                </p>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Supports PNG, JPG, WEBP • You can upload multiple new images
+                </p>
+              </label>
+
+              {/* Images Grid */}
+              {images.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2">
+                  {images.map((item, idx) => {
+                    const isPrimary = idx === 0;
+                    const imgSrc = item.type === 'existing' ? item.url : item.preview;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`relative group aspect-square rounded-xl overflow-hidden border bg-neutral-100 transition-all ${
+                          isPrimary ? 'border-primary ring-2 ring-primary/20 shadow-md' : 'border-neutral-200 hover:border-neutral-300'
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={imgSrc}
+                          alt={`Product image ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'https://placehold.co/400x400?text=Invalid+Image';
+                          }}
+                        />
+
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 opacity-80 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+                        {/* Primary Badge or Make Primary */}
+                        <div className="absolute top-2 left-2 z-10">
+                          {isPrimary ? (
+                            <span className="px-2 py-0.5 bg-primary text-white text-[10px] font-bold uppercase tracking-wider rounded-md flex items-center gap-1 shadow">
+                              <Star className="w-3 h-3 fill-current" /> Cover
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleSetPrimary(idx)}
+                              className="px-2 py-0.5 bg-white/90 hover:bg-white text-neutral-800 text-[10px] font-medium rounded-md shadow-sm opacity-90 hover:opacity-100 transition-all flex items-center gap-1 cursor-pointer"
+                              title="Set as primary cover image"
+                            >
+                              <Star className="w-3 h-3 text-amber-500" /> Cover
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Delete Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(item.id)}
+                          className="absolute top-2 right-2 z-10 w-6 h-6 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center justify-center shadow transition-all cursor-pointer"
+                          title="Remove this image"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Bottom Tag */}
+                        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-[10px] text-white/90 pointer-events-none">
+                          <span className="px-1.5 py-0.5 rounded bg-black/50 backdrop-blur-sm text-[9px]">
+                            {item.type === 'existing' ? 'Saved' : 'New'}
+                          </span>
+                          <span className="font-mono text-neutral-300">
+                            #{idx + 1}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
-              <input type="file" accept="image/*" name="image" onChange={handleImageChange} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary/50 outline-none text-sm" />
-              <p className="text-xs text-neutral-400">Leave blank to keep the current image, or select a new file to replace it.</p>
             </div>
           </div>
         </div>

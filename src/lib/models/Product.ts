@@ -6,6 +6,7 @@ export interface IProduct extends Document {
   description: string;
   price: number;
   imageUrl: string;
+  images?: string[];
   productType: string;
   stock: number;
   isBulkAvailable: boolean;
@@ -31,7 +32,8 @@ const ProductSchema: Schema = new Schema({
   description: { type: String, required: true },
   price: { type: Number, required: true },
   originalPrice: { type: Number },
-  imageUrl: { type: String, required: true },
+  imageUrl: { type: String, default: '' },
+  images: { type: [String], default: [] },
   productType: { type: String, required: true, default: 'Spice' },
   stock: { type: Number, default: 0 },
   isBulkAvailable: { type: Boolean, default: false },
