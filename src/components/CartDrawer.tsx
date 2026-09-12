@@ -74,7 +74,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 <div className="h-full flex flex-col items-center justify-center text-center opacity-60">
                   <ShoppingCart size={64} className="mb-4 text-neutral-300" />
                   <p className="text-xl font-semibold mb-2">Your cart is empty</p>
-                  <p className="text-sm">Looks like you haven't added any premium spices yet.</p>
+                  <p className="text-sm">Looks like you haven&apos;t added any premium spices yet.</p>
                   <button 
                     onClick={onClose}
                     className="mt-6 text-primary font-bold hover:underline"
@@ -157,7 +157,7 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                            {remainingForFreeDelivery > 0 ? (
                              <>Add ₹{remainingForFreeDelivery.toFixed(0)} more for <strong>Free Delivery</strong></>
                            ) : (
-                             <strong>You've unlocked Free Delivery! 🎉</strong>
+                             <strong>You&apos;ve unlocked Free Delivery! 🎉</strong>
                            )}
                          </div>
                          <div className="h-1.5 w-full bg-black/10 rounded-full overflow-hidden">

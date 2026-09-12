@@ -53,7 +53,7 @@ export const ReceiptEmail = ({ customerName = 'Customer', orderTotal = 0, discou
               </Text>
               
               <Text className="text-zinc-300 text-base mb-6 leading-relaxed">
-                We've successfully processed your payment. Your hand-selected, premium spices are being prepared for dispatch. We will send you another update as soon as they are on their way.
+                We&apos;ve successfully processed your payment. Your hand-selected, premium spices are being prepared for dispatch. We will send you another update as soon as they are on their way.
               </Text>
 
               <Section className="bg-zinc-900 rounded p-6 mb-6">

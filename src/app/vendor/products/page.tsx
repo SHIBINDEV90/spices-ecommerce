@@ -138,7 +138,7 @@ Thank you!`;
               />
             </div>
             <p className="text-[11px] text-neutral-400">
-              Tip: Enter customer's 10-digit number. We'll auto-prefix +91 (India) if no country code is provided.
+              Tip: Enter customer&apos;s 10-digit number. We&apos;ll auto-prefix +91 (India) if no country code is provided.
             </p>
           </div>
 
@@ -307,7 +307,7 @@ export default function VendorProducts() {
               {products.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-6 py-8 text-center text-neutral-500">
-                    You haven't added any products yet.
+                    You haven&apos;t added any products yet.
                   </td>
                 </tr>
               )}

@@ -158,7 +158,7 @@ Thank you!`;
               />
             </div>
             <p className="text-[11px] text-gray-500">
-              Tip: Enter customer's 10-digit number. We'll auto-prefix +91 (India) if no country code is provided.
+              Tip: Enter customer&apos;s 10-digit number. We&apos;ll auto-prefix +91 (India) if no country code is provided.
             </p>
           </div>
 
