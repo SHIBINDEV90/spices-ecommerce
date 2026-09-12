@@ -70,7 +70,7 @@ export default function ContactPage() {
           <span className="font-label-md text-label-md text-saffron-glow uppercase tracking-widest block mb-4">Connect With Excellence</span>
           <h1 className="font-display-lg text-headline-lg md:text-display-lg mb-6 leading-tight">Get in Touch</h1>
           <p className="max-w-2xl font-body-lg text-body-lg text-surface-container-low opacity-90">
-            Whether you're a retail enthusiast or an international procurement officer, we're here to bring the world's finest spices to your doorstep.
+            Whether you&apos;re a retail enthusiast or an international procurement officer, we&apos;re here to bring the world&apos;s finest spices to your doorstep.
           </p>
         </div>
       </section>

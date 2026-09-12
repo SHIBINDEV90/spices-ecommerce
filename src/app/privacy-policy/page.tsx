@@ -226,7 +226,7 @@ export default function PrivacyPolicyPage() {
 
               <hr className="my-8 border-outline-variant/50" />
 
-              <h2 className="text-2xl font-bold mt-10 mb-4 text-moss-deep">11. Children's Privacy</h2>
+              <h2 className="text-2xl font-bold mt-10 mb-4 text-moss-deep">11. Children&apos;s Privacy</h2>
               <p>Our products and services are not intended for individuals under 18 years of age.</p>
               <p>We do not knowingly collect personal information from children.</p>
 

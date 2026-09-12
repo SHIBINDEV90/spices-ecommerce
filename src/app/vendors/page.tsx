@@ -49,7 +49,7 @@ export default async function VendorsPage() {
               Farmer & Exporter Marketplace
             </h1>
             <p className="text-emerald-100/80 text-lg leading-relaxed mb-8">
-              Connect directly with verified spice growers, organic farmers, and certified exporters from Kerala's spice belt. Support direct trade with maximum quality transparency.
+              Connect directly with verified spice growers, organic farmers, and certified exporters from Kerala&apos;s spice belt. Support direct trade with maximum quality transparency.
             </p>
             
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-4 border-t border-white/10">

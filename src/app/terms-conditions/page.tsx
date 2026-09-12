@@ -116,7 +116,7 @@ export default function TermsConditionsPage() {
               <h2 className="text-2xl font-bold mt-10 mb-4 text-moss-deep">8. International Orders</h2>
               <p>For international shipments:</p>
               <ul className="list-disc pl-6 mb-4 space-y-1">
-                <li>Buyers are responsible for complying with their country's import regulations.</li>
+                <li>Buyers are responsible for complying with their country&apos;s import regulations.</li>
                 <li>Customs duties, taxes, import fees, inspections, or clearance charges are the responsibility of the buyer unless otherwise agreed in writing.</li>
                 <li>Delivery timelines may vary due to customs procedures, logistics, or regulatory requirements.</li>
               </ul>
