@@ -21,27 +21,44 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'Vendor profile not found' }, { status: 404 });
     }
 
-    // Find all orders that have at least one product from this vendor
-    const orders = await Order.find({ "products.vendorId": vendor._id }).sort({ createdAt: -1 }).lean();
+    // Find all orders that have products from this vendor that were sent by admin or in progress
+    const orders = await Order.find({
+      products: {
+        $elemMatch: {
+          vendorId: vendor._id,
+          $or: [
+            { sentToVendor: true },
+            { status: { $in: ['Accepted', 'Shipped', 'Delivered'] } }
+          ]
+        }
+      }
+    }).sort({ createdAt: -1 }).lean();
 
-    // Filter products array to only show this vendor's items to protect privacy of other vendors
+    // Filter products array to only show this vendor's dispatched items
     const vendorOrders = orders.map(order => {
-        const vendorProducts = order.products.filter((p: any) => p.vendorId?.toString() === vendor._id.toString());
+        const vendorProducts = order.products.filter((p: any) => 
+          p.vendorId?.toString() === vendor._id.toString() &&
+          (p.sentToVendor || ['Accepted', 'Shipped', 'Delivered'].includes(p.status))
+        );
         
         // Calculate the subtotal for this vendor's part of the order
         const vendorTotal = vendorProducts.reduce((sum: number, p: any) => sum + (p.price * p.quantity), 0);
+        const firstSentAt = vendorProducts.find((p: any) => p.sentToVendorAt)?.sentToVendorAt;
 
         return {
             _id: order._id,
             customerName: order.customerName,
             customerEmail: order.customerEmail,
+            customerPhone: order.customerPhone,
             shippingAddress: order.shippingAddress,
+            orderNote: order.orderNote,
             paymentStatus: order.paymentStatus,
             createdAt: order.createdAt,
+            sentToVendorAt: firstSentAt || order.createdAt,
             products: vendorProducts,
             vendorTotal
         };
-    });
+    }).filter(order => order.products.length > 0);
 
     return NextResponse.json({ orders: vendorOrders });
   } catch (error: any) {

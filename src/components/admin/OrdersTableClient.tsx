@@ -19,7 +19,13 @@ import {
   Search, 
   Receipt, 
   CreditCard,
-  FileText
+  FileText,
+  Trash2,
+  Send,
+  SendHorizontal,
+  Building2,
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react';
 
 interface OrdersTableClientProps {
@@ -33,6 +39,71 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+
+  // Delete states
+  const [orderToDelete, setOrderToDelete] = useState<any | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Send to vendor states
+  const [sendingVendorKey, setSendingVendorKey] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const showFeedback = (type: 'success' | 'error', text: string) => {
+    setFeedback({ type, text });
+    setTimeout(() => setFeedback(null), 4500);
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    setDeletingId(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to delete order.');
+
+      setOrders(prev => prev.filter(o => o._id !== orderId));
+      if (selectedOrder && selectedOrder._id === orderId) {
+        setSelectedOrder(null);
+      }
+      setOrderToDelete(null);
+      showFeedback('success', `Order #${orderId.substring(orderId.length - 8).toUpperCase()} was permanently deleted.`);
+    } catch (err: any) {
+      console.error(err);
+      showFeedback('error', err.message || 'Failed to delete order.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleSendToVendor = async (orderId: string, vendorId?: string) => {
+    const key = `${orderId}_${vendorId || 'all'}`;
+    setSendingVendorKey(key);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}/send-to-vendor`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vendorId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to dispatch order to vendor.');
+
+      // Update in orders list
+      if (data.order) {
+        setOrders(prev => prev.map(o => o._id === orderId ? data.order : o));
+        if (selectedOrder && selectedOrder._id === orderId) {
+          setSelectedOrder(data.order);
+        }
+      }
+
+      showFeedback('success', data.message || 'Order details sent to vendor dashboard & email sent.');
+    } catch (err: any) {
+      console.error(err);
+      showFeedback('error', err.message || 'Failed to dispatch to vendor.');
+    } finally {
+      setSendingVendorKey(null);
+    }
+  };
 
   const handleStatusChange = async (id: string, newStatus: string) => {
     setUpdatingId(id);
@@ -215,6 +286,26 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                             <span>{order.customerPhone}</span>
                           </p>
                         )}
+                        {(() => {
+                          const vendorItems = order.products?.filter((p: any) => p.vendorId);
+                          if (!vendorItems || vendorItems.length === 0) return null;
+                          const allSent = vendorItems.every((p: any) => p.sentToVendor);
+                          return (
+                            <div className="mt-1.5 flex items-center gap-1.5">
+                              {allSent ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                  <span>Vendor Dispatched</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                                  <Clock className="w-3 h-3 text-amber-400" />
+                                  <span>Pending Vendor Send</span>
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
 
                       {/* Shipping Destination */}
@@ -281,15 +372,25 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                       </td>
 
-                      {/* Details Button */}
+                      {/* Actions Column */}
                       <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => setSelectedOrder(order)}
-                          className="px-3 py-1.5 bg-white/10 hover:bg-orange-500/20 hover:text-orange-400 text-gray-300 rounded-lg text-xs font-medium transition-all inline-flex items-center gap-1.5 border border-white/10"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Details</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setSelectedOrder(order)}
+                            className="px-2.5 py-1.5 bg-white/10 hover:bg-orange-500/20 hover:text-orange-400 text-gray-300 rounded-lg text-xs font-medium transition-all inline-flex items-center gap-1.5 border border-white/10"
+                            title="View Details"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>Details</span>
+                          </button>
+                          <button
+                            onClick={() => setOrderToDelete(order)}
+                            className="p-1.5 bg-red-500/10 hover:bg-red-500/25 text-red-400 hover:text-red-300 rounded-lg text-xs font-medium transition-all inline-flex items-center border border-red-500/20"
+                            title="Delete Unwanted Order"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))
@@ -332,12 +433,24 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                   </p>
                 </div>
 
-                <button 
-                  onClick={() => setSelectedOrder(null)}
-                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    type="button"
+                    onClick={() => setOrderToDelete(selectedOrder)}
+                    className="px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-xl text-xs font-semibold transition-all inline-flex items-center gap-1.5 border border-red-500/25"
+                    title="Delete Unwanted Order"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Order</span>
+                  </button>
+
+                  <button 
+                    onClick={() => setSelectedOrder(null)}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               {/* Modal Content */}
@@ -397,7 +510,150 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                   )}
                 </div>
 
-                {/* 2. ORDER ITEMS BREAKDOWN */}
+                {/* 2. VENDOR ORDER DISPATCH & NOTIFICATIONS */}
+                {(() => {
+                  const vendorItems = selectedOrder.products?.filter((p: any) => p.vendorId);
+                  if (!vendorItems || vendorItems.length === 0) return null;
+
+                  // Group items by vendor
+                  const vendorGroups: Record<string, { vendor: any, items: any[] }> = {};
+                  vendorItems.forEach((p: any) => {
+                    const vId = p.vendorId?._id ? p.vendorId._id.toString() : p.vendorId.toString();
+                    if (!vendorGroups[vId]) {
+                      vendorGroups[vId] = {
+                        vendor: typeof p.vendorId === 'object' ? p.vendorId : { _id: vId },
+                        items: []
+                      };
+                    }
+                    vendorGroups[vId].items.push(p);
+                  });
+
+                  const vendorList = Object.entries(vendorGroups);
+                  const totalVendors = vendorList.length;
+
+                  return (
+                    <div className="bg-gradient-to-br from-orange-500/10 via-amber-500/5 to-transparent border border-orange-500/25 rounded-2xl p-5 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-orange-500/20 pb-3">
+                        <div>
+                          <div className="flex items-center gap-2 text-orange-400 font-semibold text-sm">
+                            <Building2 className="w-4 h-4" />
+                            <span>Vendor Dispatch &amp; Notifications</span>
+                          </div>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            Send order details directly to the vendor&apos;s dashboard and dispatch fulfillment email.
+                          </p>
+                        </div>
+
+                        {totalVendors > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleSendToVendor(selectedOrder._id)}
+                            disabled={sendingVendorKey === `${selectedOrder._id}_all`}
+                            className="px-3.5 py-1.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-orange-500/20 transition-all self-start sm:self-auto"
+                          >
+                            {sendingVendorKey === `${selectedOrder._id}_all` ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Send className="w-3.5 h-3.5" />
+                            )}
+                            <span>Send to All Vendors</span>
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        {vendorList.map(([vId, group]) => {
+                          const v = group.vendor;
+                          const allSent = group.items.every((item: any) => item.sentToVendor);
+                          const firstSentDate = group.items.find((item: any) => item.sentToVendorAt)?.sentToVendorAt;
+                          const groupSubtotal = group.items.reduce((sum: number, it: any) => sum + (it.price * it.quantity), 0);
+                          const isCurrentLoading = sendingVendorKey === `${selectedOrder._id}_${vId}` || sendingVendorKey === `${selectedOrder._id}_all`;
+
+                          return (
+                            <div key={vId} className="bg-black/40 border border-white/10 rounded-xl p-4 space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-white text-sm">
+                                      {v.businessName || 'Partner Vendor'}
+                                    </span>
+                                    {v.vendorType && (
+                                      <span className="px-2 py-0.5 text-[10px] rounded bg-white/10 text-gray-300 font-medium">
+                                        {v.vendorType}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-0.5">
+                                    {v.ownerName ? `${v.ownerName} • ` : ''}
+                                    <span className="font-mono text-orange-300">{v.email || 'No email on record'}</span>
+                                    {v.phone ? ` • ${v.phone}` : ''}
+                                  </p>
+                                </div>
+
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {allSent ? (
+                                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 flex items-center gap-1.5">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                      <span>
+                                        Dispatched {firstSentDate ? `(${new Date(firstSentDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })})` : ''}
+                                      </span>
+                                    </span>
+                                  ) : (
+                                    <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/25 flex items-center gap-1.5">
+                                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                                      <span>Awaiting Dispatch</span>
+                                    </span>
+                                  )}
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSendToVendor(selectedOrder._id, vId)}
+                                    disabled={isCurrentLoading}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 border ${
+                                      allSent 
+                                        ? 'bg-white/5 hover:bg-white/10 text-gray-300 border-white/10' 
+                                        : 'bg-orange-500 hover:bg-orange-600 text-white border-orange-500 shadow-md shadow-orange-500/20'
+                                    }`}
+                                  >
+                                    {isCurrentLoading ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
+                                    ) : allSent ? (
+                                      <SendHorizontal className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <Send className="w-3.5 h-3.5" />
+                                    )}
+                                    <span>{allSent ? 'Resend Details & Mail' : 'Send to Vendor & Mail'}</span>
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Items list from this vendor */}
+                              <div className="bg-white/5 rounded-lg p-3 text-xs divide-y divide-white/5">
+                                {group.items.map((item: any, idx: number) => (
+                                  <div key={idx} className="py-1.5 first:pt-0 last:pb-0 flex justify-between items-center text-gray-300">
+                                    <div>
+                                      <span className="font-medium text-white">{item.quantity}x {item.name}</span>
+                                      <span className="text-gray-500 ml-2">(@ ₹{item.price})</span>
+                                    </div>
+                                    <span className="font-mono text-white font-semibold">
+                                      ₹{(item.price * item.quantity).toLocaleString('en-IN')}
+                                    </span>
+                                  </div>
+                                ))}
+                                <div className="pt-2 mt-1 flex justify-between font-semibold text-gray-300">
+                                  <span>Vendor Share:</span>
+                                  <span className="text-orange-400 font-mono">₹{groupSubtotal.toLocaleString('en-IN')}</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* 3. ORDER ITEMS BREAKDOWN */}
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
                   <div className="flex items-center gap-2 font-semibold text-sm text-gray-300 mb-4">
                     <Receipt className="w-4 h-4 text-orange-400" />
@@ -501,6 +757,97 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {orderToDelete && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-[#18181b] border border-red-500/30 rounded-2xl w-full max-w-md p-6 text-white shadow-2xl space-y-4"
+            >
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-red-400 flex-shrink-0">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Delete Order?</h3>
+                  <p className="text-sm text-gray-400 mt-1 leading-relaxed">
+                    Are you sure you want to permanently delete order{' '}
+                    <span className="font-mono font-semibold text-orange-400">
+                      #{orderToDelete._id.substring(orderToDelete._id.length - 8).toUpperCase()}
+                    </span>{' '}
+                    for <strong className="text-white">{orderToDelete.customerName}</strong>?
+                  </p>
+                  <p className="text-xs text-red-400/90 mt-2 bg-red-500/10 p-2.5 rounded-lg border border-red-500/20 leading-relaxed">
+                    ⚠️ This will remove the order permanently from the database. Unwanted/test orders will be completely erased.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setOrderToDelete(null)}
+                  disabled={deletingId === orderToDelete._id}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 text-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteOrder(orderToDelete._id)}
+                  disabled={deletingId === orderToDelete._id}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-red-600 hover:bg-red-700 text-white flex items-center gap-1.5 shadow-lg shadow-red-600/25 transition-all"
+                >
+                  {deletingId === orderToDelete._id ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Yes, Delete Order</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Feedback Toast Notification */}
+      <AnimatePresence>
+        {feedback && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, x: 20 }}
+            animate={{ opacity: 1, y: 0, x: 0 }}
+            exit={{ opacity: 0, y: -20, x: 20 }}
+            className={`fixed top-6 right-6 z-[70] px-4 py-3 rounded-xl shadow-2xl border flex items-center gap-3 text-sm font-medium ${
+              feedback.type === 'success'
+                ? 'bg-emerald-950/95 text-emerald-200 border-emerald-500/30 backdrop-blur-md'
+                : 'bg-red-950/95 text-red-200 border-red-500/30 backdrop-blur-md'
+            }`}
+          >
+            {feedback.type === 'success' ? (
+              <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            ) : (
+              <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
+            )}
+            <span>{feedback.text}</span>
+            <button 
+              onClick={() => setFeedback(null)} 
+              className="p-1 hover:bg-white/10 rounded-lg transition-colors ml-2"
+            >
+              <X className="w-4 h-4 text-gray-400" />
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

@@ -30,7 +30,15 @@ export async function GET(req: Request) {
     // In MongoDB, we can aggregate to find this.
     const ordersWithVendorItems = await Order.aggregate([
         { $unwind: "$products" },
-        { $match: { "products.vendorId": vendor._id } },
+        { 
+            $match: { 
+                "products.vendorId": vendor._id,
+                $or: [
+                    { "products.sentToVendor": true },
+                    { "products.status": { $in: ['Accepted', 'Shipped', 'Delivered'] } }
+                ]
+            } 
+        },
         {
             $group: {
                 _id: "$_id",

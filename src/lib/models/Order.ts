@@ -10,6 +10,8 @@ export interface IOrderItem {
   price: number; // Price at the time of purchase
   vendorId?: mongoose.Types.ObjectId;
   status?: 'Pending' | 'Accepted' | 'Shipped' | 'Delivered';
+  sentToVendor?: boolean;
+  sentToVendorAt?: Date;
 }
 
 // Interface for the complete order document
@@ -45,6 +47,8 @@ const OrderItemSchema = new Schema<IOrderItem>({
   price: { type: Number, required: true },
   vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor' },
   status: { type: String, enum: ['Pending', 'Accepted', 'Shipped', 'Delivered'], default: 'Pending' },
+  sentToVendor: { type: Boolean, default: false },
+  sentToVendorAt: { type: Date },
 });
 
 const OrderSchema = new Schema<IOrder>(
@@ -84,6 +88,7 @@ const OrderSchema = new Schema<IOrder>(
   { timestamps: true }
 );
 
+delete mongoose.models.Order;
 const Order = models.Order || model<IOrder>('Order', OrderSchema);
 
 export default Order;

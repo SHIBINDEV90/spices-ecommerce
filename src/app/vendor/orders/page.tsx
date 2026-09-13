@@ -7,9 +7,12 @@ type VendorOrder = {
   _id: string;
   customerName: string;
   customerEmail: string;
+  customerPhone?: string;
+  orderNote?: string;
   shippingAddress: any;
   paymentStatus: string;
   createdAt: string;
+  sentToVendorAt?: string;
   vendorTotal: number;
   products: any[];
 };
@@ -81,8 +84,11 @@ export default function VendorOrders() {
               <div key={order._id} className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
                 <div className="p-5 border-b border-neutral-100 bg-neutral-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <div className="flex items-center gap-3 mb-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-1.5">
                       <span className="font-semibold text-neutral-900">Order #{order._id.slice(-6).toUpperCase()}</span>
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-200">
+                        Assigned by Admin
+                      </span>
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                       }`}>
@@ -97,8 +103,9 @@ export default function VendorOrders() {
                         {vendorStatus}
                       </span>
                     </div>
-                    <p className="text-sm text-neutral-500">
-                      Placed on {new Date(order.createdAt).toLocaleDateString()}
+                    <p className="text-xs text-neutral-500">
+                      Order Placed: {new Date(order.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {order.sentToVendorAt && ` • Dispatched to you: ${new Date(order.sentToVendorAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`}
                     </p>
                   </div>
                   
@@ -141,14 +148,23 @@ export default function VendorOrders() {
                   <div className="w-full md:w-64 bg-neutral-50 rounded-lg p-4 text-sm">
                     <h3 className="font-semibold text-neutral-900 mb-2">Customer Details</h3>
                     <p className="text-neutral-800 font-medium">{order.customerName}</p>
-                    <p className="text-neutral-500 mb-3">{order.customerEmail}</p>
+                    <p className="text-neutral-500">{order.customerEmail}</p>
+                    {order.customerPhone && (
+                      <p className="text-neutral-500 mb-3">Phone: {order.customerPhone}</p>
+                    )}
                     
-                    <h3 className="font-semibold text-neutral-900 mb-1">Shipping Address</h3>
+                    <h3 className="font-semibold text-neutral-900 mb-1 mt-3">Shipping Address</h3>
                     <p className="text-neutral-600">
                       {order.shippingAddress.street}<br/>
                       {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.postalCode}<br/>
                       {order.shippingAddress.country}
                     </p>
+
+                    {order.orderNote && (
+                      <div className="mt-3 pt-2 border-t border-neutral-200 text-xs text-amber-900 bg-amber-50 p-2 rounded">
+                        <strong>Customer Note:</strong> {order.orderNote}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
