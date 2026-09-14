@@ -5,6 +5,8 @@ import dbConnect from '@/lib/db';
 import Vendor from '@/lib/models/Vendor';
 import User from '@/lib/models/User'; // need this for populate to work if we want to populate email, though we have userId
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);

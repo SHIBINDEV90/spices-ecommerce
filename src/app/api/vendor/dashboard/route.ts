@@ -6,6 +6,8 @@ import Product from '@/lib/models/Product';
 import Order from '@/lib/models/Order';
 import Vendor from '@/lib/models/Vendor';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);

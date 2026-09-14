@@ -47,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          sshpass -e ssh -p "$DEPLOY_PORT" "$VPS_USER@$VPS_HOST" "DEPLOY_PATH='$DEPLOY_PATH' bash -se" <<'REMOTE_SCRIPT'
+          sshpass -e ssh -v -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password,keyboard-interactive -o PubkeyAuthentication=no -p "$DEPLOY_PORT" "$VPS_USER@$VPS_HOST" "DEPLOY_PATH='$DEPLOY_PATH' bash -se" <<'REMOTE_SCRIPT'
           set -euo pipefail
 
           cd "$DEPLOY_PATH"
