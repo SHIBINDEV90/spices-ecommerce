@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import type { Product } from '@/types/product';
+import ProductCard from '@/components/ProductCard';
 import AnimatedSection from '@/components/AnimatedSection';
 import { motion } from 'framer-motion';
 import { ArrowRight, Tractor, ShieldCheck, Factory, Truck, Award } from 'lucide-react';
@@ -17,8 +18,8 @@ export default function Home() {
       try {
         const res = await fetch('/api/products');
         const data = await res.json();
-        // Just take first 3 products for the homepage
-        setProducts(data.slice(0, 3));
+        // Take first 4 products for the homepage
+        setProducts(data.slice(0, 4));
       } catch (err) {
         console.error("Error fetching products", err);
       }
@@ -120,62 +121,33 @@ export default function Home() {
             <h4 className="font-label-md text-label-md text-moss-deep uppercase tracking-widest mb-2">From Our Farms</h4>
             <h2 className="font-headline-lg text-headline-lg text-slate-ink">Featured Products</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product, idx) => (
-              <motion.div 
-                key={product._id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: idx * 0.1 }}
-                className="bg-cream-paper rounded overflow-hidden shadow-sm shadow-moss-deep/5 hover:shadow-xl transition-shadow duration-300 group cursor-pointer flex flex-col h-full border border-surface-variant relative"
-              >
-                <Link href="/bulk-enquiry" className="flex flex-col h-full relative">
-                  <div className="h-64 relative overflow-hidden">
-                    <Image
-                      src={product.imageUrl || '/images/Cardamom.jpg'}
-                      alt={product.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      unoptimized={typeof product.imageUrl === 'string' && product.imageUrl.startsWith('/uploads/')}
-                    />
-                    <div className="absolute top-4 left-4 bg-moss-deep text-surface-container-lowest font-label-md text-xs px-3 py-1 rounded uppercase tracking-wider z-10">
-                      Export Grade
-                    </div>
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-slate-ink/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                      <button className="border-2 border-saffron-glow text-saffron-glow font-label-md px-6 py-3 uppercase tracking-wider hover:bg-saffron-glow hover:text-slate-ink transition-colors">Request Bulk Quote</button>
-                    </div>
-                  </div>
-                  <div className="p-8 flex-grow flex flex-col justify-between relative z-10 bg-cream-paper">
-                    <div>
-                      <h3 className="font-headline-md text-headline-md text-slate-ink mb-2">{product.name}</h3>
-                      <p className="font-body-md text-body-md text-on-surface-variant mb-6 line-clamp-3">
-                        {product.description || "Premium quality spices sourced from the best farms, ensuring rich flavor and intense aroma for global markets."}
-                      </p>
-                    </div>
-
-                  </div>
-                </Link>
-              </motion.div>
+              <ProductCard 
+                key={product._id} 
+                product={product} 
+                index={idx} 
+                featured={idx < 2} 
+              />
             ))}
-            
-            {products.length === 0 && (
-              <>
-                {[1, 2, 3].map((item) => (
-                  <div key={item} className="bg-cream-paper rounded border border-surface-variant p-8 text-center h-64 flex items-center justify-center">
-                    <p className="text-on-surface-variant">Product Loading...</p>
-                  </div>
-                ))}
-              </>
-            )}
           </div>
-          <div className="mt-12 text-center">
+            
+          {products.length === 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((item) => (
+                <div key={item} className="bg-surface rounded-2xl border border-neutral-200/60 p-8 text-center h-72 flex items-center justify-center">
+                  <p className="text-foreground/50 text-sm font-medium">Loading products...</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-16 text-center">
             <Link 
               href="/products" 
-              className="inline-block border-2 border-moss-deep text-moss-deep font-label-md text-label-md uppercase px-8 py-4 rounded hover:bg-moss-deep hover:text-surface-container-lowest transition-colors"
+              className="inline-flex items-center gap-2 bg-foreground text-background font-bold py-4 px-10 rounded-full hover:bg-neutral-800 transition-colors shadow-md text-sm uppercase tracking-wider"
             >
-              View Entire Catalog
+              View Entire Catalog &rarr;
             </Link>
           </div>
         </AnimatedSection>
