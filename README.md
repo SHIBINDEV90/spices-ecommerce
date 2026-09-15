@@ -9,10 +9,10 @@ Required GitHub repository secrets:
 ```bash
 VPS_HOST
 VPS_USER
-VPS_SSH_KEY
+VPS_PASSWORD or VPS_SSH_KEY
 ```
 
-Set `VPS_HOST` to `176.57.150.47`, `VPS_USER` to `root`, and `VPS_SSH_KEY` to the private key for that server user (with the matching public key installed in `~/.ssh/authorized_keys` on the VPS). The server checkout must already be able to pull from `origin`, and production environment variables should remain in the server `.env` file.
+Set `VPS_HOST` to `176.57.150.47` and `VPS_USER` to `root`. Prefer setting `VPS_SSH_KEY` to the private key for that server user (with the matching public key installed in `~/.ssh/authorized_keys` on the VPS); if no key secret is configured, the workflow falls back to `VPS_PASSWORD`. The server checkout must already be able to pull from `origin`, and production environment variables should remain in the server `.env` file.
 
 ## Getting Started
 
