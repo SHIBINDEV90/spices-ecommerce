@@ -148,7 +148,7 @@ export default function AdminQuickCommercePage() {
 
         {vendors.length === 0 ? (
           <div className="py-8 text-center text-gray-500 text-sm">
-            No vendors have activated Quick Commerce yet. Vendors can enable it from their Vendor Dashboard under "Quick Commerce".
+            No vendors have activated Quick Commerce yet. Vendors can enable it from their Vendor Dashboard under &quot;Quick Commerce&quot;.
           </div>
         ) : (
           <div className="overflow-x-auto">
