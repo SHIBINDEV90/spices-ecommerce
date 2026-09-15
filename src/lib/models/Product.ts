@@ -24,6 +24,12 @@ export interface IProduct extends Document {
   tax?: number;
   pricePerGram?: number;
   originalPrice?: number;
+  quickCommerce?: {
+    isAvailable: boolean;
+    maxRadiusKm?: number;
+    quickStock?: number;
+    estimatedPrepMinutes?: number;
+  };
 }
 
 const ProductSchema: Schema = new Schema({
@@ -50,7 +56,14 @@ const ProductSchema: Schema = new Schema({
   origin: { type: String },
   exportAvailable: { type: Boolean, default: false },
   shippingDays: { type: Number },
+  quickCommerce: {
+    isAvailable: { type: Boolean, default: false },
+    maxRadiusKm: { type: Number, default: 35 },
+    quickStock: { type: Number, default: 0 },
+    estimatedPrepMinutes: { type: Number, default: 15 },
+  },
 }, { timestamps: true });
 
 delete mongoose.models.Product;
 export default mongoose.model<IProduct>('Product', ProductSchema);
+

@@ -4,7 +4,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { Home, Package, ShoppingCart, Wallet, Star, Settings, LogOut } from 'lucide-react';
+import { Home, Package, ShoppingCart, Wallet, Star, Settings, LogOut, Zap } from 'lucide-react';
 
 export default function VendorLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -36,12 +36,14 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
 
   const navItems = [
     { name: 'Dashboard', href: '/vendor/dashboard', icon: Home },
+    { name: 'Quick Commerce (35km)', href: '/vendor/quick-commerce', icon: Zap },
     { name: 'Products', href: '/vendor/products', icon: Package },
     { name: 'Orders', href: '/vendor/orders', icon: ShoppingCart },
     { name: 'My Wallet & Payouts', href: '/vendor/wallet', icon: Wallet },
     { name: 'Customer Reviews', href: '/vendor/reviews', icon: Star },
     { name: 'Settings', href: '/vendor/settings', icon: Settings },
   ];
+
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col md:flex-row">

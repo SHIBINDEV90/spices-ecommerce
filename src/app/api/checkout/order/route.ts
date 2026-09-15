@@ -28,7 +28,10 @@ export async function POST(req: Request) {
         customerPhone,
         orderNote,
         paymentMethod = 'razorpay',
-        couponCode
+        couponCode,
+        deliveryType = 'standard',
+        deliveryLocation,
+        estimatedDeliveryMinutes,
     } = body;
 
     if (!cartItems || cartItems.length === 0) {
@@ -96,7 +99,11 @@ export async function POST(req: Request) {
         paymentStatus: 'pending',
         orderStatus: 'Pending',
         paymentMethod: paymentMethod === 'cod' ? 'cod' : (paymentMethod === 'stripe' ? 'stripe' : 'razorpay'),
+        deliveryType: deliveryType === 'quick' ? 'quick' : 'standard',
+        deliveryLocation: deliveryLocation || undefined,
+        estimatedDeliveryMinutes: estimatedDeliveryMinutes || undefined,
     });
+
 
     // 1. CASH ON DELIVERY
     if (paymentMethod === 'cod') {

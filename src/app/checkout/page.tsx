@@ -2,13 +2,17 @@
 
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
+import { useLocation } from '@/context/LocationContext';
 import { 
   ShoppingBag, 
   Tag, 
   ShieldCheck, 
   Truck, 
   Smartphone, 
-  Globe
+  Globe,
+  Zap,
+  MapPin,
+  Clock
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -18,6 +22,8 @@ const isUploadedImage = (src: string) => src.startsWith('/uploads/');
 
 export default function CheckoutPage() {
   const { cartItems, getCartTotal, clearCart } = useCart();
+  const { location, isQuickMode, setQuickMode, setIsModalOpen } = useLocation();
+
   const [loading, setLoading] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   
@@ -142,9 +148,17 @@ export default function CheckoutPage() {
                 customerPhone: contactNo,
                 orderNote: orderNote,
                 paymentMethod,
-                couponCode: appliedCoupon?.coupon || null
+                couponCode: appliedCoupon?.coupon || null,
+                deliveryType: isQuickMode ? 'quick' : 'standard',
+                deliveryLocation: location.lat && location.lng ? {
+                    type: 'Point',
+                    coordinates: [location.lng, location.lat],
+                    addressText: `${shippingAddress.street}, ${shippingAddress.city}`,
+                } : undefined,
+                estimatedDeliveryMinutes: isQuickMode ? 45 : undefined,
             })
         });
+
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Checkout initialization failed');
@@ -312,9 +326,79 @@ export default function CheckoutPage() {
                 {appliedCoupon && <p className="text-[#317a26] text-sm mt-2 font-medium">Coupon applied successfully!</p>}
               </div>
 
+              {/* Delivery Speed Selection Card */}
+              <div className="bg-white border border-neutral-200 rounded-xl p-6 md:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-[20px] font-bold text-neutral-800 flex items-center gap-2">
+                    <Truck className="w-5 h-5 text-primary" />
+                    <span>Choose Delivery Speed</span>
+                  </h2>
+                  <div className="text-xs text-neutral-500 flex items-center gap-1">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+                    <span className="font-semibold text-neutral-700">{location.city || 'Vythiri, Wayanad'}</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(true)}
+                      className="text-primary hover:underline font-bold ml-1"
+                    >
+                      (Change)
+                    </button>
+                  </div>
+
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Standard Shipping */}
+                  <div
+                    onClick={() => setQuickMode(false)}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      !isQuickMode
+                        ? 'border-primary bg-primary/5 text-neutral-900'
+                        : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-bold text-neutral-900">Standard Shipping</span>
+                      <Truck className={`w-4 h-4 ${!isQuickMode ? 'text-primary' : 'text-neutral-400'}`} />
+                    </div>
+                    <p className="text-xs text-neutral-500 mb-3">
+                      Delivered via trusted courier partner across India within 3–5 business days.
+                    </p>
+                    <div className="text-xs font-semibold text-neutral-700">
+                      Standard Rates Apply
+                    </div>
+                  </div>
+
+                  {/* 35 km Quick Commerce */}
+                  <div
+                    onClick={() => setQuickMode(true)}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
+                      isQuickMode
+                        ? 'border-amber-500 bg-amber-500/10 text-neutral-900 ring-2 ring-amber-400/50'
+                        : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                        <Zap className="w-4 h-4 text-amber-500 fill-current" />
+                        <span>⚡ 35 km Quick Commerce</span>
+                      </span>
+                      <Clock className={`w-4 h-4 ${isQuickMode ? 'text-amber-600' : 'text-neutral-400'}`} />
+                    </div>
+                    <p className="text-xs text-neutral-500 mb-3">
+                      Hyperlocal delivery from nearby stores within a 35 km radius in <strong className="text-amber-700 dark:text-amber-300">30–60 minutes</strong>.
+                    </p>
+                    <div className="text-xs font-bold text-amber-700 flex items-center gap-1">
+                      <span>⚡ Express Local Dispatch</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Billing Details */}
               <div className="bg-white border border-neutral-200 rounded-xl p-6 md:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                 <h2 className="text-[22px] font-semibold text-neutral-800 mb-6">Billing Details</h2>
+
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 mb-5">
                   <div>

@@ -9,6 +9,8 @@ import AnimatedSection from '@/components/AnimatedSection';
 import { motion } from 'framer-motion';
 import { ArrowRight, Tractor, ShieldCheck, Factory, Truck, Award } from 'lucide-react';
 import HeroBackground from '@/components/HeroBackground';
+import QuickCommerceBanner from '@/components/QuickCommerceBanner';
+
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -83,8 +85,12 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 35 km Quick Commerce Callout Banner */}
+      <QuickCommerceBanner />
+
       {/* 2. About/Heritage Section */}
       <section className="py-24 md:py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full">
+
         <AnimatedSection className="grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-6">
             <h4 className="font-label-md text-label-md text-moss-deep uppercase tracking-widest">Our Heritage</h4>

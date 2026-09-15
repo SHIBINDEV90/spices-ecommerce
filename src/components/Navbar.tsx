@@ -2,16 +2,19 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Menu, X, ChevronDown } from 'lucide-react';
+import { ShoppingCart, Menu, X, ChevronDown, MapPin, Zap } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useLocation } from '@/context/LocationContext';
 import { useState } from 'react';
 import CartDrawer from './CartDrawer';
+import LocationPickerModal from './LocationPickerModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
   const { cartItems, isCartOpen, setIsCartOpen } = useCart();
+  const { location, setIsModalOpen, isQuickMode } = useLocation();
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
@@ -34,9 +37,25 @@ export default function Navbar() {
     <>
       <nav className="bg-surface/80 dark:bg-zinc-900/80 backdrop-blur-md p-4 sticky top-0 z-40 shadow-sm border-b border-black/5 dark:border-white/10 transition-all duration-300">
         <div className="container mx-auto flex justify-between items-center relative">
-          <Link href="/" className="flex items-center hover:opacity-90 transition-opacity" onClick={closeMobileMenu}>
-            <Image src="/images/logo.jpeg" alt="Spicewizz Logo" width={240} height={72} className="object-cover h-16 w-auto rounded shadow-sm" priority />
-          </Link>
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <Link href="/" className="flex items-center hover:opacity-90 transition-opacity" onClick={closeMobileMenu}>
+              <Image src="/images/logo.jpeg" alt="Spicewizz Logo" width={240} height={72} className="object-cover h-12 sm:h-14 md:h-16 w-auto rounded shadow-sm" priority />
+            </Link>
+
+            {/* Delivery Location Pill */}
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 text-xs font-semibold transition"
+              title="Select Delivery Location (Within 35 km)"
+            >
+              <MapPin size={13} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="max-w-[85px] sm:max-w-[120px] md:max-w-[150px] truncate">
+                {location.city || 'Select Location'}
+              </span>
+              <ChevronDown size={11} className="opacity-70 shrink-0" />
+            </button>
+          </div>
+
           
           <div className="flex items-center space-x-4 md:space-x-8">
             <div className="hidden md:flex space-x-6 items-center">
@@ -91,8 +110,22 @@ export default function Navbar() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-3 md:space-x-4">
-              <div className="hidden md:flex items-center space-x-4 border-r border-black/10 dark:border-white/10 pr-4 mr-2">
+            <div className="flex items-center space-x-2 sm:space-x-3 md:space-x-4">
+              {/* Quick Commerce 35km Link */}
+              <Link 
+                href="/quick"
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition shadow-sm ${
+                  pathname === '/quick' || isQuickMode
+                    ? 'bg-amber-500 text-white shadow-amber-500/25 ring-2 ring-amber-400'
+                    : 'bg-amber-500/10 text-amber-900 dark:text-amber-300 hover:bg-amber-500/20 border border-amber-500/30'
+                }`}
+                title="Hyperlocal Spices within 35 km"
+              >
+                <Zap size={14} className={pathname === '/quick' || isQuickMode ? 'fill-current' : 'text-amber-600 dark:text-amber-400'} />
+                <span>⚡ Quick 35km</span>
+              </Link>
+
+              <div className="hidden md:flex items-center space-x-4 border-r border-black/10 dark:border-white/10 pr-4 mr-1">
                 {session && (session.user as any)?.role === 'Customer' ? (
                   <button onClick={() => signOut()} className="text-sm font-bold text-foreground/80 hover:text-primary transition-colors">Log Out</button>
                 ) : (
@@ -123,6 +156,7 @@ export default function Navbar() {
                   )}
                 </AnimatePresence>
               </button>
+
 
               <button 
                 className="md:hidden text-foreground p-2 hover:bg-foreground/5 rounded-full transition-colors flex items-center justify-center"
@@ -231,6 +265,10 @@ export default function Navbar() {
 
       {/* Persistent Cart Drawer UI */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Global Location Picker Modal */}
+      <LocationPickerModal />
     </>
   );
 }
+

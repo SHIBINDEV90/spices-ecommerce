@@ -15,11 +15,13 @@ import {
   FileText, 
   Settings, 
   Ticket,
-  LogOut 
+  LogOut,
+  Zap
 } from 'lucide-react';
 
 const MENU_ITEMS = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Quick Commerce (35km)', href: '/admin/quick-commerce', icon: Zap },
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { name: 'Vendors', href: '/admin/vendors', icon: Store },
@@ -31,6 +33,7 @@ const MENU_ITEMS = [
   { name: 'Blog', href: '/admin/blog', icon: FileText },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
+
 
 export default function Sidebar() {
   const pathname = usePathname();

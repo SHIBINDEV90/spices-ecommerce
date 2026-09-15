@@ -36,6 +36,13 @@ export interface IOrder extends Document {
   paymentMethod?: 'razorpay' | 'stripe' | 'cod';
   paymentGatewayId?: string; // To store Razorpay order ID or Stripe session ID
   paymentId?: string; // To store Razorpay payment ID for auditing
+  deliveryType?: 'standard' | 'quick';
+  deliveryLocation?: {
+    type: 'Point';
+    coordinates: [number, number]; // [lng, lat]
+    addressText?: string;
+  };
+  estimatedDeliveryMinutes?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,6 +91,21 @@ const OrderSchema = new Schema<IOrder>(
     },
     paymentGatewayId: { type: String },
     paymentId: { type: String },
+    deliveryType: {
+      type: String,
+      enum: ['standard', 'quick'],
+      default: 'standard',
+    },
+    deliveryLocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: [Number], // [lng, lat]
+      addressText: String,
+    },
+    estimatedDeliveryMinutes: { type: Number },
   },
   { timestamps: true }
 );
