@@ -6,6 +6,9 @@ Pushes to the `main` branch run `.github/workflows/deploy.yml`. The workflow con
 
 Required GitHub repository secrets:
 
+
+
+
 ```bash
 VPS_HOST
 VPS_USER
