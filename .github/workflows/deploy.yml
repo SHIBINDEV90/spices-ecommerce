@@ -20,34 +20,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install SSH password client
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          sudo apt-get update
-          sudo apt-get install -y sshpass
-
-      - name: Configure SSH known hosts
+      - name: Configure SSH
         shell: bash
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           set -euo pipefail
 
+          : "${VPS_HOST:?VPS_HOST secret is required}"
+          : "${VPS_SSH_KEY:?VPS_SSH_KEY secret is required}"
+
           install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -T 10 -p "$DEPLOY_PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
 
       - name: Pull latest code and restart Docker Compose
         shell: bash
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
-          SSHPASS: ${{ secrets.VPS_PASSWORD }}
         run: |
           set -euo pipefail
 
-          sshpass -e ssh -v -o StrictHostKeyChecking=accept-new -o PreferredAuthentications=password,keyboard-interactive -o PubkeyAuthentication=no -p "$DEPLOY_PORT" "$VPS_USER@$VPS_HOST" "DEPLOY_PATH='$DEPLOY_PATH' bash -se" <<'REMOTE_SCRIPT'
+          : "${VPS_HOST:?VPS_HOST secret is required}"
+          : "${VPS_USER:?VPS_USER secret is required}"
+
+          ssh -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -p "$DEPLOY_PORT" "$VPS_USER@$VPS_HOST" "DEPLOY_PATH='$DEPLOY_PATH' bash -se" <<'REMOTE_SCRIPT'
           set -euo pipefail
 
           cd "$DEPLOY_PATH"
