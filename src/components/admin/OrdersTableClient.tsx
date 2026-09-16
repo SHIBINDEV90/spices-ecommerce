@@ -96,7 +96,11 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
         }
       }
 
-      showFeedback('success', data.message || 'Order details sent to vendor dashboard & email sent.');
+      if (data.allEmailsDelivered === false) {
+        showFeedback('error', data.message || 'Order assigned to vendor dashboard, but notification email delivery failed.');
+      } else {
+        showFeedback('success', data.message || 'Order details dispatched to vendor dashboard & email sent.');
+      }
     } catch (err: any) {
       console.error(err);
       showFeedback('error', err.message || 'Failed to dispatch to vendor.');

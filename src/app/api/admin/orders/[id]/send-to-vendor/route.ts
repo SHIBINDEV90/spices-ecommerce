@@ -104,12 +104,17 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         console.warn(`[Send to Vendor] Vendor ${vId} does not have an email address.`);
       }
 
+      const emailDelivered = !!emailResult?.delivered;
+      const emailError = emailResult?.error || (!vendorEmail ? 'No vendor email address on record' : null);
+
       notifiedVendors.push({
         vendorId: vId,
         businessName: vendor.businessName,
         email: vendorEmail,
         itemsCount: itemsForThisVendor.length,
-        emailDispatched: !!emailResult?.success,
+        emailDispatched: emailDelivered,
+        emailError,
+        emailProvider: emailResult?.provider,
       });
     }
 
@@ -119,9 +124,25 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const populatedOrder = await Order.findById(order._id)
       .populate('products.vendorId', 'businessName ownerName email phone vendorType');
 
+    const totalVendors = notifiedVendors.length;
+    const deliveredCount = notifiedVendors.filter(v => v.emailDispatched).length;
+    const failedVendors = notifiedVendors.filter(v => !v.emailDispatched);
+
+    let feedbackMessage = '';
+    if (deliveredCount === totalVendors && totalVendors > 0) {
+      feedbackMessage = `Order assigned and notification email successfully delivered to ${totalVendors} vendor(s).`;
+    } else if (deliveredCount > 0) {
+      feedbackMessage = `Order assigned to ${totalVendors} vendor(s). Email delivered to ${deliveredCount}, but failed for ${failedVendors.length} vendor(s).`;
+    } else {
+      const reason = failedVendors[0]?.emailError ? `: ${failedVendors[0].emailError}` : '';
+      feedbackMessage = `Order assigned to vendor dashboard, but notification email could not be sent${reason}`;
+    }
+
     return NextResponse.json({
       success: true,
-      message: `Order details dispatched to ${notifiedVendors.length} vendor(s) successfully.`,
+      allEmailsDelivered: deliveredCount === totalVendors,
+      emailDeliveredCount: deliveredCount,
+      message: feedbackMessage,
       order: populatedOrder,
       notifiedVendors,
     });

@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 export interface VendorOrderItemSummary {
   name: string;
@@ -27,7 +28,149 @@ export interface SendVendorOrderEmailParams {
   baseUrl?: string;
 }
 
-export async function sendVendorOrderNotificationEmail(params: SendVendorOrderEmailParams) {
+export interface SendEmailOptions {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+  from?: string;
+}
+
+export interface SendEmailResult {
+  success: boolean;
+  delivered: boolean;
+  provider: 'smtp' | 'resend' | 'none';
+  messageId?: string;
+  error?: string;
+  note?: string;
+  details?: any;
+}
+
+/**
+ * Universal email delivery engine supporting SMTP (Nodemailer) and Resend.
+ * Priority:
+ * 1. SMTP if SMTP_HOST, SMTP_USER, and SMTP_PASS are configured.
+ * 2. Resend if RESEND_API_KEY is configured and valid.
+ * 3. Graceful failure reporting if no provider is configured.
+ */
+export async function sendEmail(options: SendEmailOptions): Promise<SendEmailResult> {
+  const { to, subject, html, text, from } = options;
+
+  // 1. Check SMTP credentials
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+  const smtpSecure = process.env.SMTP_SECURE === 'true' || smtpPort === 465;
+
+  if (smtpHost && smtpUser && smtpPass) {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpSecure,
+        auth: {
+          user: smtpUser,
+          pass: smtpPass,
+        },
+      });
+
+      const defaultFrom = process.env.SMTP_FROM || process.env.EMAIL_FROM || `SpiceWizz <${smtpUser}>`;
+      const mailOptions = {
+        from: from || defaultFrom,
+        to,
+        subject,
+        html,
+        text: text || html.replace(/<[^>]*>?/gm, ''),
+      };
+
+      const info = await transporter.sendMail(mailOptions);
+      console.log(`[Email Service] Delivered via SMTP to ${to}. MessageId: ${info.messageId}`);
+      return {
+        success: true,
+        delivered: true,
+        provider: 'smtp',
+        messageId: info.messageId,
+        details: info,
+      };
+    } catch (smtpError: any) {
+      console.error('[Email Service] SMTP delivery failed:', smtpError);
+      // If Resend is not configured, return SMTP error immediately
+      const apiKey = process.env.RESEND_API_KEY;
+      if (!apiKey || apiKey === 're_PLACEHOLDER') {
+        return {
+          success: false,
+          delivered: false,
+          provider: 'smtp',
+          error: `SMTP error: ${smtpError.message}`,
+        };
+      }
+      console.log('[Email Service] Attempting fallback to Resend API...');
+    }
+  }
+
+  // 2. Check Resend credentials
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (resendApiKey && resendApiKey !== 're_PLACEHOLDER') {
+    try {
+      const resend = new Resend(resendApiKey);
+      const resendFrom =
+        from ||
+        process.env.RESEND_FROM_EMAIL ||
+        process.env.EMAIL_FROM ||
+        'SpiceWizz Orders <orders@spicewizz.com>';
+
+      const response = await resend.emails.send({
+        from: resendFrom,
+        to,
+        subject,
+        html,
+        text: text || html.replace(/<[^>]*>?/gm, ''),
+      });
+
+      // Resend Node SDK v2/v3/v6 returns { data, error } and does NOT throw on API errors
+      if (response.error) {
+        console.error('[Email Service] Resend API error response:', response.error);
+        return {
+          success: false,
+          delivered: false,
+          provider: 'resend',
+          error: `Resend error (${response.error.name || 'API'}): ${response.error.message}`,
+          details: response.error,
+        };
+      }
+
+      console.log(`[Email Service] Delivered via Resend to ${to}. ID: ${response.data?.id}`);
+      return {
+        success: true,
+        delivered: true,
+        provider: 'resend',
+        messageId: response.data?.id,
+        details: response.data,
+      };
+    } catch (resendError: any) {
+      console.error('[Email Service] Resend SDK exception:', resendError);
+      return {
+        success: false,
+        delivered: false,
+        provider: 'resend',
+        error: `Resend exception: ${resendError.message}`,
+      };
+    }
+  }
+
+  // 3. No email service configured
+  const errorMsg = 'Email service not configured. Please provide SMTP credentials (SMTP_HOST, SMTP_USER, SMTP_PASS) or a valid RESEND_API_KEY in .env.';
+  console.warn(`[Email Service] ${errorMsg}`);
+  return {
+    success: false,
+    delivered: false,
+    provider: 'none',
+    error: errorMsg,
+  };
+}
+
+export async function sendVendorOrderNotificationEmail(params: SendVendorOrderEmailParams): Promise<SendEmailResult> {
   const {
     vendorEmail,
     vendorName,
@@ -188,24 +331,9 @@ export async function sendVendorOrderNotificationEmail(params: SendVendorOrderEm
   console.log(`Portal Link: ${portalUrl}`);
   console.log(`========================================\n`);
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (apiKey && apiKey !== 're_PLACEHOLDER') {
-    try {
-      const resend = new Resend(apiKey);
-      const resendResponse = await resend.emails.send({
-        from: 'SpiceWizz Orders <onboarding@resend.dev>',
-        to: vendorEmail,
-        subject: `New Order Assigned #${shortOrderId} - SpiceWizz Fulfillment`,
-        html: htmlContent,
-      });
-      console.log(`[Vendor Notification Email] Successfully delivered via Resend to ${vendorEmail}:`, resendResponse);
-      return { success: true, delivered: true, resendResponse };
-    } catch (emailError: any) {
-      console.error('[Vendor Notification Email] Resend API error:', emailError);
-      return { success: true, delivered: false, error: emailError.message };
-    }
-  } else {
-    console.warn('[Vendor Notification Email] RESEND_API_KEY not configured or is placeholder. Email logged to console.');
-    return { success: true, delivered: false, note: 'Resend API key not configured or is placeholder' };
-  }
+  return sendEmail({
+    to: vendorEmail,
+    subject: `New Order Assigned #${shortOrderId} - SpiceWizz Fulfillment`,
+    html: htmlContent,
+  });
 }
