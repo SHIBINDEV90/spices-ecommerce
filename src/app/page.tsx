@@ -88,37 +88,7 @@ export default function Home() {
       {/* 35 km Quick Commerce Callout Banner */}
       <QuickCommerceBanner />
 
-      {/* 2. About/Heritage Section */}
-      <section className="py-24 md:py-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full">
 
-        <AnimatedSection className="grid md:grid-cols-2 gap-16 items-center">
-          <div className="space-y-6">
-            <h4 className="font-label-md text-label-md text-moss-deep uppercase tracking-widest">Our Heritage</h4>
-            <h2 className="font-headline-lg text-headline-lg text-slate-ink">About Spicewizz</h2>
-            <p className="font-body-lg text-body-lg text-on-surface-variant">
-              We are a leading exporter of high-quality, authentic spices sourced directly from the lush farms of Kerala. With generations of expertise, our commitment is to bring you the freshest, most aromatic spices that meet international export standards and elevate global culinary experiences.
-            </p>
-            <div className="pt-4">
-              <Image 
-                src="/images/logo.jpeg" 
-                alt="Spicewizz Logo" 
-                width={200}
-                height={64}
-                className="h-16 w-auto opacity-80 mix-blend-multiply filter grayscale hover:grayscale-0 transition-all duration-500" 
-              />
-            </div>
-          </div>
-          <div className="relative h-[500px] rounded overflow-hidden shadow-2xl shadow-moss-deep/5 group">
-            <Image 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNKZ8zCoM5yB-Se-dBmNd_fgfsEMRb_ZVpZweE0-HsLpw2H791CaIJa1exk-jXgRRPnuOq0TWsTyFteM7A-kBiBBdiyuhQEm0G4rxj-bgOKSzqk5yLTbC6w4-34bO0WyBn7ORu7D0uKnOiuZhwIpnFg16EUl2trp1C7RgxPQy3pPVgSXq1J8Xsa6B3NHSMR_BldSSws3dHRIOebTi2W3KxWZauOOJlk4sOBjki5K_dfMkqEmYvcijYFXiMObSZgY_N_Wb4RLvwN2Y"
-              alt="Raw green cardamom pods"
-              fill
-              className="object-cover transform group-hover:scale-105 transition-transform duration-700" 
-            />
-            <div className="absolute inset-0 border border-cream-paper/20 rounded m-4 pointer-events-none" />
-          </div>
-        </AnimatedSection>
-      </section>
 
       {/* 3. Featured Products Grid */}
       <section className="py-24 bg-surface-container-low border-y border-surface-variant w-full">

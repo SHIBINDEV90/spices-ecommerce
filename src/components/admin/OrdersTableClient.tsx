@@ -46,11 +46,11 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
 
   // Send to vendor states
   const [sendingVendorKey, setSendingVendorKey] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'warning' | 'error', text: string } | null>(null);
 
-  const showFeedback = (type: 'success' | 'error', text: string) => {
+  const showFeedback = (type: 'success' | 'warning' | 'error', text: string) => {
     setFeedback({ type, text });
-    setTimeout(() => setFeedback(null), 4500);
+    setTimeout(() => setFeedback(null), 5500);
   };
 
   const handleDeleteOrder = async (orderId: string) => {
@@ -97,7 +97,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
       }
 
       if (data.allEmailsDelivered === false) {
-        showFeedback('error', data.message || 'Order assigned to vendor dashboard, but notification email delivery failed.');
+        showFeedback('warning', data.message || 'Order assigned to vendor dashboard, but notification email delivery was skipped.');
       } else {
         showFeedback('success', data.message || 'Order details dispatched to vendor dashboard & email sent.');
       }
@@ -836,11 +836,15 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
             className={`fixed top-6 right-6 z-[70] px-4 py-3 rounded-xl shadow-2xl border flex items-center gap-3 text-sm font-medium ${
               feedback.type === 'success'
                 ? 'bg-emerald-950/95 text-emerald-200 border-emerald-500/30 backdrop-blur-md'
+                : feedback.type === 'warning'
+                ? 'bg-amber-950/95 text-amber-200 border-amber-500/30 backdrop-blur-md'
                 : 'bg-red-950/95 text-red-200 border-red-500/30 backdrop-blur-md'
             }`}
           >
             {feedback.type === 'success' ? (
               <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            ) : feedback.type === 'warning' ? (
+              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
             ) : (
               <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
             )}

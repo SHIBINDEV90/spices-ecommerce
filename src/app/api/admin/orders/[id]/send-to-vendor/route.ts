@@ -134,8 +134,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     } else if (deliveredCount > 0) {
       feedbackMessage = `Order assigned to ${totalVendors} vendor(s). Email delivered to ${deliveredCount}, but failed for ${failedVendors.length} vendor(s).`;
     } else {
-      const reason = failedVendors[0]?.emailError ? `: ${failedVendors[0].emailError}` : '';
-      feedbackMessage = `Order assigned to vendor dashboard, but notification email could not be sent${reason}`;
+      const err = failedVendors[0]?.emailError;
+      if (err && err.includes('Email service not configured')) {
+        feedbackMessage = 'Order assigned to vendor dashboard successfully! (Email alert skipped: Email service not configured in .env)';
+      } else {
+        const reason = err ? `: ${err}` : '';
+        feedbackMessage = `Order assigned to vendor dashboard, but notification email could not be sent${reason}`;
+      }
     }
 
     return NextResponse.json({
