@@ -23,7 +23,8 @@
   --color-secondary-fixed-dim: #ffb95f;
   --color-moss-deep: #4A6121;
   --color-on-surface: #1c1c18;
-  --color-background: #fcf9f2;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --color-secondary: #855300;
   --color-on-secondary-container: #684000;
   --color-tertiary-container: #747373;

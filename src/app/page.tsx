@@ -121,9 +121,10 @@ export default function Home() {
           <div className="mt-16 text-center">
             <Link 
               href="/products" 
-              className="inline-flex items-center gap-2 bg-foreground text-background font-bold py-4 px-10 rounded-full hover:bg-neutral-800 transition-colors shadow-md text-sm uppercase tracking-wider"
+              className="inline-flex items-center gap-2 bg-moss-deep hover:bg-slate-ink text-white font-bold py-4 px-10 rounded-full transition-all duration-300 shadow-lg shadow-moss-deep/20 hover:shadow-xl hover:-translate-y-0.5 text-sm uppercase tracking-wider group"
             >
-              View Entire Catalog &rarr;
+              <span>View Entire Catalog</span>
+              <span className="transform group-hover:translate-x-1.5 transition-transform duration-300">&rarr;</span>
             </Link>
           </div>
         </AnimatedSection>
