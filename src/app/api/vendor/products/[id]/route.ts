@@ -122,6 +122,9 @@ export async function PUT(
     const shippingDays = formData.has('shippingDays') ? parseNumber(formData.get('shippingDays'), existingProduct.shippingDays || 0) : existingProduct.shippingDays;
     const isBulkAvailable = formData.has('isBulkAvailable') ? formData.get('isBulkAvailable') === 'true' : existingProduct.isBulkAvailable;
     const isRetailAvailable = formData.has('isRetailAvailable') ? formData.get('isRetailAvailable') === 'true' : existingProduct.isRetailAvailable;
+    const rating = formData.has('rating')
+      ? Math.max(1, Math.min(5, Number(parseNumber(formData.get('rating'), existingProduct.rating || 5).toFixed(1))))
+      : existingProduct.rating;
 
     const updatedProduct = await Product.findByIdAndUpdate(
       params.id,
@@ -142,6 +145,7 @@ export async function PUT(
         shippingDays,
         isBulkAvailable,
         isRetailAvailable,
+        rating,
         imageUrl,
         images,
       },

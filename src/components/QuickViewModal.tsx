@@ -81,8 +81,8 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
     setIsBuying(false);
   };
 
-  const rating = 5;
-  const reviewCount = (product.name.length * 13) % 200 + 10;
+  const ratingValue = product.rating !== undefined && !isNaN(Number(product.rating)) ? Number(product.rating) : 5;
+  const reviewCount = product.reviewsCount !== undefined ? Number(product.reviewsCount) : 0;
 
   return (
     <AnimatePresence>
@@ -167,11 +167,28 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
                 <div className="flex items-center gap-2 mb-6">
                   <div className="flex text-amber-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} fill={i < rating ? "currentColor" : "none"} className={i >= rating ? "text-neutral-600" : ""} />
-                    ))}
+                    {[...Array(5)].map((_, i) => {
+                      const starVal = i + 1;
+                      const isFull = ratingValue >= starVal;
+                      const isHalf = !isFull && ratingValue >= starVal - 0.5;
+                      return (
+                        <Star 
+                          key={i} 
+                          size={16} 
+                          fill={isFull || isHalf ? "currentColor" : "none"} 
+                          className={!isFull && !isHalf ? "text-neutral-600" : ""} 
+                        />
+                      );
+                    })}
                   </div>
-                  <span className="text-sm font-medium text-white/60">{rating}.0 ({reviewCount} reviews)</span>
+                  <span className="text-sm font-semibold text-white">
+                    {ratingValue.toFixed(1)}
+                  </span>
+                  {reviewCount > 0 ? (
+                    <span className="text-sm font-medium text-white/60">({reviewCount} reviews)</span>
+                  ) : (
+                    <span className="text-xs text-white/40">(Store Rating)</span>
+                  )}
                 </div>
 
                 {/* Price Section */}

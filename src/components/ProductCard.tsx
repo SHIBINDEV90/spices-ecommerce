@@ -35,9 +35,9 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
     }, 2000);
   };
 
-  // Display calculations matching the screenshot layout
-  const rating = 5;
-  const reviewCount = (product.name.length * 13) % 200 + 10; // stable random looking number
+  // Dynamic product rating and reviews count
+  const ratingValue = product.rating !== undefined && !isNaN(Number(product.rating)) ? Number(product.rating) : 5;
+  const reviewCount = product.reviewsCount !== undefined ? Number(product.reviewsCount) : 0;
   const originalPrice = (product.originalPrice && Number(product.originalPrice) > basePrice) ? Number(product.originalPrice) : null;
   const discountPercent = originalPrice ? Math.round(((originalPrice - basePrice) / originalPrice) * 100) : 0;
   const usp = perGramPrice.toFixed(2);
@@ -120,13 +120,28 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
         </Link>
         
         {/* Rating */}
-        <div className="flex items-center gap-1 mb-3">
+        <div className="flex items-center gap-1.5 mb-3">
           <div className="flex text-amber-500">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={13} fill={i < rating ? "currentColor" : "none"} className={i >= rating ? "text-gray-300" : ""} />
-            ))}
+            {[...Array(5)].map((_, i) => {
+              const starVal = i + 1;
+              const isFull = ratingValue >= starVal;
+              const isHalf = !isFull && ratingValue >= starVal - 0.5;
+              return (
+                <Star 
+                  key={i} 
+                  size={13} 
+                  fill={isFull || isHalf ? "currentColor" : "none"} 
+                  className={!isFull && !isHalf ? "text-gray-300" : ""} 
+                />
+              );
+            })}
           </div>
-          <span className="text-xs text-foreground/50 ml-1">({reviewCount})</span>
+          <span className="text-xs font-semibold text-foreground/80">
+            {ratingValue.toFixed(1)}
+          </span>
+          {reviewCount > 0 && (
+            <span className="text-xs text-foreground/50">({reviewCount})</span>
+          )}
         </div>
         
         {/* Pricing Segment */}

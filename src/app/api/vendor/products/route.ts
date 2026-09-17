@@ -90,6 +90,12 @@ export async function POST(req: Request) {
     const rawPricePerGram = formData.get('pricePerGram');
     const rawShippingDays = formData.get('shippingDays');
     const rawOriginalPrice = formData.get('originalPrice');
+    const rawRating = formData.get('rating');
+    let rating = 5;
+    if (rawRating !== null && rawRating !== undefined && rawRating !== '') {
+      const parsedRating = parseNumber(rawRating, 5);
+      rating = Math.max(1, Math.min(5, Number(parsedRating.toFixed(1))));
+    }
 
     const payload = {
       name: formData.get('name') as string,
@@ -108,6 +114,8 @@ export async function POST(req: Request) {
       shippingDays: rawShippingDays ? parseNumber(rawShippingDays, 0) : undefined,
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
       isRetailAvailable: formData.get('isRetailAvailable') === 'true',
+      rating,
+      reviewsCount: 0,
       imageUrl,
       images,
       vendorId: vendor._id,

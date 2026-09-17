@@ -40,4 +40,6 @@ export interface Product {
   vendorId?: VendorInfo | string | null;
   approvalStatus?: 'Pending' | 'Approved' | 'Rejected';
   category?: string;
+  rating?: number;
+  reviewsCount?: number;
 }

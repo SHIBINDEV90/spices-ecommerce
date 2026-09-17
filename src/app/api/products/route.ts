@@ -44,6 +44,15 @@ export async function POST(request: Request) {
     const imageUrl = images[0] || (formData.get('imageUrl') as string) || '';
 
     const rawOriginal = formData.get('originalPrice');
+    const rawRating = formData.get('rating');
+    let rating = 5;
+    if (rawRating !== null && rawRating !== undefined && rawRating !== '') {
+      const numRating = Number(rawRating);
+      if (!isNaN(numRating)) {
+        rating = Math.max(1, Math.min(5, Number(numRating.toFixed(1))));
+      }
+    }
+
     const payload = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
@@ -53,6 +62,8 @@ export async function POST(request: Request) {
       productType: formData.get('productType') as string,
       stock: Number(formData.get('stock')),
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
+      rating,
+      reviewsCount: 0,
       imageUrl,
       images,
     };

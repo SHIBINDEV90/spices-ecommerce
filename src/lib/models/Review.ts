@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IReview extends Document {
   productId: mongoose.Types.ObjectId;
-  vendorId: mongoose.Types.ObjectId;
+  vendorId?: mongoose.Types.ObjectId;
   customerId: mongoose.Types.ObjectId;
   customerName: string;
   rating: number; // 1 to 5
@@ -14,7 +14,7 @@ export interface IReview extends Document {
 
 const ReviewSchema: Schema = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
-  vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor', required: true },
+  vendorId: { type: Schema.Types.ObjectId, ref: 'Vendor', required: false },
   customerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   customerName: { type: String, required: true },
   rating: { type: Number, required: true, min: 1, max: 5 },

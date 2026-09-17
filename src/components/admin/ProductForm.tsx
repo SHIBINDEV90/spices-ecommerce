@@ -29,6 +29,7 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     productType: initialData?.productType || 'Spice',
     stock: initialData?.stock || 0,
     isBulkAvailable: initialData?.isBulkAvailable || false,
+    rating: initialData?.rating !== undefined ? Number(initialData.rating) : 5,
   });
 
   const [images, setImages] = useState<ImageEntry[]>(() => {
@@ -83,7 +84,7 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: name === 'price' || name === 'originalPrice' || name === 'stock' ? Number(value) : value
+        [name]: name === 'price' || name === 'originalPrice' || name === 'stock' || name === 'rating' ? Number(value) : value
       }));
     }
   };
@@ -113,6 +114,7 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
       payload.append('productType', formData.productType);
       payload.append('stock', formData.stock.toString());
       payload.append('isBulkAvailable', formData.isBulkAvailable.toString());
+      payload.append('rating', (formData.rating || 5).toString());
       
       const existingImages: string[] = [];
       images.forEach((item) => {
@@ -205,19 +207,58 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
             </div>
           </div>
           
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Product Type</label>
-            <select
-              name="productType"
-              value={formData.productType}
-              onChange={handleChange}
-              className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-            >
-              <option value="Spice">Spice</option>
-              <option value="Herb">Herb</option>
-              <option value="Blend">Blend</option>
-              <option value="Other">Other</option>
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300">Product Type</label>
+              <select
+                name="productType"
+                value={formData.productType}
+                onChange={handleChange}
+                className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+              >
+                <option value="Spice">Spice</option>
+                <option value="Herb">Herb</option>
+                <option value="Blend">Blend</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-300 flex items-center justify-between">
+                <span>Product Rating (Stars)</span>
+                <span className="text-xs text-orange-400 font-bold">
+                  {Number(formData.rating || 5) >= 4.5 ? '⭐ Top Rated' : '✨ Good'}
+                </span>
+              </label>
+              <div className="flex items-center gap-3 bg-black/20 border border-white/10 rounded-xl px-4 py-2.5">
+                <div className="flex text-amber-400">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
+                      className="p-1 hover:scale-110 transition-transform cursor-pointer"
+                      title={`Set ${star} stars`}
+                    >
+                      <Star 
+                        className={`w-5 h-5 ${Number(formData.rating || 5) >= star ? 'fill-current text-amber-400' : 'text-gray-600'}`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  name="rating"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={formData.rating}
+                  onChange={handleChange}
+                  className="w-16 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-sm font-bold text-center text-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                />
+                <span className="text-xs text-gray-400">/ 5.0</span>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">

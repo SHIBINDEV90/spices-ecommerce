@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Plus, Edit, Trash, Share2, X } from 'lucide-react';
+import { Plus, Edit, Trash, Share2, X, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type Product = {
@@ -15,6 +15,8 @@ type Product = {
   approvalStatus: string;
   weight?: string;
   imageUrl?: string;
+  rating?: number;
+  reviewsCount?: number;
 };
 
 // Share Product Modal Component
@@ -266,7 +268,16 @@ export default function VendorProducts() {
                       />
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-medium text-neutral-900">{product.name}</td>
+                  <td className="px-6 py-4">
+                    <div className="font-medium text-neutral-900">{product.name}</div>
+                    <div className="flex items-center gap-1 text-[11px] text-amber-500 font-semibold mt-0.5">
+                      <Star className="w-3 h-3 fill-current" />
+                      <span>{(product.rating !== undefined && !isNaN(Number(product.rating)) ? Number(product.rating) : 5).toFixed(1)}</span>
+                      {product.reviewsCount && product.reviewsCount > 0 ? (
+                        <span className="text-neutral-400 font-normal">({product.reviewsCount} reviews)</span>
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-6 py-4">{product.category || 'N/A'}</td>
                   <td className="px-6 py-4">₹{product.price}</td>
                   <td className="px-6 py-4">{product.stock}</td>

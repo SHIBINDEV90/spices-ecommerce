@@ -24,6 +24,8 @@ export interface IProduct extends Document {
   tax?: number;
   pricePerGram?: number;
   originalPrice?: number;
+  rating?: number;
+  reviewsCount?: number;
   quickCommerce?: {
     isAvailable: boolean;
     maxRadiusKm?: number;
@@ -38,6 +40,8 @@ const ProductSchema: Schema = new Schema({
   description: { type: String, required: true },
   price: { type: Number, required: true },
   originalPrice: { type: Number },
+  rating: { type: Number, default: 5, min: 1, max: 5 },
+  reviewsCount: { type: Number, default: 0 },
   imageUrl: { type: String, default: '' },
   images: { type: [String], default: [] },
   productType: { type: String, required: true, default: 'Spice' },

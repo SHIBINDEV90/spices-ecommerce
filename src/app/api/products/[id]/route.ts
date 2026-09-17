@@ -33,6 +33,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     const formData = await request.formData();
     
     const rawOriginal = formData.get('originalPrice');
+    const rawRating = formData.get('rating');
     const payload: any = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
@@ -43,6 +44,13 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       stock: Number(formData.get('stock')),
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
     };
+
+    if (rawRating !== null && rawRating !== undefined && rawRating !== '') {
+      const numRating = Number(rawRating);
+      if (!isNaN(numRating)) {
+        payload.rating = Math.max(1, Math.min(5, Number(numRating.toFixed(1))));
+      }
+    }
 
     // Gather all uploaded files from 'images' and 'image' fields
     const filesFromImages = formData.getAll('images') as File[];

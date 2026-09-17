@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, Edit, Plus, Package, Loader2, Check, X, Share2 } from 'lucide-react';
+import { Trash2, Edit, Plus, Package, Loader2, Check, X, Share2, Star } from 'lucide-react';
 import Link from 'next/link';
 import ShareProductModal from './ShareProductModal';
 
@@ -135,7 +135,14 @@ export default function ProductTableClient({ initialProducts }: ProductTableClie
                           </div>
                           <div>
                             <p className="font-medium text-white">{product.name}</p>
-                            <p className="text-xs text-gray-500 max-w-[200px] truncate">{product.description}</p>
+                            <div className="flex items-center gap-1 text-[11px] text-amber-400 font-semibold mt-0.5">
+                              <Star className="w-3 h-3 fill-current" />
+                              <span>{(product.rating !== undefined && !isNaN(Number(product.rating)) ? Number(product.rating) : 5).toFixed(1)}</span>
+                              {product.reviewsCount && product.reviewsCount > 0 ? (
+                                <span className="text-gray-400 font-normal">({product.reviewsCount} reviews)</span>
+                              ) : null}
+                            </div>
+                            <p className="text-xs text-gray-500 max-w-[200px] truncate mt-0.5">{product.description}</p>
                           </div>
                         </div>
                       </td>

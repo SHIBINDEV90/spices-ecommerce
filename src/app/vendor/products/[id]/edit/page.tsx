@@ -29,6 +29,7 @@ export default function EditVendorProductPage({ params }: { params: { id: string
     shippingDays: '',
     isBulkAvailable: false,
     isRetailAvailable: true,
+    rating: '5',
   });
   const [images, setImages] = useState<ImageEntry[]>([]);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -63,6 +64,7 @@ export default function EditVendorProductPage({ params }: { params: { id: string
           shippingDays: p.shippingDays !== undefined ? p.shippingDays.toString() : '',
           isBulkAvailable: !!p.isBulkAvailable,
           isRetailAvailable: p.isRetailAvailable !== undefined ? !!p.isRetailAvailable : true,
+          rating: p.rating !== undefined ? p.rating.toString() : '5',
         });
 
         const list: ImageEntry[] = [];
@@ -235,6 +237,42 @@ export default function EditVendorProductPage({ params }: { params: { id: string
                 <option value="Blend">Blend</option>
                 <option value="Extract">Extract</option>
               </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">Product Rating (Stars)</label>
+              <div className="flex items-center gap-3">
+                <div className="flex text-amber-400">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, rating: star.toString() }))}
+                      className="p-0.5 hover:scale-110 transition-transform cursor-pointer"
+                      title={`Set ${star} stars`}
+                    >
+                      <Star 
+                        className={`w-6 h-6 ${parseFloat(formData.rating || '5') >= star ? 'fill-current text-amber-400' : 'text-neutral-300'}`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="number"
+                  name="rating"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={formData.rating}
+                  onChange={handleChange}
+                  className="w-20 px-3 py-1.5 border rounded-lg text-sm font-bold text-center focus:ring-2 focus:ring-primary/50 outline-none"
+                />
+                <span className="text-xs text-neutral-500 font-medium">
+                  {parseFloat(formData.rating || '5') >= 4.5 ? '⭐ Top Rated' : parseFloat(formData.rating || '5') >= 3.5 ? '✨ Good' : 'Standard'}
+                </span>
+              </div>
+              <span className="text-[11px] text-neutral-500 mt-1 block">
+                Assign your product initial store rating (1.0 to 5.0)
+              </span>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-neutral-700 mb-1">Description *</label>

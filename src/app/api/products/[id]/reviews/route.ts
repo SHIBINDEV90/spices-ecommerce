@@ -37,14 +37,23 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const user = session.user as any;
     const review = await Review.create({
         productId: product._id,
-        vendorId: product.vendorId, // Important: linking review to vendor!
+        vendorId: product.vendorId || undefined,
         customerId: user.id,
         customerName: user.name || 'Anonymous',
         rating,
         comment
     });
 
-    return NextResponse.json({ message: 'Review submitted successfully', review }, { status: 201 });
+    // Recalculate average rating from all customer reviews
+    const allReviews = await Review.find({ productId: product._id });
+    if (allReviews.length > 0) {
+      const totalScore = allReviews.reduce((sum, r) => sum + (Number(r.rating) || 0), 0);
+      product.rating = Number((totalScore / allReviews.length).toFixed(1));
+      product.reviewsCount = allReviews.length;
+      await product.save();
+    }
+
+    return NextResponse.json({ message: 'Review submitted successfully', review, newRating: product.rating, reviewsCount: product.reviewsCount }, { status: 201 });
   } catch (error: any) {
     if (error.code === 11000) {
         return NextResponse.json({ error: 'You have already reviewed this product' }, { status: 400 });

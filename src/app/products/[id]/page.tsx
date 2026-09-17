@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import ProductImageGallery from '@/components/ProductImageGallery';
 import ProductInteraction from '@/components/ProductInteraction';
-import { ArrowLeft, MapPin, Tag, Activity, Tractor, Store, ShieldCheck, ChevronRight } from 'lucide-react';
+import { ArrowLeft, MapPin, Tag, Activity, Tractor, Store, ShieldCheck, ChevronRight, Star } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
@@ -63,7 +63,35 @@ export default async function ProductDetailsPage({ params }: { params: { id: str
                <Tag className="w-4 h-4" /> {product.productType || 'Premium Spice'}
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">{product.name}</h1>
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">{product.name}</h1>
+
+            {/* Product Rating */}
+            <div className="flex items-center gap-2.5 mb-6">
+              <div className="flex text-amber-400">
+                {[...Array(5)].map((_, i) => {
+                  const ratingVal = product.rating !== undefined && !isNaN(Number(product.rating)) ? Number(product.rating) : 5;
+                  const starVal = i + 1;
+                  const isFull = ratingVal >= starVal;
+                  const isHalf = !isFull && ratingVal >= starVal - 0.5;
+                  return (
+                    <Star 
+                      key={i} 
+                      size={18} 
+                      fill={isFull || isHalf ? "currentColor" : "none"} 
+                      className={!isFull && !isHalf ? "text-gray-600" : ""} 
+                    />
+                  );
+                })}
+              </div>
+              <span className="text-base font-bold text-white">
+                {(product.rating !== undefined && !isNaN(Number(product.rating)) ? Number(product.rating) : 5).toFixed(1)}
+              </span>
+              {product.reviewsCount && Number(product.reviewsCount) > 0 ? (
+                <span className="text-sm text-gray-400">({product.reviewsCount} customer reviews)</span>
+              ) : (
+                <span className="text-xs text-gray-400 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">Verified Rating</span>
+              )}
+            </div>
             <p className="text-gray-400 text-lg md:text-xl leading-relaxed mb-8 border-l-2 border-orange-500 pl-6">
               {product.description}
             </p>
