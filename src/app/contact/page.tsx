@@ -55,6 +55,61 @@ export default function ContactPage() {
   const [activeLocationId, setActiveLocationId] = useState<"wayanad" | "calicut">("wayanad");
   const activeOffice = OFFICE_LOCATIONS.find((loc) => loc.id === activeLocationId) || OFFICE_LOCATIONS[0];
 
+  const [formState, setFormState] = useState({
+    name: '',
+    company: '',
+    country: '',
+    email: '',
+    phone: '',
+    product: 'Cardamom',
+    quantity: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setFormState(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmitEnquiry = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError('');
+    setSubmitSuccess(false);
+
+    try {
+      const res = await fetch('/api/enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formState,
+          quantity: formState.quantity || 'Commercial / Export Volume',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Submission failed');
+
+      setSubmitSuccess(true);
+      setFormState({
+        name: '',
+        company: '',
+        country: '',
+        email: '',
+        phone: '',
+        product: 'Cardamom',
+        quantity: '',
+        message: '',
+      });
+    } catch (err: any) {
+      setSubmitError(err.message || 'An error occurred while submitting. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen font-body-md overflow-x-hidden">
       {/* Hero Section */}
@@ -195,68 +250,144 @@ export default function ContactPage() {
               <h2 className="font-headline-md text-headline-md text-primary mb-2">Bulk & Export Inquiry</h2>
               <p className="text-on-surface-variant font-body-md mb-10 relative z-10">Exclusive procurement portal for international B2B buyers and wholesalers.</p>
               
-              <form className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10" onSubmit={(e) => {
-                e.preventDefault();
-                const btn = document.getElementById('submitBtn');
-                if (btn) {
-                  const originalText = btn.innerHTML;
-                  btn.innerHTML = '<span class="animate-spin inline-block">⏳</span> Sending...';
-                  (btn as HTMLButtonElement).disabled = true;
-                  setTimeout(() => {
-                    btn.innerHTML = '<span>✓</span> Inquiry Sent Successfully';
-                    btn.classList.add('bg-primary');
-                    btn.classList.remove('bg-secondary');
-                    setTimeout(() => {
-                      btn.innerHTML = originalText;
-                      btn.classList.remove('bg-primary');
-                      btn.classList.add('bg-secondary');
-                      (btn as HTMLButtonElement).disabled = false;
-                      (e.target as HTMLFormElement).reset();
-                    }, 3000);
-                  }, 1500);
-                }
-              }}>
-                <div className="space-y-2">
-                  <label className="font-label-md text-label-md text-on-surface-variant">Full Name</label>
-                  <input required className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" placeholder="e.g. Julian Schmidt" type="text" />
-                </div>
-                <div className="space-y-2">
-                  <label className="font-label-md text-label-md text-on-surface-variant">Company Name</label>
-                  <input required className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" placeholder="Registered Company Name" type="text" />
-                </div>
-                <div className="space-y-2">
-                  <label className="font-label-md text-label-md text-on-surface-variant">Country</label>
-                  <input required className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" placeholder="Shipping Destination" type="text" />
-                </div>
-                <div className="space-y-2">
-                  <label className="font-label-md text-label-md text-on-surface-variant">Work Email</label>
-                  <input required className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" placeholder="corporate@domain.com" type="email" />
-                </div>
-                <div className="space-y-2">
-                  <label className="font-label-md text-label-md text-on-surface-variant">Phone Number</label>
-                  <input required className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" placeholder="+ (CC) Number" type="tel" />
-                </div>
-                <div className="space-y-2">
-                  <label className="font-label-md text-label-md text-on-surface-variant">Product Interest</label>
-                  <select className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3">
-                    {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
-                      <option key={item} value={item}>{item}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="md:col-span-2 space-y-2">
-                  <label className="font-label-md text-label-md text-on-surface-variant">Quantity Requirements & Specifications</label>
-                  <textarea required className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3 resize-y" placeholder="Mention volume (MT/kg), packaging requirements, and any lab certification needs..." rows={4}></textarea>
-                </div>
-                <div className="md:col-span-2 mt-4">
-                  <button id="submitBtn" className="w-full bg-secondary text-white py-4 font-label-md text-label-md uppercase tracking-[0.2em] hover:bg-on-secondary-container transition-colors rounded-sm flex items-center justify-center gap-2" type="submit">
-                    Send Export Inquiry <Send className="w-4 h-4 ml-2" />
-                  </button>
-                  <p className="text-center text-[11px] text-on-surface-variant mt-4 opacity-70">
-                    By submitting, you agree to our Export Terms and Privacy Policy. Our trade desk responds within 24 business hours.
+              {submitSuccess ? (
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-8 text-center my-6">
+                  <div className="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto mb-3 font-bold text-xl">
+                    ✓
+                  </div>
+                  <h3 className="text-xl font-bold text-emerald-900 mb-2">Export Inquiry Transmitted</h3>
+                  <p className="text-sm text-emerald-700 max-w-md mx-auto leading-relaxed">
+                    Thank you! Our global commodity trade desk and admins have been notified. A freight and price proposal will be dispatched to your email within 24 business hours.
                   </p>
+                  <button
+                    onClick={() => setSubmitSuccess(false)}
+                    className="mt-6 px-6 py-2.5 bg-emerald-700 text-white text-xs font-bold uppercase tracking-wider rounded hover:bg-emerald-800 transition-colors"
+                  >
+                    Send Another Inquiry
+                  </button>
                 </div>
-              </form>
+              ) : (
+                <form className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10" onSubmit={handleSubmitEnquiry}>
+                  {submitError && (
+                    <div className="md:col-span-2 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded">
+                      {submitError}
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Full Name</label>
+                    <input 
+                      required 
+                      name="name"
+                      value={formState.name}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" 
+                      placeholder="e.g. Julian Schmidt" 
+                      type="text" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Company Name</label>
+                    <input 
+                      required 
+                      name="company"
+                      value={formState.company}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" 
+                      placeholder="Registered Company Name" 
+                      type="text" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Country</label>
+                    <input 
+                      required 
+                      name="country"
+                      value={formState.country}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" 
+                      placeholder="Shipping Destination" 
+                      type="text" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Work Email</label>
+                    <input 
+                      required 
+                      name="email"
+                      value={formState.email}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" 
+                      placeholder="corporate@domain.com" 
+                      type="email" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Phone / WhatsApp</label>
+                    <input 
+                      name="phone"
+                      value={formState.phone}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3" 
+                      placeholder="+ (CC) Number" 
+                      type="tel" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Target Commodity</label>
+                    <select 
+                      name="product"
+                      value={formState.product}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3"
+                    >
+                      {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
+                        <option key={item} value={item}>{item}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Volume &amp; Quantity (e.g. 500kg, 2 MT)</label>
+                    <input
+                      required
+                      name="quantity"
+                      value={formState.quantity}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3"
+                      placeholder="e.g. 500 Kilograms / 2 Metric Tons"
+                      type="text"
+                    />
+                  </div>
+                  <div className="md:col-span-2 space-y-2">
+                    <label className="font-label-md text-label-md text-on-surface-variant">Specifications &amp; Packaging Requirements</label>
+                    <textarea 
+                      required 
+                      name="message"
+                      value={formState.message}
+                      onChange={handleInputChange}
+                      className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3 resize-y" 
+                      placeholder="Mention grade (e.g. 8mm+ Extra Bold), packaging requirements (jute bags, vacuum seal), and destination port..." 
+                      rows={4}
+                    />
+                  </div>
+                  <div className="md:col-span-2 mt-4">
+                    <button 
+                      id="submitBtn" 
+                      disabled={isSubmitting}
+                      className="w-full bg-secondary text-white py-4 font-label-md text-label-md uppercase tracking-[0.2em] hover:bg-on-secondary-container transition-colors rounded-sm flex items-center justify-center gap-2 disabled:opacity-50" 
+                      type="submit"
+                    >
+                      {isSubmitting ? (
+                        <span>Transmitting Inquiry...</span>
+                      ) : (
+                        <>Send Export Inquiry <Send className="w-4 h-4 ml-2" /></>
+                      )}
+                    </button>
+                    <p className="text-center text-[11px] text-on-surface-variant mt-4 opacity-70">
+                      By submitting, you agree to our Export Terms and Privacy Policy. Our trade desk responds within 24 business hours.
+                    </p>
+                  </div>
+                </form>
+              )}
             </div>
           </div>
         </div>

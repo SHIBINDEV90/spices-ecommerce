@@ -3,7 +3,7 @@ import Product from '@/lib/models/Product';
 import Order from '@/lib/models/Order';
 import Enquiry from '@/lib/models/Enquiry';
 import DashboardCharts from '@/components/admin/DashboardCharts';
-import { Package, ShoppingCart, MessageSquare, Users, IndianRupee } from 'lucide-react';
+import { Package, ShoppingCart, MessageSquare, Users, IndianRupee, Bell, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 // Mock data builder for charts for now
@@ -34,6 +34,7 @@ export default async function AdminDashboardPage() {
   const totalProducts = await Product.countDocuments();
   const totalOrders = await Order.countDocuments();
   const totalEnquiries = await Enquiry.countDocuments();
+  const pendingEnquiriesCount = await Enquiry.countDocuments({ status: 'pending' });
   
   // Unique Customers calculation
   const uniqueCustomers = await Order.distinct('customerEmail');
@@ -50,12 +51,42 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-600">
-          Dashboard Overview
-        </h1>
-        <p className="text-gray-400 mt-2">Welcome back. Here is your business at a glance.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-600">
+            Dashboard Overview
+          </h1>
+          <p className="text-gray-400 mt-2">Welcome back. Here is your business at a glance.</p>
+        </div>
       </div>
+
+      {/* Pending Purchase Enquiries Alert Banner */}
+      {pendingEnquiriesCount > 0 && (
+        <div className="bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-neutral-900/50 border border-amber-500/30 rounded-2xl p-5 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/5">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="p-3 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex-shrink-0">
+              <Bell className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-sm sm:text-base flex items-center gap-2 flex-wrap">
+                <span>{pendingEnquiriesCount} Pending Purchase {pendingEnquiriesCount === 1 ? 'Enquiry' : 'Enquiries'}</span>
+                <span className="bg-amber-500 text-black text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Action Needed
+                </span>
+              </h3>
+              <p className="text-gray-300 text-xs mt-0.5 leading-relaxed">
+                Prospective buyers have requested price quotes and cargo volumes. Prompt responses yield higher export closing rates.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/enquiries"
+            className="flex-shrink-0 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-orange-500/20 flex items-center gap-1.5"
+          >
+            Review Enquiries <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -139,27 +170,49 @@ export default async function AdminDashboardPage() {
         {/* Recent Enquiries */}
         <div className="bg-white/5 border border-white/10 rounded-2xl backdrop-blur-lg overflow-hidden flex flex-col">
           <div className="p-6 border-b border-white/10 flex justify-between items-center">
-            <h3 className="text-xl font-semibold">Recent Enquiries</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-semibold">Recent Enquiries</h3>
+              {pendingEnquiriesCount > 0 && (
+                <span className="bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                  {pendingEnquiriesCount} pending
+                </span>
+              )}
+            </div>
             <Link href="/admin/enquiries" className="text-sm text-amber-400 hover:text-amber-300">View All</Link>
           </div>
           <div className="overflow-x-auto flex-1">
             <table className="w-full text-left border-collapse whitespace-nowrap">
               <thead>
                 <tr className="bg-black/40 text-gray-400 text-sm">
-                  <th className="p-4 font-medium">Name</th>
+                  <th className="p-4 font-medium">Buyer</th>
+                  <th className="p-4 font-medium">Commodity</th>
                   <th className="p-4 font-medium">Country</th>
-                  <th className="p-4 font-medium">Quantity</th>
+                  <th className="p-4 font-medium">Volume</th>
+                  <th className="p-4 font-medium">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {recentEnquiries.length === 0 ? (
-                  <tr><td colSpan={3} className="p-4 text-center text-gray-500">No recent enquiries.</td></tr>
+                  <tr><td colSpan={5} className="p-4 text-center text-gray-500">No recent enquiries.</td></tr>
                 ) : (
                   recentEnquiries.map(enq => (
                     <tr key={enq._id.toString()} className="border-b border-white/5 hover:bg-white/5">
-                      <td className="p-4">{enq.name}</td>
-                      <td className="p-4">{enq.country}</td>
-                      <td className="p-4 text-amber-400">{enq.quantity}</td>
+                      <td className="p-4">
+                        <p className="font-medium text-white">{enq.name}</p>
+                        <p className="text-xs text-gray-400">{enq.email}</p>
+                      </td>
+                      <td className="p-4 text-xs font-semibold text-white">{enq.product}</td>
+                      <td className="p-4 text-xs text-gray-300">{enq.country}</td>
+                      <td className="p-4 text-xs text-amber-400 font-bold">{enq.quantity}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                          enq.status === 'reviewed' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 
+                          enq.status === 'closed' ? 'bg-gray-500/10 text-gray-400 border border-gray-500/20' :
+                          'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                        }`}>
+                          {enq.status || 'pending'}
+                        </span>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -171,3 +224,4 @@ export default async function AdminDashboardPage() {
     </div>
   );
 }
+

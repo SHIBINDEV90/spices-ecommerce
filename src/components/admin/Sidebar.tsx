@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -34,9 +35,29 @@ const MENU_ITEMS = [
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
-
 export default function Sidebar() {
   const pathname = usePathname();
+  const [pendingEnquiriesCount, setPendingEnquiriesCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await fetch('/api/admin/notifications', { cache: 'no-store' });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && typeof json.pendingEnquiriesCount === 'number') {
+            setPendingEnquiriesCount(json.pendingEnquiriesCount);
+          }
+        }
+      } catch {
+        // Silently ignore
+      }
+    };
+
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <aside className="w-64 bg-black border-r border-white/10 flex flex-col h-screen sticky top-0">
@@ -50,6 +71,7 @@ export default function Sidebar() {
         {MENU_ITEMS.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
+          const isEnquiries = item.href === '/admin/enquiries';
           
           return (
             <Link
@@ -62,7 +84,12 @@ export default function Sidebar() {
               }`}
             >
               <Icon className="w-5 h-5" />
-              {item.name}
+              <span className="flex-1 truncate">{item.name}</span>
+              {isEnquiries && pendingEnquiriesCount > 0 && (
+                <span className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm animate-pulse">
+                  {pendingEnquiriesCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -80,3 +107,4 @@ export default function Sidebar() {
     </aside>
   );
 }
+
