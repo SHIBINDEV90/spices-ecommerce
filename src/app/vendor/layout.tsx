@@ -22,12 +22,12 @@ export default function VendorLayout({ children }: { children: React.ReactNode }
     }
   }, [status, session, router, isPublicRoute]);
 
-  if (status === 'loading') {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-  }
-
   if (isPublicRoute) {
     return <>{children}</>;
+  }
+
+  if (status === 'loading') {
+    return <div className="min-h-screen flex items-center justify-center text-foreground/70">Loading...</div>;
   }
 
   if (!session || (session?.user as any)?.role !== 'Vendor') {

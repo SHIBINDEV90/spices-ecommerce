@@ -131,22 +131,22 @@ export default function VendorRegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Business Name *</label>
-                  <input required type="text" name="businessName" value={formData.businessName} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="businessName" value={formData.businessName} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Vendor Type *</label>
-                  <select required name="vendorType" value={formData.vendorType} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none">
+                  <select required name="vendorType" value={formData.vendorType} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary">
                     <option value="Farmer">Farmer / Producer</option>
                     <option value="Exporter">Exporter / Processor</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">GST Number</label>
-                  <input type="text" name="gstNumber" value={formData.gstNumber} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input type="text" name="gstNumber" value={formData.gstNumber} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">IEC Number</label>
-                  <input type="text" name="iecNumber" value={formData.iecNumber} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input type="text" name="iecNumber" value={formData.iecNumber} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
               </div>
             </div>
@@ -157,19 +157,19 @@ export default function VendorRegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Owner Name *</label>
-                  <input required type="text" name="ownerName" value={formData.ownerName} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="ownerName" value={formData.ownerName} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Phone Number *</label>
-                  <input required type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Email Address *</label>
-                  <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="email" name="email" value={formData.email} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Password *</label>
-                  <input required type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                   <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
                     Password must be at least 5 characters, contain at least one uppercase letter and one digit, with no special characters.
                   </p>
@@ -183,23 +183,23 @@ export default function VendorRegisterPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Street Address *</label>
-                  <input required type="text" name="address.street" value={formData.businessAddress.street} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="address.street" value={formData.businessAddress.street} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">City *</label>
-                  <input required type="text" name="address.city" value={formData.businessAddress.city} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="address.city" value={formData.businessAddress.city} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">State/Province *</label>
-                  <input required type="text" name="address.state" value={formData.businessAddress.state} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="address.state" value={formData.businessAddress.state} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Country *</label>
-                  <input required type="text" name="address.country" value={formData.businessAddress.country} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="address.country" value={formData.businessAddress.country} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Postal Code *</label>
-                  <input required type="text" name="address.postalCode" value={formData.businessAddress.postalCode} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none" />
+                  <input required type="text" name="address.postalCode" value={formData.businessAddress.postalCode} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                 </div>
               </div>
             </div>

@@ -111,6 +111,20 @@ html, body {
   scroll-behavior: smooth;
 }
 
+/* Form Controls Contrast Safeguards */
+input, select, textarea {
+  caret-color: var(--color-primary, #486413);
+}
+
+.bg-white input:not([class*="text-"]),
+.bg-white select:not([class*="text-"]),
+.bg-white textarea:not([class*="text-"]),
+.bg-neutral-50 input:not([class*="text-"]),
+.bg-neutral-50 select:not([class*="text-"]),
+.bg-neutral-50 textarea:not([class*="text-"]) {
+  color: #171717;
+}
+
 /* Glassmorphism Utility */
 .glass {
   background: rgba(255, 255, 255, 0.15);
