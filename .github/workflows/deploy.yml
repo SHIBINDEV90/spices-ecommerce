@@ -79,6 +79,14 @@ jobs:
           git checkout main
           git pull --ff-only origin main
 
+          # Secrets live outside the git-tracked tree; restore them after each pull
+          # since .env is no longer committed to the repository.
+          if [ -f /root/workspace/secrets/spices-ecommerce.env ]; then
+            cp /root/workspace/secrets/spices-ecommerce.env .env
+          else
+            echo "WARNING: /root/workspace/secrets/spices-ecommerce.env not found; .env will be missing." >&2
+          fi
+
           if docker compose version >/dev/null 2>&1; then
             COMPOSE="docker compose"
           elif command -v docker-compose >/dev/null 2>&1; then
