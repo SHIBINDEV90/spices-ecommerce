@@ -4,7 +4,7 @@ import Enquiry from '@/lib/models/Enquiry';
 import Product from '@/lib/models/Product';
 import Notification from '@/lib/models/Notification';
 import User from '@/lib/models/User';
-import { sendAdminEnquiryNotificationEmail } from '@/lib/email';
+import { sendAdminEnquiryNotificationEmail, sendEnquiryConfirmationEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   await dbConnect();
@@ -96,6 +96,19 @@ export async function POST(req: NextRequest) {
       });
     } catch (emailError) {
       console.error('[Enquiry API] Failed to deliver admin email:', emailError);
+    }
+
+    // 4. Dispatch Confirmation Email to the Buyer
+    try {
+      await sendEnquiryConfirmationEmail({
+        name,
+        email,
+        product: resolvedProductName,
+        quantity,
+        country,
+      });
+    } catch (emailError) {
+      console.error('[Enquiry API] Failed to deliver buyer confirmation email:', emailError);
     }
 
     return NextResponse.json(

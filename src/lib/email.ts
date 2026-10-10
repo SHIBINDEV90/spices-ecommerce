@@ -513,3 +513,102 @@ ${message}
   });
 }
 
+export interface SendEnquiryConfirmationEmailParams {
+  name: string;
+  email: string;
+  product: string;
+  quantity: string;
+  country: string;
+  baseUrl?: string;
+}
+
+/**
+ * Sends an acknowledgement email to the buyer confirming their enquiry was received.
+ */
+export async function sendEnquiryConfirmationEmail(params: SendEnquiryConfirmationEmailParams): Promise<SendEmailResult> {
+  const {
+    name,
+    email,
+    product,
+    quantity,
+    country,
+    baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  } = params;
+
+  const dateFormatted = new Date().toLocaleString('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px; background-color: #0d0d0c; color: #f5f5f4;">
+
+      <!-- Brand Header -->
+      <div style="text-align: center; margin-bottom: 24px; padding: 12px 0;">
+        <span style="font-size: 11px; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: #f59e0b; display: block; margin-bottom: 6px;">
+          SPICEWIZZ GLOBAL TRADE DESK
+        </span>
+        <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em;">
+          Enquiry Received
+        </h1>
+        <p style="color: #a8a29e; font-size: 13px; margin: 6px 0 0 0;">
+          Submitted on ${dateFormatted}
+        </p>
+      </div>
+
+      <!-- Main Container Card -->
+      <div style="background-color: #171717; padding: 28px; border-radius: 16px; border: 1px solid #292524; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);">
+
+        <p style="font-size: 15px; line-height: 1.6; color: #e7e5e4; margin: 0 0 20px 0;">
+          Hi ${name},
+        </p>
+        <p style="font-size: 15px; line-height: 1.6; color: #e7e5e4; margin: 0 0 20px 0;">
+          Thank you for reaching out to SpiceWizz. We've received your enquiry and our global commodity trade desk
+          has been notified. A member of our team will send you a freight and price proposal within
+          <strong style="color: #fbbf24;">24 business hours</strong>.
+        </p>
+
+        <!-- Summary Banner -->
+        <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #f59e0b; font-weight: 700;">Commodity</div>
+            <div style="font-size: 20px; font-weight: 800; color: #ffffff; margin-top: 2px;">${product}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #f59e0b; font-weight: 700;">Requested Volume</div>
+            <div style="font-size: 20px; font-weight: 800; color: #fbbf24; margin-top: 2px;">${quantity}</div>
+          </div>
+        </div>
+
+        <p style="font-size: 14px; line-height: 1.6; color: #a8a29e; margin: 0 0 24px 0;">
+          Destination Country: <strong style="color: #ffffff;">${country}</strong>
+        </p>
+
+        <p style="font-size: 14px; line-height: 1.6; color: #a8a29e; margin: 0;">
+          If you have any additional specifications or urgent requirements, simply reply to this email and our
+          team will get back to you directly.
+        </p>
+
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align: center; margin-top: 24px; font-size: 12px; color: #78716c;">
+        <p style="margin: 0 0 4px 0;">SpiceWizz &bull; <a href="${baseUrl}" style="color: #78716c;">${baseUrl.replace(/^https?:\/\//, '')}</a></p>
+        <p style="margin: 0;">&copy; ${new Date().getFullYear()} SpiceWizz. All rights reserved.</p>
+      </div>
+
+    </div>
+  `;
+
+  console.log(`\n========================================`);
+  console.log(`[Enquiry Confirmation Email] Sending to: ${email}`);
+  console.log(`Product: ${product} | Qty: ${quantity} | From: ${name} (${country})`);
+  console.log(`========================================\n`);
+
+  return sendEmail({
+    to: email,
+    subject: `We've received your enquiry - ${product} (${quantity})`,
+    html: htmlContent,
+  });
+}
+
