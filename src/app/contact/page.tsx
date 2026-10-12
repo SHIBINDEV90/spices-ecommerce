@@ -225,8 +225,12 @@ export default function ContactPage() {
                 <Mail className="text-secondary w-7 h-7 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink font-semibold">Email Us</h3>
-                  <p className="text-on-surface-variant font-body-md text-sm">exports@spicewizz.com</p>
-                  <p className="text-on-surface-variant font-body-md text-sm">support@spicewizz.com</p>
+                  <a
+                    href="mailto:contact@spicewizz.com"
+                    className="block text-on-surface-variant hover:text-secondary font-body-md text-sm transition-colors"
+                  >
+                    contact@spicewizz.com
+                  </a>
                 </div>
               </div>
             </div>
@@ -236,8 +240,18 @@ export default function ContactPage() {
                 <Phone className="text-secondary w-7 h-7 flex-shrink-0 mt-1" />
                 <div>
                   <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink font-semibold">Call Us</h3>
-                  <p className="text-on-surface-variant font-body-md text-sm">+91 98765 43210 (Wayanad)</p>
-                  <p className="text-on-surface-variant font-body-md text-sm">+91 (484) 2345 6789 (Calicut)</p>
+                  <a
+                    href="tel:+919876543210"
+                    className="block text-on-surface-variant hover:text-secondary font-body-md text-sm transition-colors"
+                  >
+                    +91 98765 43210 (Wayanad)
+                  </a>
+                  <a
+                    href="tel:+9148423456789"
+                    className="block text-on-surface-variant hover:text-secondary font-body-md text-sm transition-colors"
+                  >
+                    +91 (484) 2345 6789 (Calicut)
+                  </a>
                 </div>
               </div>
             </div>

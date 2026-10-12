@@ -225,7 +225,7 @@ export default function TermsConditionsPage() {
               
               <div className="bg-surface border border-outline-variant/50 rounded-lg p-6 mt-4 inline-block">
                 <p className="font-bold text-lg text-slate-ink mb-2">SpiceWizz</p>
-                <p className="mb-1"><strong>Email:</strong> <Link href="mailto:support@spicewizz.com" className="text-secondary hover:underline">support@spicewizz.com</Link></p>
+                <p className="mb-1"><strong>Email:</strong> <Link href="mailto:contact@spicewizz.com" className="text-secondary hover:underline">contact@spicewizz.com</Link></p>
                 <p className="mb-1"><strong>Website:</strong> <Link href="https://spicewizz.com" className="text-secondary hover:underline">https://spicewizz.com</Link></p>
                 <p><strong>Business Hours:</strong> Monday – Saturday, 9:00 AM – 6:00 PM (IST)</p>
               </div>
