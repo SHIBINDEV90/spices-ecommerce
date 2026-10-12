@@ -29,7 +29,7 @@ const OFFICE_LOCATIONS = [
     directionsUrl: "https://www.google.com/maps/search/?api=1&query=Vythiri+Wayanad+Kerala+673576",
     badge: "Origin & Sourcing Hub",
     tagColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    phone: "+91 98765 43210",
+    phone: "+91 80864 51830",
     email: "wayanad@spicewizz.com",
     features: ["Spice Processing & Quality Grading", "Farmer Procurement Center", "Direct Origin Sourcing"]
   },
@@ -45,7 +45,7 @@ const OFFICE_LOCATIONS = [
     directionsUrl: "https://www.google.com/maps/search/?api=1&query=Cyber+Park+Thondayad+Calicut",
     badge: "Corporate & Export Office",
     tagColor: "bg-amber-100 text-amber-800 border-amber-200",
-    phone: "+91 (484) 2345 6789",
+    phone: "+91 80864 51830",
     email: "calicut@spicewizz.com",
     features: ["Global Export Logistics Desk", "B2B International Trade Desk", "Tech & Supply Chain Management"]
   }
@@ -241,16 +241,16 @@ export default function ContactPage() {
                 <div>
                   <h3 className="font-title-lg text-title-lg mb-2 text-slate-ink font-semibold">Call Us</h3>
                   <a
-                    href="tel:+919876543210"
+                    href="tel:+918086451830"
                     className="block text-on-surface-variant hover:text-secondary font-body-md text-sm transition-colors"
                   >
-                    +91 98765 43210 (Wayanad)
+                    +91 80864 51830 (Wayanad)
                   </a>
                   <a
-                    href="tel:+9148423456789"
+                    href="tel:+918086451830"
                     className="block text-on-surface-variant hover:text-secondary font-body-md text-sm transition-colors"
                   >
-                    +91 (484) 2345 6789 (Calicut)
+                    +91 80864 51830 (Calicut)
                   </a>
                 </div>
               </div>
@@ -619,7 +619,7 @@ export default function ContactPage() {
       {/* WhatsApp Floating Action Button */}
       <a 
         className="fixed bottom-8 right-8 z-[60] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform flex items-center justify-center group" 
-        href="https://wa.me/919876543210" 
+        href="https://wa.me/918086451830" 
         target="_blank"
         rel="noopener noreferrer"
       >
