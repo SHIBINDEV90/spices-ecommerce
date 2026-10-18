@@ -29,7 +29,9 @@ export async function GET(req: NextRequest) {
       vendor: {
         _id: vendor._id,
         businessName: vendor.businessName,
-        location: vendor.location || { type: 'Point', coordinates: [76.2999, 9.9312] },
+        location: (vendor.location?.coordinates && vendor.location.coordinates.length === 2) 
+          ? vendor.location 
+          : { type: 'Point', coordinates: [76.0389, 11.5561] },
         quickCommerce: vendor.quickCommerce || {
           enabled: false,
           deliveryRadiusKm: 35,
@@ -62,7 +64,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { coordinates, quickCommerce, productSettings } = body;
 
-    // 1. Update vendor store location coordinates if provided
+    // Check if any product is set to available in this catalog save
+    const hasActiveCatalogProducts = Array.isArray(productSettings) && 
+      productSettings.some((item: any) => Boolean(item.isAvailable));
+
+    // 1. Update vendor store location coordinates
     if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
       const lng = parseFloat(coordinates[0]);
       const lat = parseFloat(coordinates[1]);
@@ -72,37 +78,57 @@ export async function POST(req: NextRequest) {
           coordinates: [lng, lat],
         };
       }
-    }
-
-    // 2. Update quick commerce operational settings
-    if (quickCommerce) {
-      const radius = Math.min(35, Math.max(1, parseFloat(quickCommerce.deliveryRadiusKm) || 35));
-      const prepMinutes = Math.max(5, parseInt(quickCommerce.preparationTimeMinutes) || 15);
-
-      vendor.quickCommerce = {
-        enabled: Boolean(quickCommerce.enabled),
-        deliveryRadiusKm: radius,
-        preparationTimeMinutes: prepMinutes,
-        isAcceptingOrders: Boolean(quickCommerce.isAcceptingOrders),
+    } else if (!vendor.location?.coordinates || vendor.location.coordinates.length !== 2) {
+      // Default to Wayanad Central Hub if coordinates are missing
+      vendor.location = {
+        type: 'Point',
+        coordinates: [76.0389, 11.5561],
       };
     }
 
+    // 2. Update quick commerce operational settings
+    const radius = Math.min(35, Math.max(1, parseFloat(quickCommerce?.deliveryRadiusKm) || 35));
+    const prepMinutes = Math.max(5, parseInt(quickCommerce?.preparationTimeMinutes) || 15);
+
+    // Auto-enable if active products are saved in the catalog and enabled isn't explicitly false
+    const isMasterEnabled = quickCommerce?.enabled !== undefined 
+      ? Boolean(quickCommerce.enabled) || hasActiveCatalogProducts
+      : hasActiveCatalogProducts || Boolean(vendor.quickCommerce?.enabled);
+
+    vendor.quickCommerce = {
+      enabled: isMasterEnabled,
+      deliveryRadiusKm: radius,
+      preparationTimeMinutes: prepMinutes,
+      isAcceptingOrders: quickCommerce?.isAcceptingOrders !== false,
+    };
+
     await vendor.save();
 
-    // 3. Batch update product quick commerce availability & fast-stock if provided
+    // 3. Batch update product quick commerce availability & fast-stock
     if (productSettings && Array.isArray(productSettings)) {
       for (const item of productSettings) {
         if (item.productId) {
+          const isItemActive = Boolean(item.isAvailable);
+          const qStock = Math.max(0, parseInt(item.quickStock) || (isItemActive ? 10 : 0));
+
+          const updateFields: any = {
+            'quickCommerce.isAvailable': isItemActive,
+            'quickCommerce.quickStock': qStock,
+            'quickCommerce.maxRadiusKm': vendor.quickCommerce?.deliveryRadiusKm || 35,
+            'quickCommerce.estimatedPrepMinutes': vendor.quickCommerce?.preparationTimeMinutes || 15,
+          };
+
+          // If product has 0 stock but vendor allocated quick stock, ensure product stock is at least quickStock
+          if (isItemActive && qStock > 0) {
+            const currentProd = await Product.findOne({ _id: item.productId, vendorId: vendor._id }).select('stock');
+            if (currentProd && (currentProd.stock === 0 || !currentProd.stock)) {
+              updateFields.stock = qStock;
+            }
+          }
+
           await Product.findOneAndUpdate(
             { _id: item.productId, vendorId: vendor._id },
-            {
-              $set: {
-                'quickCommerce.isAvailable': Boolean(item.isAvailable),
-                'quickCommerce.quickStock': parseInt(item.quickStock) || 0,
-                'quickCommerce.maxRadiusKm': vendor.quickCommerce?.deliveryRadiusKm || 35,
-                'quickCommerce.estimatedPrepMinutes': vendor.quickCommerce?.preparationTimeMinutes || 15,
-              },
-            }
+            { $set: updateFields }
           );
         }
       }
@@ -110,7 +136,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Quick Commerce settings updated successfully!',
+      message: 'Quick Commerce configuration saved successfully! Your items are active for local delivery.',
       vendor: {
         location: vendor.location,
         quickCommerce: vendor.quickCommerce,

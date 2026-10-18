@@ -25,50 +25,36 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // 1. Query MongoDB for active vendors within 35 km (35,000 meters) using 2dsphere index
-    let nearbyVendors: any[] = [];
-    try {
-      nearbyVendors = await Vendor.find({
-        status: 'Approved',
-        'quickCommerce.enabled': { $ne: false },
-        'quickCommerce.isAcceptingOrders': { $ne: false },
-        location: {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [userLng, userLat], // [longitude, latitude]
-            },
-            $maxDistance: maxDistanceMeters,
-          },
-        },
-      }).lean();
-    } catch (geoErr) {
-      console.warn('MongoDB $near query fallback (if index building):', geoErr);
-      // Fallback in case 2dsphere index is still indexing: fetch all approved vendors and filter with haversine
-      const allVendors = await Vendor.find({
-        status: 'Approved',
-        'quickCommerce.enabled': { $ne: false },
-        'quickCommerce.isAcceptingOrders': { $ne: false },
-      }).lean();
+    // 1. Query MongoDB for active vendors
+    const allApprovedVendors = await Vendor.find({
+      status: 'Approved',
+      'quickCommerce.enabled': { $ne: false },
+      'quickCommerce.isAcceptingOrders': { $ne: false },
+    }).lean();
 
-      nearbyVendors = allVendors.filter((v: any) => {
-        if (v.location?.coordinates && Array.isArray(v.location.coordinates)) {
-          const [vLng, vLat] = v.location.coordinates;
-          const dist = calculateHaversineDistanceKm(
-            { lat: userLat, lng: userLng },
-            { lat: vLat, lng: vLng }
-          );
-          return dist <= (v.quickCommerce?.deliveryRadiusKm || radiusKm);
-        }
-        return false;
-      });
-    }
+    // Filter vendors within service radius (using vendor location or fallback to Wayanad hub coordinates)
+    const nearbyVendors = allApprovedVendors.filter((v: any) => {
+      const coords = (v.location?.coordinates && Array.isArray(v.location.coordinates) && v.location.coordinates.length === 2)
+        ? v.location.coordinates
+        : [WAYANAD_OFFICE.lng, WAYANAD_OFFICE.lat];
+      
+      const [vLng, vLat] = coords;
+      const dist = calculateHaversineDistanceKm(
+        { lat: userLat, lng: userLng },
+        { lat: vLat, lng: vLng }
+      );
+      const maxRadius = v.quickCommerce?.deliveryRadiusKm || radiusKm;
+      return dist <= maxRadius;
+    });
 
     // Build a map of vendor distance and prep time
     const vendorMap = new Map<string, { distanceKm: number; prepMinutes: number; businessName: string }>();
 
     for (const v of nearbyVendors) {
-      const [vLng, vLat] = v.location?.coordinates || [WAYANAD_OFFICE.lng, WAYANAD_OFFICE.lat];
+      const coords = (v.location?.coordinates && Array.isArray(v.location.coordinates) && v.location.coordinates.length === 2)
+        ? v.location.coordinates
+        : [WAYANAD_OFFICE.lng, WAYANAD_OFFICE.lat];
+      const [vLng, vLat] = coords;
       const dist = calculateHaversineDistanceKm(
         { lat: userLat, lng: userLng },
         { lat: vLat, lng: vLng }
@@ -92,7 +78,10 @@ export async function GET(req: NextRequest) {
 
     const filterQuery: any = {
       approvalStatus: 'Approved',
-      stock: { $gt: 0 },
+      $or: [
+        { stock: { $gt: 0 } },
+        { 'quickCommerce.quickStock': { $gt: 0 } },
+      ],
       'quickCommerce.isAvailable': { $ne: false },
     };
 
@@ -106,7 +95,7 @@ export async function GET(req: NextRequest) {
     }
 
     if (orClauses.length > 0) {
-      filterQuery.$or = orClauses;
+      filterQuery.$and = [{ $or: orClauses }];
     } else {
       // If neither any vendor is within 35km nor is the customer within 35km of Wayanad Office
       return NextResponse.json({
@@ -150,6 +139,7 @@ export async function GET(req: NextRequest) {
 
       return {
         ...prod,
+        stock: Math.max(prod.stock || 0, prod.quickCommerce?.quickStock || 0),
         quickCommerce: {
           ...prod.quickCommerce,
           isAvailable: true,

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { 
   Zap, 
   MapPin, 
@@ -12,7 +13,9 @@ import {
   Navigation, 
   Store,
   PackageCheck,
-  Power
+  Power,
+  ExternalLink,
+  ArrowRight
 } from 'lucide-react';
 import Image from 'next/image';
 import { POPULAR_HUBS } from '@/lib/geo';
@@ -112,13 +115,21 @@ export default function VendorQuickCommercePage() {
   };
 
   const toggleProductAvailability = (productId: string) => {
-    setProductSettings((prev) => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        isAvailable: !prev[productId]?.isAvailable,
-      },
-    }));
+    setProductSettings((prev) => {
+      const willBeActive = !prev[productId]?.isAvailable;
+      // Auto-enable Quick Commerce master switch if vendor activates any product
+      if (willBeActive && !enabled) {
+        setEnabled(true);
+      }
+      return {
+        ...prev,
+        [productId]: {
+          ...prev[productId],
+          isAvailable: willBeActive,
+          quickStock: prev[productId]?.quickStock > 0 ? prev[productId]?.quickStock : 10,
+        },
+      };
+    });
   };
 
   const updateProductStock = (productId: string, stock: number) => {
@@ -136,10 +147,17 @@ export default function VendorQuickCommercePage() {
     setMessage(null);
     setError(null);
 
+    // Auto-enable master quick commerce if any product is set to active
+    const hasActiveItems = Object.values(productSettings).some((p) => p.isAvailable);
+    const effectiveEnabled = enabled || hasActiveItems;
+    if (hasActiveItems && !enabled) {
+      setEnabled(true);
+    }
+
     const payload = {
       coordinates: [lng, lat],
       quickCommerce: {
-        enabled,
+        enabled: effectiveEnabled,
         isAcceptingOrders,
         deliveryRadiusKm,
         preparationTimeMinutes,
@@ -160,8 +178,8 @@ export default function VendorQuickCommercePage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        setMessage('Quick Commerce configuration saved successfully!');
-        setTimeout(() => setMessage(null), 4000);
+        setMessage('Quick Commerce configuration saved successfully! Your items are now discoverable on Explore Quick Spices.');
+        setTimeout(() => setMessage(null), 7000);
       } else {
         setError(data.error || 'Failed to save settings');
       }
@@ -199,21 +217,45 @@ export default function VendorQuickCommercePage() {
           </p>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="px-6 py-2.5 rounded-xl bg-primary text-white font-bold text-sm shadow-md hover:bg-primary-700 transition flex items-center gap-2 self-start sm:self-auto"
-        >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          <span>{saving ? 'Saving...' : 'Save Settings'}</span>
-        </button>
+        <div className="flex items-center gap-3 self-start sm:self-auto flex-wrap">
+          <Link
+            href="/quick"
+            target="_blank"
+            className="px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-neutral-950 font-black text-sm shadow-md transition flex items-center gap-2 group"
+            title="View Live Quick Commerce Storefront"
+          >
+            <Zap className="w-4 h-4 fill-current text-neutral-950" />
+            <span>Explore Quick Spices</span>
+            <ExternalLink className="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="px-6 py-2.5 rounded-xl bg-primary text-white font-bold text-sm shadow-md hover:bg-primary-700 transition flex items-center gap-2"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            <span>{saving ? 'Saving...' : 'Save Settings'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Notifications */}
       {message && (
-        <div className="p-4 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-2 text-sm font-semibold">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-          <span>{message}</span>
+        <div className="p-4 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm font-semibold">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+            <span>{message}</span>
+          </div>
+          <Link
+            href="/quick"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl text-xs font-bold transition shadow-sm shrink-0"
+          >
+            <Zap className="w-3.5 h-3.5 fill-current" />
+            <span>Explore Quick Spices (Live View)</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
         </div>
       )}
 
@@ -397,14 +439,24 @@ export default function VendorQuickCommercePage() {
 
       {/* Product Quick Catalog Manager */}
       <div className="p-6 rounded-2xl bg-white border border-neutral-200 shadow-sm space-y-4">
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-neutral-100 gap-3">
           <div className="flex items-center gap-2">
             <PackageCheck className="w-5 h-5 text-primary-600" />
             <h3 className="font-bold text-neutral-900 text-base">Quick Delivery Products Catalog</h3>
           </div>
-          <span className="text-xs text-neutral-500 font-medium">
-            Select items ready for local 30–60 min dispatch
-          </span>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs text-neutral-500 font-medium">
+              Select items ready for local 30–60 min dispatch
+            </span>
+            <Link
+              href="/quick"
+              target="_blank"
+              className="text-xs font-bold text-amber-700 hover:text-amber-800 underline flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200/60"
+            >
+              <span>Explore Quick Spices Storefront</span>
+              <ExternalLink className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
 
         {products.length === 0 ? (
@@ -466,7 +518,7 @@ export default function VendorQuickCommercePage() {
                         <input
                           type="number"
                           min="0"
-                          max={p.stock || 100}
+                          max={Math.max(p.stock || 0, 999)}
                           value={setting.quickStock}
                           disabled={!setting.isAvailable}
                           onChange={(e) => updateProductStock(p._id, parseInt(e.target.value) || 0)}
@@ -486,12 +538,22 @@ export default function VendorQuickCommercePage() {
         )}
       </div>
 
-      {/* Floating Save Bar */}
-      <div className="flex justify-end pt-4">
+      {/* Floating Action Bar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+        <Link
+          href="/quick"
+          target="_blank"
+          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-neutral-950 font-bold text-sm shadow-md transition flex items-center justify-center gap-2 group"
+        >
+          <Zap className="w-4 h-4 fill-current text-neutral-950" />
+          <span>Explore Quick Spices (Live View)</span>
+          <ExternalLink className="w-4 h-4 opacity-75 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
+
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-8 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-lg hover:bg-primary-700 transition flex items-center gap-2"
+          className="w-full sm:w-auto px-8 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-lg hover:bg-primary-700 transition flex items-center justify-center gap-2"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           <span>{saving ? 'Saving...' : 'Save Quick Commerce Configuration'}</span>

@@ -119,10 +119,11 @@ export default function Navbar() {
                     ? 'bg-amber-500 text-white shadow-amber-500/25 ring-2 ring-amber-400'
                     : 'bg-amber-500/10 text-amber-900 dark:text-amber-300 hover:bg-amber-500/20 border border-amber-500/30'
                 }`}
-                title="Hyperlocal Spices within 35 km"
+                title="Explore Quick Spices (30-60 min delivery within 35 km in Wayanad)"
               >
                 <Zap size={14} className={pathname === '/quick' || isQuickMode ? 'fill-current' : 'text-amber-600 dark:text-amber-400'} />
-                <span>⚡ Quick 35km</span>
+                <span className="hidden sm:inline">⚡ Explore Quick Spices</span>
+                <span className="sm:hidden">⚡ Quick Spices</span>
               </Link>
 
               <div className="hidden md:flex items-center space-x-4 border-r border-black/10 dark:border-white/10 pr-4 mr-1">
@@ -213,6 +214,21 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
+
+                {/* Explore Quick Spices Mobile Banner */}
+                <Link 
+                  href="/quick" 
+                  onClick={closeMobileMenu} 
+                  className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/20 to-emerald-500/15 border border-amber-500/30 text-amber-950 dark:text-amber-300 font-bold text-sm shadow-sm"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Zap size={18} className="fill-amber-500 text-amber-600 shrink-0" />
+                    <span>Explore Quick Spices (35km)</span>
+                  </div>
+                  <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-amber-400 text-neutral-950">
+                    30-60 Min
+                  </span>
+                </Link>
 
                 <Link href="/" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Home</Link>
                 <Link href="/about" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">About</Link>

@@ -28,41 +28,23 @@ export async function POST(req: NextRequest) {
     const isWithinWayanadHub = distToWayanadHub <= radiusKm;
 
     // Search for active vendors within 35 km
-    let vendors: any[] = [];
-    try {
-      vendors = await Vendor.find({
-        status: 'Approved',
-        'quickCommerce.enabled': { $ne: false },
-        'quickCommerce.isAcceptingOrders': { $ne: false },
-        location: {
-          $near: {
-            $geometry: {
-              type: 'Point',
-              coordinates: [parseFloat(lng), parseFloat(lat)],
-            },
-            $maxDistance: maxDistanceMeters,
-          },
-        },
-      }).lean();
-    } catch (err) {
-      const allVendors = await Vendor.find({
-        status: 'Approved',
-        'quickCommerce.enabled': { $ne: false },
-        'quickCommerce.isAcceptingOrders': { $ne: false },
-      }).lean();
+    const allApprovedVendors = await Vendor.find({
+      status: 'Approved',
+      'quickCommerce.enabled': { $ne: false },
+      'quickCommerce.isAcceptingOrders': { $ne: false },
+    }).lean();
 
-      vendors = allVendors.filter((v: any) => {
-        if (v.location?.coordinates) {
-          const [vLng, vLat] = v.location.coordinates;
-          const dist = calculateHaversineDistanceKm(
-            { lat: parseFloat(lat), lng: parseFloat(lng) },
-            { lat: vLat, lng: vLng }
-          );
-          return dist <= (v.quickCommerce?.deliveryRadiusKm || radiusKm);
-        }
-        return false;
-      });
-    }
+    const vendors = allApprovedVendors.filter((v: any) => {
+      const coords = (v.location?.coordinates && Array.isArray(v.location.coordinates) && v.location.coordinates.length === 2)
+        ? v.location.coordinates
+        : [WAYANAD_OFFICE.lng, WAYANAD_OFFICE.lat];
+      const [vLng, vLat] = coords;
+      const dist = calculateHaversineDistanceKm(
+        { lat: parseFloat(lat), lng: parseFloat(lng) },
+        { lat: vLat, lng: vLng }
+      );
+      return dist <= (v.quickCommerce?.deliveryRadiusKm || radiusKm);
+    });
 
     if (!isWithinWayanadHub && (!vendors || vendors.length === 0)) {
       return NextResponse.json({
