@@ -107,7 +107,7 @@ export default function QuickCommercePage() {
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
-                Fresh Wayanad Spices in <span className="text-amber-300">30–60 Minutes</span>
+                Fresh Wayanad Spices in <span className="text-amber-300">3 Hours</span>
               </h1>
               
               <p className="text-sm sm:text-base text-white/80 leading-relaxed">
@@ -148,8 +148,8 @@ export default function QuickCommercePage() {
                 <Clock className="w-4 h-4 text-amber-300" />
               </div>
               <div>
-                <div className="font-bold text-white">30–60 Mins</div>
-                <div className="text-white/70 text-[11px]">Average ETA</div>
+                <div className="font-bold text-white">Within 3 Hours</div>
+                <div className="text-white/70 text-[11px]">Guaranteed Window</div>
               </div>
             </div>
 
@@ -289,7 +289,7 @@ export default function QuickCommercePage() {
                     {/* ETA Badge */}
                     <div className="absolute top-3 left-3 bg-amber-500 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
                       <Zap className="w-3 h-3 fill-current" />
-                      <span>{qc.etaFormatted || '30–45 mins'}</span>
+                      <span>{qc.etaFormatted || 'Within 3 hrs'}</span>
                     </div>
 
                     {/* Distance Badge */}

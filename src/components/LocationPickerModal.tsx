@@ -254,7 +254,7 @@ export default function LocationPickerModal() {
                     ⚡ 35 km Quick Commerce
                   </h4>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    Filter catalog to items delivered in 30–60 mins
+                    Filter catalog to items delivered within 3 hours
                   </p>
                 </div>
               </div>

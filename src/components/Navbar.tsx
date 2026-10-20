@@ -119,7 +119,7 @@ export default function Navbar() {
                     ? 'bg-amber-500 text-white shadow-amber-500/25 ring-2 ring-amber-400'
                     : 'bg-amber-500/10 text-amber-900 dark:text-amber-300 hover:bg-amber-500/20 border border-amber-500/30'
                 }`}
-                title="Explore Quick Spices (30-60 min delivery within 35 km in Wayanad)"
+                title="Explore Quick Spices (Delivery within 3 hours within 35 km in Wayanad)"
               >
                 <Zap size={14} className={pathname === '/quick' || isQuickMode ? 'fill-current' : 'text-amber-600 dark:text-amber-400'} />
                 <span className="hidden sm:inline">⚡ Explore Quick Spices</span>
@@ -226,7 +226,7 @@ export default function Navbar() {
                     <span>Explore Quick Spices (35km)</span>
                   </div>
                   <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-amber-400 text-neutral-950">
-                    30-60 Min
+                    3 Hours
                   </span>
                 </Link>
 

@@ -155,7 +155,7 @@ export default function CheckoutPage() {
                     coordinates: [location.lng, location.lat],
                     addressText: `${shippingAddress.street}, ${shippingAddress.city}`,
                 } : undefined,
-                estimatedDeliveryMinutes: isQuickMode ? 45 : undefined,
+                estimatedDeliveryMinutes: isQuickMode ? 180 : undefined,
             })
         });
 
@@ -386,7 +386,7 @@ export default function CheckoutPage() {
                       <Clock className={`w-4 h-4 ${isQuickMode ? 'text-amber-600' : 'text-neutral-400'}`} />
                     </div>
                     <p className="text-xs text-neutral-500 mb-3">
-                      Hyperlocal delivery from nearby stores within a 35 km radius in <strong className="text-amber-700 dark:text-amber-300">30–60 minutes</strong>.
+                      Hyperlocal delivery from nearby stores within a 35 km radius in <strong className="text-amber-700 dark:text-amber-300">3 hours</strong>.
                     </p>
                     <div className="text-xs font-bold text-amber-700 flex items-center gap-1">
                       <span>⚡ Express Local Dispatch</span>

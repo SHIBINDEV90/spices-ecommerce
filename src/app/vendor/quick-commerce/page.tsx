@@ -276,7 +276,7 @@ export default function VendorQuickCommercePage() {
               <h3 className="font-bold text-neutral-900 text-base">Enable Quick Commerce</h3>
             </div>
             <p className="text-xs text-neutral-500">
-              When enabled, your store becomes discoverable to customers within 35 km for 30–60 min delivery.
+              When enabled, your store becomes discoverable to customers within 35 km for delivery within 3 hours.
             </p>
           </div>
 
@@ -446,7 +446,7 @@ export default function VendorQuickCommercePage() {
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-xs text-neutral-500 font-medium">
-              Select items ready for local 30–60 min dispatch
+              Select items ready for local 3-hour dispatch
             </span>
             <Link
               href="/quick"

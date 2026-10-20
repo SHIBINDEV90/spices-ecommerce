@@ -22,7 +22,7 @@ export default function QuickCommerceBanner() {
             </div>
 
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
-              Fresh Spices Delivered in <span className="text-amber-300 underline decoration-amber-400">30–60 Minutes</span>
+              Fresh Spices Delivered in <span className="text-amber-300 underline decoration-amber-400">3 Hours</span>
             </h2>
 
             <p className="text-sm text-white/85 leading-relaxed">
