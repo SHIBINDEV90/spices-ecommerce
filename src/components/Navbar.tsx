@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, Menu, X, ChevronDown, MapPin, Zap } from 'lucide-react';
+import { ShoppingCart, Menu, X, ChevronDown, MapPin, Zap, Truck } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
 import { useState } from 'react';
@@ -81,6 +81,10 @@ export default function Navbar() {
               <Link href="/certifications" className="text-foreground/80 font-medium hover:text-primary transition-colors">Certifications</Link>
               <Link href="/blog" className="text-foreground/80 font-medium hover:text-primary transition-colors">Journal</Link>
               <Link href="/contact" className="text-foreground/80 font-medium hover:text-primary transition-colors">Contact</Link>
+              <Link href="/track-order" className="text-foreground/80 font-medium hover:text-primary transition-colors flex items-center gap-1.5">
+                <Truck size={14} className="text-emerald-600 dark:text-emerald-400" />
+                <span>Track Order</span>
+              </Link>
               <div className="relative group">
                 <button className="text-foreground/80 font-medium hover:text-primary transition-colors py-4 flex items-center gap-1">
                   Vendors
@@ -266,6 +270,10 @@ export default function Navbar() {
                 <Link href="/certifications" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Certifications</Link>
                 <Link href="/blog" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Journal</Link>
                 <Link href="/contact" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg">Contact</Link>
+                <Link href="/track-order" onClick={closeMobileMenu} className="text-foreground/90 font-medium hover:text-primary transition-colors text-lg flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-semibold">
+                  <Truck size={18} />
+                  <span>Track Order</span>
+                </Link>
                 
                 <div className="flex flex-col space-y-3">
                   <span className="text-foreground/90 font-bold text-lg">Vendors</span>

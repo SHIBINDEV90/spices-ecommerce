@@ -36,12 +36,26 @@ export async function fulfillOrder({
     return { success: true, message: 'Order already marked as paid', order };
   }
 
-  // 1. Update Order Status
+  // 1. Update Order Status & Tracking
   order.paymentStatus = 'paid';
   order.orderStatus = 'Paid';
   if (paymentMethod) order.paymentMethod = paymentMethod;
   if (paymentId) order.paymentId = paymentId;
   if (paymentGatewayId && !order.paymentGatewayId) order.paymentGatewayId = paymentGatewayId;
+
+  if (!order.trackingStatus || order.trackingStatus === 'processing') {
+    order.trackingStatus = 'processing';
+  }
+  if (!order.trackingHistory) {
+    order.trackingHistory = [];
+  }
+  order.trackingHistory.push({
+    status: 'processing',
+    description: 'Payment verified successfully. Order confirmed and sent for spice preparation.',
+    source: 'system',
+    eventKey: `payment_verified_${Date.now()}`,
+    timestamp: new Date(),
+  });
   await order.save();
 
   // 2. Increment Coupon Usage if applicable

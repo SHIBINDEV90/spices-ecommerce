@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShoppingCart, 
@@ -25,7 +25,14 @@ import {
   SendHorizontal,
   Building2,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  RefreshCw,
+  Compass,
+  Boxes,
+  ShieldAlert,
+  Sparkles,
+  Navigation
 } from 'lucide-react';
 
 interface OrdersTableClientProps {
@@ -47,6 +54,29 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
   // Send to vendor states
   const [sendingVendorKey, setSendingVendorKey] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'warning' | 'error', text: string } | null>(null);
+
+  // Tracking states
+  const [trackingStatus, setTrackingStatus] = useState<string>('processing');
+  const [carrier, setCarrier] = useState<string>('');
+  const [trackingNumber, setTrackingNumber] = useState<string>('');
+  const [trackingUrl, setTrackingUrl] = useState<string>('');
+  const [updateNote, setUpdateNote] = useState<string>('');
+  const [updateLocation, setUpdateLocation] = useState<string>('');
+  const [isUpdatingTracking, setIsUpdatingTracking] = useState(false);
+  const [isCreatingShiprocket, setIsCreatingShiprocket] = useState(false);
+  const [isSyncingTracking, setIsSyncingTracking] = useState(false);
+  const [copiedTrackingUrl, setCopiedTrackingUrl] = useState(false);
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setTrackingStatus(selectedOrder.trackingStatus || 'processing');
+      setCarrier(selectedOrder.shipping?.carrier || '');
+      setTrackingNumber(selectedOrder.shipping?.trackingNumber || selectedOrder.shipping?.awbCode || '');
+      setTrackingUrl(selectedOrder.shipping?.trackingUrl || '');
+      setUpdateNote('');
+      setUpdateLocation('');
+    }
+  }, [selectedOrder]);
 
   const showFeedback = (type: 'success' | 'warning' | 'error', text: string) => {
     setFeedback({ type, text });
@@ -143,6 +173,109 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
       case 'Delivered': return <Package className="w-3.5 h-3.5" />;
       default: return <Clock className="w-3.5 h-3.5" />;
     }
+  };
+
+  const handleUpdateTracking = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!selectedOrder) return;
+    setIsUpdatingTracking(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${selectedOrder._id}/tracking`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: trackingStatus,
+          carrier,
+          trackingNumber,
+          trackingUrl,
+          description: updateNote,
+          location: updateLocation,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update tracking');
+
+      setOrders(prev => prev.map(o => o._id === selectedOrder._id ? data.order : o));
+      setSelectedOrder(data.order);
+      setUpdateNote('');
+      showFeedback('success', `Tracking updated: ${trackingStatus.toUpperCase()}${carrier ? ` via ${carrier}` : ''}`);
+    } catch (err: any) {
+      console.error(err);
+      showFeedback('error', err.message || 'Failed to update tracking');
+    } finally {
+      setIsUpdatingTracking(false);
+    }
+  };
+
+  const handleCreateShiprocket = async () => {
+    if (!selectedOrder) return;
+    setIsCreatingShiprocket(true);
+    try {
+      const res = await fetch('/api/shipping/shiprocket/create-shipment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selectedOrder._id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to create Shiprocket shipment');
+
+      if (data.order) {
+        setOrders(prev => prev.map(o => o._id === selectedOrder._id ? data.order : o));
+        setSelectedOrder(data.order);
+      }
+      showFeedback('success', data.message || 'Shiprocket shipment created successfully!');
+    } catch (err: any) {
+      console.error(err);
+      showFeedback('error', err.message || 'Shiprocket shipment failed');
+    } finally {
+      setIsCreatingShiprocket(false);
+    }
+  };
+
+  const handleSyncShiprocket = async () => {
+    if (!selectedOrder) return;
+    setIsSyncingTracking(true);
+    try {
+      const res = await fetch('/api/shipping/shiprocket/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selectedOrder._id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to sync tracking from Shiprocket');
+
+      if (data.order) {
+        setOrders(prev => prev.map(o => o._id === selectedOrder._id ? data.order : o));
+        setSelectedOrder(data.order);
+      }
+      showFeedback('success', data.message || 'Live tracking synced from Shiprocket!');
+    } catch (err: any) {
+      console.error(err);
+      showFeedback('error', err.message || 'Failed to sync tracking');
+    } finally {
+      setIsSyncingTracking(false);
+    }
+  };
+
+  const handleCopyCustomerTrackingLink = (orderId: string) => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const url = `${origin}/track-order?orderId=${orderId}`;
+    navigator.clipboard.writeText(url);
+    setCopiedTrackingUrl(true);
+    setTimeout(() => setCopiedTrackingUrl(false), 2000);
+    showFeedback('success', 'Customer tracking link copied to clipboard!');
+  };
+
+  const trackingBadgeStyles: Record<string, string> = {
+    processing: 'bg-blue-500/10 text-blue-400 border-blue-500/25',
+    packed: 'bg-amber-500/10 text-amber-400 border-amber-500/25',
+    shipped: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/25',
+    in_transit: 'bg-purple-500/10 text-purple-400 border-purple-500/25',
+    out_for_delivery: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/25',
+    delivered: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25',
+    cancelled: 'bg-red-500/10 text-red-400 border-red-500/25',
+    returned: 'bg-rose-500/10 text-rose-400 border-rose-500/25',
+    exception: 'bg-orange-500/10 text-orange-400 border-orange-500/25',
   };
 
   const statusColors: Record<string, string> = {
@@ -734,28 +867,268 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                   </div>
                 </div>
 
-                {/* 4. UPDATE STATUS QUICK ACTION */}
-                <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <span className="text-sm font-medium text-gray-300">
-                    Update Shipment / Order Status:
-                  </span>
-                  
-                  <div className="flex items-center gap-2">
-                    {updatingId === selectedOrder._id ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
-                    ) : (
-                      <select
-                        value={selectedOrder.orderStatus || 'Pending'}
-                        onChange={(e) => handleStatusChange(selectedOrder._id, e.target.value)}
-                        className={`appearance-none outline-none cursor-pointer pl-8 pr-6 py-2 text-xs font-semibold rounded-lg border transition-all ${statusColors[selectedOrder.orderStatus || 'Pending']}`}
+                {/* 4. COMPREHENSIVE SHIPPING & TRACKING CENTER */}
+                <div className="bg-gradient-to-br from-emerald-950/40 via-zinc-900 to-black/60 border border-emerald-500/20 rounded-2xl p-5 sm:p-6 space-y-6">
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <Truck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-base text-white flex items-center gap-2">
+                          <span>Shipping &amp; Order Tracking</span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider border ${
+                            trackingBadgeStyles[selectedOrder.trackingStatus || 'processing'] || 'bg-gray-500/10 text-gray-300 border-gray-500/20'
+                          }`}>
+                            {selectedOrder.trackingStatus || 'processing'}
+                          </span>
+                        </h4>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          Manage courier assignment, AWB codes, and live tracking timeline
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Customer Link Actions */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleCopyCustomerTrackingLink(selectedOrder._id)}
+                        className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-white font-medium transition flex items-center gap-1.5 border border-white/10"
+                        title="Copy direct tracking link to share with customer via WhatsApp/Email"
                       >
-                        <option value="Pending" className="bg-gray-900 text-white">Pending</option>
-                        <option value="Paid" className="bg-gray-900 text-white">Paid</option>
-                        <option value="Shipped" className="bg-gray-900 text-white">Shipped</option>
-                        <option value="Delivered" className="bg-gray-900 text-white">Delivered</option>
-                      </select>
-                    )}
+                        {copiedTrackingUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                        <span>{copiedTrackingUrl ? 'Link Copied!' : 'Copy Tracking Link'}</span>
+                      </button>
+
+                      <a
+                        href={`/track-order?orderId=${selectedOrder._id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 text-xs text-emerald-200 font-medium transition flex items-center gap-1.5 border border-emerald-500/30"
+                      >
+                        <span>Customer View</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
                   </div>
+
+                  {/* Shiprocket Automated Courier Actions Bar */}
+                  <div className="bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-amber-400" />
+                        <span className="font-bold text-sm text-white">Automated Shiprocket Courier Dispatch</span>
+                      </div>
+                      <p className="text-xs text-gray-400">
+                        {selectedOrder.shipping?.awbCode
+                          ? `AWB #${selectedOrder.shipping.awbCode} assigned via ${selectedOrder.shipping.carrier || 'Courier'}. Click to sync latest tracking scans.`
+                          : 'Push order details to Shiprocket to automatically create a shipment and assign courier AWB.'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {selectedOrder.shipping?.awbCode ? (
+                        <button
+                          type="button"
+                          onClick={handleSyncShiprocket}
+                          disabled={isSyncingTracking}
+                          className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20 disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isSyncingTracking ? 'animate-spin' : ''}`} />
+                          <span>{isSyncingTracking ? 'Syncing Scans...' : 'Sync Live Shiprocket Status'}</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleCreateShiprocket}
+                          disabled={isCreatingShiprocket}
+                          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 disabled:opacity-50"
+                        >
+                          {isCreatingShiprocket ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Package className="w-3.5 h-3.5" />
+                          )}
+                          <span>{isCreatingShiprocket ? 'Creating Shipment...' : 'Create Shiprocket Shipment'}</span>
+                        </button>
+                      )}
+
+                      {selectedOrder.shipping?.trackingUrl && (
+                        <a
+                          href={selectedOrder.shipping.trackingUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-xl bg-white/10 hover:bg-white/15 text-gray-300 hover:text-white transition"
+                          title="Open External Courier Page"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Manual Status & Courier Update Form */}
+                  <form onSubmit={handleUpdateTracking} className="space-y-4 pt-1">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      
+                      {/* Tracking Status */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                          Tracking Status
+                        </label>
+                        <select
+                          value={trackingStatus}
+                          onChange={(e) => setTrackingStatus(e.target.value)}
+                          className="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                        >
+                          <option value="processing">Order Processing</option>
+                          <option value="packed">Packed &amp; Inspected</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="in_transit">In Transit</option>
+                          <option value="out_for_delivery">Out for Delivery</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                          <option value="returned">Returned (RTO)</option>
+                          <option value="exception">Delivery Exception</option>
+                        </select>
+                      </div>
+
+                      {/* Courier Carrier */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                          Courier Partner
+                        </label>
+                        <div className="space-y-1.5">
+                          <input
+                            type="text"
+                            placeholder="e.g. Shiprocket, Blue Dart, Delhivery"
+                            value={carrier}
+                            onChange={(e) => setCarrier(e.target.value)}
+                            className="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+                          />
+                          <div className="flex flex-wrap gap-1">
+                            {['Shiprocket', 'Blue Dart', 'Delhivery', 'DTDC', 'India Post'].map((c) => (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={() => setCarrier(c)}
+                                className={`text-[10px] px-2 py-0.5 rounded transition ${
+                                  carrier === c ? 'bg-emerald-600 text-white' : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                                }`}
+                              >
+                                {c}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* AWB Tracking Number */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                          AWB / Tracking Number
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 142239485721"
+                          value={trackingNumber}
+                          onChange={(e) => setTrackingNumber(e.target.value)}
+                          className="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white font-mono placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Checkpoint Location */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                          Checkpoint Location (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Wayanad Plantation Hub, Kerala"
+                          value={updateLocation}
+                          onChange={(e) => setUpdateLocation(e.target.value)}
+                          className="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+
+                      {/* Checkpoint Note / Description */}
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-300 mb-1.5">
+                          Activity Update Note (Optional)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Package dispatched via express airway"
+                          value={updateNote}
+                          onChange={(e) => setUpdateNote(e.target.value)}
+                          className="w-full bg-black/60 border border-white/15 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end pt-1">
+                      <button
+                        type="submit"
+                        disabled={isUpdatingTracking}
+                        className="px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-orange-500/25 disabled:opacity-50"
+                      >
+                        {isUpdatingTracking ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                        )}
+                        <span>{isUpdatingTracking ? 'Updating...' : 'Save Tracking Update & Log Checkpoint'}</span>
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Tracking Events Timeline History Log */}
+                  {selectedOrder.trackingHistory && selectedOrder.trackingHistory.length > 0 && (
+                    <div className="pt-4 border-t border-white/10 space-y-3">
+                      <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        Checkpoint Activity History ({selectedOrder.trackingHistory.length})
+                      </span>
+
+                      <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+                        {[...selectedOrder.trackingHistory].reverse().map((ev: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-black/30 border border-white/5 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs"
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                                  trackingBadgeStyles[ev.status] || 'bg-gray-500/10 text-gray-300'
+                                }`}>
+                                  {ev.status}
+                                </span>
+                                <span className="font-medium text-white">{ev.description}</span>
+                              </div>
+                              {ev.location && (
+                                <p className="text-[11px] text-emerald-400 flex items-center gap-1 mt-0.5">
+                                  <MapPin className="w-3 h-3" />
+                                  <span>{ev.location}</span>
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="text-[11px] font-mono text-gray-400 shrink-0">
+                              {new Date(ev.timestamp).toLocaleDateString('en-GB', {
+                                day: '2-digit',
+                                month: 'short',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
               </div>

@@ -179,21 +179,33 @@ function CheckoutSuccessContent() {
           </div>
 
           {/* Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-            <Link 
-              href="/products" 
-              className="py-3 px-5 rounded-lg border border-neutral-300 text-neutral-700 font-semibold text-sm hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-center"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              <span>Explore More Spices</span>
-            </Link>
-            <Link 
-              href="/" 
-              className="py-3 px-5 rounded-lg bg-[#317a26] hover:bg-[#235e1c] text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2 text-center shadow-sm"
-            >
-              <span>Return to Home</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+          <div className="space-y-3 pt-2">
+            {displayId && (
+              <Link 
+                href={`/track-order?orderId=${encodeURIComponent(String(displayId))}`}
+                className="w-full py-3.5 px-5 rounded-xl bg-[#317a26] hover:bg-[#235e1c] text-white font-bold text-sm transition-all flex items-center justify-center gap-2.5 text-center shadow-md shadow-emerald-900/20"
+              >
+                <Truck className="w-4 h-4" />
+                <span>Track Your Order Status Live</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Link 
+                href="/products" 
+                className="py-3 px-5 rounded-lg border border-neutral-300 text-neutral-700 font-semibold text-sm hover:bg-neutral-50 transition-colors flex items-center justify-center gap-2 text-center"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Explore More Spices</span>
+              </Link>
+              <Link 
+                href="/" 
+                className="py-3 px-5 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-semibold text-sm transition-colors flex items-center justify-center gap-2 text-center"
+              >
+                <span>Return to Home</span>
+              </Link>
+            </div>
           </div>
 
         </div>

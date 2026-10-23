@@ -14,8 +14,33 @@ export interface IOrderItem {
   sentToVendorAt?: Date;
 }
 
+export interface ITrackingEvent {
+  status: 'processing' | 'packed' | 'shipped' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned' | 'exception';
+  description?: string;
+  location?: string;
+  source: 'admin' | 'shiprocket' | 'system';
+  eventKey?: string;
+  timestamp: Date;
+}
+
+export interface IShippingDetails {
+  carrier?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  shiprocketOrderId?: string;
+  shiprocketShipmentId?: string;
+  awbCode?: string;
+  courierCompanyId?: number;
+  labelUrl?: string;
+  manifestUrl?: string;
+  shippedAt?: Date;
+  deliveredAt?: Date;
+  estimatedDeliveryDate?: Date;
+}
+
 // Interface for the complete order document
 export interface IOrder extends Document {
+  userId?: mongoose.Types.ObjectId;
   customerName: string;
   customerEmail: string;
   customerPhone?: string;
@@ -32,7 +57,7 @@ export interface IOrder extends Document {
   couponCode?: string;
   discountAmount?: number;
   paymentStatus: 'pending' | 'paid' | 'failed';
-  orderStatus: 'Pending' | 'Paid' | 'Shipped' | 'Delivered';
+  orderStatus: 'Pending' | 'Paid' | 'Shipped' | 'Delivered' | 'Cancelled';
   paymentMethod?: 'razorpay' | 'stripe' | 'cod';
   paymentGatewayId?: string; // To store Razorpay order ID or Stripe session ID
   paymentId?: string; // To store Razorpay payment ID for auditing
@@ -43,6 +68,9 @@ export interface IOrder extends Document {
     addressText?: string;
   };
   estimatedDeliveryMinutes?: number;
+  trackingStatus: 'processing' | 'packed' | 'shipped' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned' | 'exception';
+  shipping: IShippingDetails;
+  trackingHistory: ITrackingEvent[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -58,8 +86,53 @@ const OrderItemSchema = new Schema<IOrderItem>({
   sentToVendorAt: { type: Date },
 });
 
+const TrackingEventSchema = new Schema<ITrackingEvent>(
+  {
+    status: {
+      type: String,
+      enum: [
+        'processing',
+        'packed',
+        'shipped',
+        'in_transit',
+        'out_for_delivery',
+        'delivered',
+        'cancelled',
+        'returned',
+        'exception',
+      ],
+      required: true,
+    },
+    description: { type: String, default: '' },
+    location: { type: String, default: '' },
+    source: { type: String, enum: ['admin', 'shiprocket', 'system'], default: 'admin' },
+    eventKey: { type: String, default: '' },
+    timestamp: { type: Date, default: Date.now },
+  },
+  { _id: true }
+);
+
+const ShippingDetailsSchema = new Schema<IShippingDetails>(
+  {
+    carrier: { type: String, default: '' },
+    trackingNumber: { type: String, default: '' },
+    trackingUrl: { type: String, default: '' },
+    shiprocketOrderId: { type: String, default: '' },
+    shiprocketShipmentId: { type: String, default: '' },
+    awbCode: { type: String, default: '' },
+    courierCompanyId: { type: Number },
+    labelUrl: { type: String, default: '' },
+    manifestUrl: { type: String, default: '' },
+    shippedAt: { type: Date, default: null },
+    deliveredAt: { type: Date, default: null },
+    estimatedDeliveryDate: { type: Date, default: null },
+  },
+  { _id: false }
+);
+
 const OrderSchema = new Schema<IOrder>(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
     customerName: { type: String, required: true },
     customerEmail: { type: String, required: true },
     customerPhone: { type: String },
@@ -82,7 +155,7 @@ const OrderSchema = new Schema<IOrder>(
     },
     orderStatus: {
       type: String,
-      enum: ['Pending', 'Paid', 'Shipped', 'Delivered'],
+      enum: ['Pending', 'Paid', 'Shipped', 'Delivered', 'Cancelled'],
       default: 'Pending',
     },
     paymentMethod: {
@@ -106,6 +179,36 @@ const OrderSchema = new Schema<IOrder>(
       addressText: String,
     },
     estimatedDeliveryMinutes: { type: Number },
+    trackingStatus: {
+      type: String,
+      enum: [
+        'processing',
+        'packed',
+        'shipped',
+        'in_transit',
+        'out_for_delivery',
+        'delivered',
+        'cancelled',
+        'returned',
+        'exception',
+      ],
+      default: 'processing',
+    },
+    shipping: {
+      type: ShippingDetailsSchema,
+      default: () => ({}),
+    },
+    trackingHistory: {
+      type: [TrackingEventSchema],
+      default: () => [
+        {
+          status: 'processing',
+          description: 'Order confirmed and registered in system.',
+          source: 'system',
+          timestamp: new Date(),
+        },
+      ],
+    },
   },
   { timestamps: true }
 );
