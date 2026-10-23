@@ -19,7 +19,7 @@ const allowedStatuses = [
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id?: string; orderId?: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -27,7 +27,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'Unauthorized. Admin access required.' }, { status: 401 });
     }
 
-    const { id: orderId } = params;
+    const orderId = params.id || params.orderId || '';
     const body = await request.json();
     const {
       status,
@@ -135,7 +135,7 @@ export async function PATCH(
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id?: string; orderId?: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -143,8 +143,9 @@ export async function GET(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
+    const orderId = params.id || params.orderId || '';
     await dbConnect();
-    const order = await Order.findById(params.id).lean();
+    const order = await Order.findById(orderId).lean();
     if (!order) {
       return NextResponse.json({ message: 'Order not found' }, { status: 404 });
     }

@@ -7,10 +7,10 @@ import mongoose from 'mongoose';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id?: string; orderId?: string } }
 ) {
   try {
-    const { id: orderId } = params;
+    const orderId = params.id || params.orderId || '';
     const { searchParams } = new URL(request.url);
     const verifyEmail = searchParams.get('email')?.trim().toLowerCase();
     const verifyPhone = searchParams.get('phone')?.trim();
@@ -45,17 +45,21 @@ export async function GET(
       isAuthorized = true;
     } else if (verifyEmail && (order as any).customerEmail?.toLowerCase() === verifyEmail) {
       isAuthorized = true;
-    } else if (verifyPhone && (order as any).customerPhone && (order as any).customerPhone.includes(verifyPhone)) {
-      isAuthorized = true;
-    } else if (!session && !verifyEmail && !verifyPhone) {
-      // In guest-friendly e-commerce, when user follows their direct order confirmation link:
-      // Return order tracking info with customer PII protected
-      isAuthorized = true;
+    } else if (verifyPhone && (order as any).customerPhone) {
+      const orderDigits = String((order as any).customerPhone).replace(/\D/g, '');
+      const verifyDigits = verifyPhone.replace(/\D/g, '');
+      if (verifyDigits.length >= 4 && orderDigits.includes(verifyDigits)) {
+        isAuthorized = true;
+      }
     }
 
     if (!isAuthorized) {
       return NextResponse.json(
-        { message: 'Please provide the email or mobile number used during checkout to track this order.' },
+        { 
+          message: session 
+            ? 'Access denied. You do not have permission to view tracking for this order.' 
+            : 'Unauthorized. Please log in with the account used at checkout, or provide the verification email or phone parameter.' 
+        },
         { status: 403 }
       );
     }
