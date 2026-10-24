@@ -48,7 +48,8 @@ const OFFICE_LOCATIONS = [
     tagColor: "bg-amber-100 text-amber-800 border-amber-200",
     phone: "+91 80864 51830",
     email: "calicut@spicewizz.com",
-    features: ["Global Export Logistics Desk", "B2B International Trade Desk", "Tech & Supply Chain Management"]
+    features: ["Global Export Logistics Desk", "B2B International Trade Desk", "Tech & Supply Chain Management"],
+    isComingSoon: true
   }
 ];
 
@@ -188,7 +189,10 @@ export default function ContactPage() {
                 <MapPin className="text-secondary w-7 h-7 flex-shrink-0 mt-1" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <h3 className="font-title-lg text-title-lg text-slate-ink font-semibold">Calicut Office</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-title-lg text-title-lg text-slate-ink font-semibold">Calicut Office</h3>
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-800 border border-amber-500/30 px-2 py-0.5 rounded-full animate-pulse">Coming Soon</span>
+                    </div>
                     <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">Cyber Park</span>
                   </div>
                   <p className="text-slate-800 font-semibold text-sm">Spicewizz</p>
@@ -251,7 +255,7 @@ export default function ContactPage() {
                     href="tel:+918086451830"
                     className="block text-on-surface-variant hover:text-secondary font-body-md text-sm transition-colors"
                   >
-                    +91 80864 51830 (Calicut)
+                    +91 80864 51830 (Calicut — Coming Soon)
                   </a>
                 </div>
               </div>
@@ -419,7 +423,7 @@ export default function ContactPage() {
               Visit Our Offices
             </h2>
             <p className="text-on-surface-variant max-w-xl mx-auto text-sm md:text-base">
-              Experience authentic Malabar spices at our source origin in Wayanad or coordinate commercial exports at our Calicut corporate hub.
+              Experience authentic Malabar spices at our source origin in Wayanad or coordinate commercial exports at our upcoming Calicut corporate hub (Coming Soon).
             </p>
           </div>
 
@@ -440,8 +444,17 @@ export default function ContactPage() {
                 >
                   <MapPin className={`w-5 h-5 flex-shrink-0 ${isActive ? "text-saffron-glow" : "text-secondary"}`} />
                   <div className="text-left">
-                    <div className="font-semibold text-sm md:text-base leading-tight">
-                      {loc.title}
+                    <div className="font-semibold text-sm md:text-base leading-tight flex items-center gap-2">
+                      <span>{loc.title}</span>
+                      {loc.isComingSoon && (
+                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                          isActive 
+                            ? "bg-amber-300 text-neutral-950" 
+                            : "bg-amber-100 text-amber-800 border border-amber-300"
+                        }`}>
+                          Coming Soon
+                        </span>
+                      )}
                     </div>
                     <div className={`text-xs ${isActive ? "text-white/80" : "text-neutral-500"}`}>
                       {loc.shortAddress}
@@ -477,11 +490,16 @@ export default function ContactPage() {
                 <div className="absolute bottom-4 left-4 right-4 md:right-auto md:max-w-md bg-white/95 backdrop-blur-md p-4 rounded-xl border border-neutral-200/80 shadow-xl pointer-events-auto">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className={`w-2.5 h-2.5 rounded-full ${activeOffice.isComingSoon ? "bg-amber-500 animate-pulse" : "bg-emerald-500 animate-pulse"}`} />
                         <span className="text-[11px] font-bold uppercase tracking-wider text-secondary">
                           {activeOffice.badge}
                         </span>
+                        {activeOffice.isComingSoon && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full">
+                            Coming Soon
+                          </span>
+                        )}
                       </div>
                       <h4 className="font-title-lg font-bold text-slate-ink text-base">
                         {activeOffice.title}
@@ -525,7 +543,14 @@ export default function ContactPage() {
                           <Building2 className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="font-bold text-slate-ink text-base">{loc.title}</h4>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className="font-bold text-slate-ink text-base">{loc.title}</h4>
+                            {loc.isComingSoon && (
+                              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-full">
+                                Coming Soon
+                              </span>
+                            )}
+                          </div>
                           <span className="text-xs text-secondary font-medium">{loc.role}</span>
                         </div>
                       </div>
