@@ -12,6 +12,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 
+export const NAVBAR_PRODUCTS = [
+  'Cardamom',
+  'Black Cardamom',
+  'Vanilla',
+  'Pepper',
+  'Cinnamon',
+  'Nutmeg',
+  'Mace flower',
+  'Star anise',
+  'Bay leafe',
+  'Honey',
+  'Coffee seeds',
+];
+
 export default function Navbar() {
   const { cartItems, isCartOpen, setIsCartOpen } = useCart();
   const { location, setIsModalOpen, isQuickMode } = useLocation();
@@ -66,8 +80,8 @@ export default function Navbar() {
                   Products
                   <ChevronDown size={16} className="transition-transform duration-200 group-hover:-rotate-180" />
                 </Link>
-                <div className="absolute top-full left-0 w-48 bg-surface dark:bg-zinc-900 rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
-                  {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
+                <div className="absolute top-full left-0 w-52 bg-surface dark:bg-zinc-900 rounded-xl shadow-lg border border-black/5 dark:border-white/5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 flex flex-col py-2 mt-[-8px]">
+                  {NAVBAR_PRODUCTS.map((item) => (
                     <Link 
                       key={item} 
                       href={`/products?filter=${encodeURIComponent(item.toLowerCase())}`}
@@ -253,7 +267,7 @@ export default function Navbar() {
                         transition={{ duration: 0.2 }}
                         className="overflow-hidden flex flex-col pl-4 mt-2 space-y-3 border-l border-black/10 dark:border-white/10"
                       >
-                        {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
+                        {NAVBAR_PRODUCTS.map((item) => (
                           <Link 
                             key={item} 
                             href={`/products?filter=${encodeURIComponent(item.toLowerCase())}`}

@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Send, Loader2, CheckCircle, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NAVBAR_PRODUCTS = ['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'];
+import { NAVBAR_PRODUCTS } from '@/components/Navbar';
 
 const COUNTRIES = [
   'India',

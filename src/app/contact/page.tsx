@@ -15,6 +15,7 @@ import {
   Compass, 
   Globe2 
 } from "lucide-react";
+import { NAVBAR_PRODUCTS } from "@/components/Navbar";
 
 const OFFICE_LOCATIONS = [
   {
@@ -354,7 +355,7 @@ export default function ContactPage() {
                       onChange={handleInputChange}
                       className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3"
                     >
-                      {['Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Mace flower', 'Star anise', 'Bay leafe', 'Honey', 'Coffee seeds'].map((item) => (
+                      {NAVBAR_PRODUCTS.map((item) => (
                         <option key={item} value={item}>{item}</option>
                       ))}
                     </select>
