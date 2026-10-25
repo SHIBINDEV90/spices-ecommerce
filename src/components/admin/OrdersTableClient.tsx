@@ -32,7 +32,8 @@ import {
   Boxes,
   ShieldAlert,
   Sparkles,
-  Navigation
+  Navigation,
+  Zap
 } from 'lucide-react';
 
 interface OrdersTableClientProps {
@@ -46,6 +47,8 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [deliveryFilter, setDeliveryFilter] = useState<'ALL' | 'quick' | 'standard'>('ALL');
+  const [isUpdatingDeliveryType, setIsUpdatingDeliveryType] = useState<boolean>(false);
 
   // Delete states
   const [orderToDelete, setOrderToDelete] = useState<any | null>(null);
@@ -162,6 +165,43 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
       alert('Failed to update status.');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleSpecifyDeliveryType = async (orderId: string, newType: 'quick' | 'standard') => {
+    setIsUpdatingDeliveryType(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deliveryType: newType }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Failed to update delivery type.');
+
+      if (data.order) {
+        setOrders(prev => prev.map(o => o._id === orderId ? data.order : o));
+        if (selectedOrder && selectedOrder._id === orderId) {
+          setSelectedOrder(data.order);
+        }
+      } else {
+        setOrders(prev => prev.map(o => o._id === orderId ? { ...o, deliveryType: newType } : o));
+        if (selectedOrder && selectedOrder._id === orderId) {
+          setSelectedOrder((prev: any) => ({ ...prev, deliveryType: newType }));
+        }
+      }
+
+      showFeedback(
+        'success',
+        `Order #${orderId.substring(orderId.length - 8).toUpperCase()} specified as ${
+          newType === 'quick' ? '⚡ Quick Commerce (3-Hour Express)' : '📦 Standard Courier'
+        }`
+      );
+    } catch (err: any) {
+      console.error(err);
+      showFeedback('error', err.message || 'Failed to update order delivery channel.');
+    } finally {
+      setIsUpdatingDeliveryType(false);
     }
   };
 
@@ -307,24 +347,37 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
   // Filtered orders
   const filteredOrders = orders.filter(order => {
     const matchesStatus = statusFilter === 'ALL' || order.orderStatus === statusFilter;
+    const matchesDelivery = 
+      deliveryFilter === 'ALL' || 
+      (deliveryFilter === 'quick' && order.deliveryType === 'quick') ||
+      (deliveryFilter === 'standard' && order.deliveryType !== 'quick');
+
     const query = searchQuery.toLowerCase().trim();
-    if (!query) return matchesStatus;
+    if (!query) return matchesStatus && matchesDelivery;
 
     const fullAddr = formatShippingAddress(order.shippingAddress).toLowerCase();
     const name = (order.customerName || '').toLowerCase();
     const email = (order.customerEmail || '').toLowerCase();
     const phone = (order.customerPhone || '').toLowerCase();
     const id = (order._id || '').toLowerCase();
+    const deliveryTypeStr = (order.deliveryType || 'standard').toLowerCase();
+    const isQuickMatch = (order.deliveryType === 'quick' && ('quick commerce express hyperlocal 35km'.includes(query) || query.includes('quick')));
 
     const matchesQuery = 
       name.includes(query) ||
       email.includes(query) ||
       phone.includes(query) ||
       id.includes(query) ||
-      fullAddr.includes(query);
+      fullAddr.includes(query) ||
+      deliveryTypeStr.includes(query) ||
+      isQuickMatch;
 
-    return matchesStatus && matchesQuery;
+    return matchesStatus && matchesDelivery && matchesQuery;
   });
+
+  const totalOrdersCount = orders.length;
+  const quickOrdersCount = orders.filter(o => o.deliveryType === 'quick').length;
+  const standardOrdersCount = orders.filter(o => o.deliveryType !== 'quick').length;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -336,7 +389,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
           </h2>
           <p className="text-gray-400 mt-1.5 flex items-center gap-2 text-sm">
             <ShoppingCart className="w-4 h-4 text-orange-400" />
-            <span>{orders.length} Total Orders &bull; Manage customer shipments &amp; tracking</span>
+            <span>{orders.length} Total Orders &bull; Quick Commerce &amp; Standard Dispatch</span>
           </p>
         </div>
 
@@ -346,12 +399,23 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
             <input 
               type="text"
-              placeholder="Search customer, city, ID..."
+              placeholder="Search customer, city, ID, quick..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder:text-gray-500 outline-none focus:border-orange-500/50 transition-colors w-64"
             />
           </div>
+
+          {/* Delivery Channel Filter */}
+          <select
+            value={deliveryFilter}
+            onChange={(e) => setDeliveryFilter(e.target.value as any)}
+            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-orange-500/50 transition-colors cursor-pointer"
+          >
+            <option value="ALL" className="bg-gray-900 text-white">All Channels</option>
+            <option value="quick" className="bg-gray-900 text-amber-300">⚡ Quick Commerce (Express)</option>
+            <option value="standard" className="bg-gray-900 text-blue-300">📦 Standard Shipping</option>
+          </select>
 
           <select
             value={statusFilter}
@@ -367,6 +431,69 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
         </div>
       </div>
 
+      {/* Quick Filter Counters Banner */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <button
+          type="button"
+          onClick={() => setDeliveryFilter('ALL')}
+          className={`p-3.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+            deliveryFilter === 'ALL'
+              ? 'bg-white/10 border-orange-500/50 shadow-md shadow-orange-500/10'
+              : 'bg-white/5 border-white/10 hover:bg-white/[0.08]'
+          }`}
+        >
+          <div>
+            <span className="text-xs text-gray-400 uppercase font-semibold tracking-wider block">All Orders</span>
+            <span className="text-2xl font-black text-white mt-0.5 block">{totalOrdersCount}</span>
+            <span className="text-[11px] text-gray-400">Total customer orders</span>
+          </div>
+          <div className="p-2.5 rounded-lg bg-white/5 border border-white/10 text-gray-300">
+            <ShoppingCart className="w-5 h-5" />
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setDeliveryFilter('quick')}
+          className={`p-3.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+            deliveryFilter === 'quick'
+              ? 'bg-amber-500/15 border-amber-400 shadow-lg shadow-amber-500/20 ring-1 ring-amber-400/30'
+              : 'bg-gradient-to-r from-amber-500/10 to-orange-500/5 border-amber-500/20 hover:border-amber-500/40'
+          }`}
+        >
+          <div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-amber-400 uppercase font-bold tracking-wider block">Quick Commerce</span>
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-black bg-amber-400 text-black">3-HR</span>
+            </div>
+            <span className="text-2xl font-black text-amber-300 mt-0.5 block">{quickOrdersCount}</span>
+            <span className="text-[11px] text-amber-400/80">Hyperlocal 35 km Dispatches</span>
+          </div>
+          <div className="p-2.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400">
+            <Zap className="w-5 h-5 fill-current" />
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setDeliveryFilter('standard')}
+          className={`p-3.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+            deliveryFilter === 'standard'
+              ? 'bg-blue-500/15 border-blue-400 shadow-lg shadow-blue-500/20 ring-1 ring-blue-400/30'
+              : 'bg-white/5 border-white/10 hover:bg-white/[0.08]'
+          }`}
+        >
+          <div>
+            <span className="text-xs text-blue-400 uppercase font-semibold tracking-wider block">Standard Shipping</span>
+            <span className="text-2xl font-black text-white mt-0.5 block">{standardOrdersCount}</span>
+            <span className="text-[11px] text-gray-400">Shiprocket / National Courier</span>
+          </div>
+          <div className="p-2.5 rounded-lg bg-blue-500/15 border border-blue-500/25 text-blue-400">
+            <Truck className="w-5 h-5" />
+          </div>
+        </button>
+      </div>
+
       {/* Orders Table */}
       <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-lg shadow-xl">
         <div className="overflow-x-auto min-h-[500px]">
@@ -375,6 +502,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
               <tr className="bg-black/40 text-gray-400 text-xs uppercase tracking-wider font-semibold">
                 <th className="p-4">Order ID</th>
                 <th className="p-4">Customer Details</th>
+                <th className="p-4">Delivery Channel</th>
                 <th className="p-4">Shipping Destination</th>
                 <th className="p-4">Amount</th>
                 <th className="p-4">Payment</th>
@@ -387,7 +515,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
               <AnimatePresence>
                 {filteredOrders.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-12 text-center text-gray-500">
+                    <td colSpan={9} className="p-12 text-center text-gray-500">
                       <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-20" />
                       <p className="text-base font-medium">No orders found.</p>
                       <p className="text-xs text-gray-500 mt-1">Try clearing filters or search terms.</p>
@@ -443,6 +571,38 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                             </div>
                           );
                         })()}
+                      </td>
+
+                      {/* Delivery Channel Column */}
+                      <td className="p-4">
+                        {order.deliveryType === 'quick' ? (
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-300 border border-amber-500/35 shadow-sm shadow-amber-500/10">
+                              <Zap className="w-3.5 h-3.5 fill-amber-400 text-amber-400 animate-pulse" />
+                              <span>Quick Commerce</span>
+                            </span>
+                            <span className="text-[11px] text-amber-400/90 font-medium pl-1 flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-orange-400" />
+                              <span>3-Hr Express ({order.estimatedDeliveryMinutes || 180}m)</span>
+                            </span>
+                            {order.deliveryLocation?.coordinates && (
+                              <span className="text-[10px] text-emerald-400 pl-1 flex items-center gap-1 font-mono">
+                                <MapPin className="w-2.5 h-2.5" />
+                                <span>35km Geo-pinned</span>
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-1 items-start">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                              <Truck className="w-3.5 h-3.5 text-blue-400" />
+                              <span>Standard Delivery</span>
+                            </span>
+                            <span className="text-[11px] text-gray-400 pl-1">
+                              National / Shiprocket
+                            </span>
+                          </div>
+                        )}
                       </td>
 
                       {/* Shipping Destination */}
@@ -592,7 +752,149 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
 
               {/* Modal Content */}
               <div className="p-6 space-y-6">
-                
+
+                {/* 0. DELIVERY CHANNEL SPECIFICATION & DISPATCH CARD */}
+                <div className={`rounded-2xl p-5 border relative overflow-hidden transition-all ${
+                  selectedOrder.deliveryType === 'quick'
+                    ? 'bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-black/40 border-amber-500/35 shadow-lg shadow-amber-500/5'
+                    : 'bg-gradient-to-br from-blue-500/15 via-indigo-500/10 to-black/40 border-blue-500/30'
+                }`}>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+                    <div className="flex items-start gap-3">
+                      <div className={`p-3 rounded-xl border flex-shrink-0 ${
+                        selectedOrder.deliveryType === 'quick'
+                          ? 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+                          : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                      }`}>
+                        {selectedOrder.deliveryType === 'quick' ? (
+                          <Zap className="w-6 h-6 fill-current animate-pulse text-amber-400" />
+                        ) : (
+                          <Truck className="w-6 h-6 text-blue-400" />
+                        )}
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                            Fulfillment Channel:
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border flex items-center gap-1.5 ${
+                            selectedOrder.deliveryType === 'quick'
+                              ? 'bg-amber-500 text-black border-amber-400 font-extrabold shadow-sm shadow-amber-500/30'
+                              : 'bg-blue-500/20 text-blue-300 border-blue-500/30 font-bold'
+                          }`}>
+                            {selectedOrder.deliveryType === 'quick' ? (
+                              <>
+                                <Zap className="w-3.5 h-3.5 fill-current" />
+                                <span>QUICK COMMERCE (3-HOUR EXPRESS)</span>
+                              </>
+                            ) : (
+                              <>
+                                <Truck className="w-3.5 h-3.5" />
+                                <span>STANDARD COMMERCE (COURIER)</span>
+                              </>
+                            )}
+                          </span>
+                        </div>
+
+                        <h4 className="text-lg font-bold text-white mt-1">
+                          {selectedOrder.deliveryType === 'quick'
+                            ? 'Hyperlocal Local Delivery (Within 35 km Radius)'
+                            : 'Standard National Courier Logistics (Shiprocket / Air Express)'}
+                        </h4>
+
+                        <p className="text-xs text-gray-300 mt-1 leading-relaxed">
+                          {selectedOrder.deliveryType === 'quick'
+                            ? '⚡ Customer ordered via Quick Commerce. Requires immediate packing and dispatch within 3 hours via local vendor pickup or direct rider. Do not send via standard national courier unless switched.'
+                            : '📦 Customer ordered via Standard Delivery. Process via regular warehouse fulfillment and Shiprocket national courier AWB generation.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Specification Action Button for Admin */}
+                    <div className="flex flex-col items-start md:items-end gap-2 shrink-0">
+                      <span className="text-[11px] text-gray-400 font-medium">Admin Specification:</span>
+                      <div className="flex items-center gap-2">
+                        {selectedOrder.deliveryType === 'quick' ? (
+                          <button
+                            type="button"
+                            disabled={isUpdatingDeliveryType}
+                            onClick={() => handleSpecifyDeliveryType(selectedOrder._id, 'standard')}
+                            className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/15 transition flex items-center gap-1.5 disabled:opacity-50"
+                            title="Convert this order to Standard Courier Delivery"
+                          >
+                            {isUpdatingDeliveryType ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Truck className="w-3.5 h-3.5 text-blue-400" />
+                            )}
+                            <span>Switch to Standard Courier 📦</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={isUpdatingDeliveryType}
+                            onClick={() => handleSpecifyDeliveryType(selectedOrder._id, 'quick')}
+                            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-xs shadow-lg shadow-orange-500/25 transition flex items-center gap-1.5 disabled:opacity-50"
+                            title="Convert this order to Quick Commerce (Express 3-Hour Delivery)"
+                          >
+                            {isUpdatingDeliveryType ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Zap className="w-3.5 h-3.5 fill-current" />
+                            )}
+                            <span>Specify as Quick Commerce ⚡</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Commerce Extra Metadata: SLA, Pinpoint, Coordinates */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 text-xs">
+                    <div className="bg-black/30 border border-white/5 rounded-xl p-3">
+                      <span className="text-gray-400 text-[11px] block">Delivery SLA Target</span>
+                      <span className="text-white font-bold text-sm flex items-center gap-1.5 mt-0.5">
+                        <Clock className="w-3.5 h-3.5 text-orange-400" />
+                        {selectedOrder.deliveryType === 'quick'
+                          ? `${selectedOrder.estimatedDeliveryMinutes || 180} Minutes (Under 3 Hrs)`
+                          : '3 - 7 Business Days'}
+                      </span>
+                    </div>
+
+                    <div className="bg-black/30 border border-white/5 rounded-xl p-3">
+                      <span className="text-gray-400 text-[11px] block">Local Service Radius</span>
+                      <span className="text-white font-bold text-sm flex items-center gap-1.5 mt-0.5">
+                        <Compass className="w-3.5 h-3.5 text-amber-400" />
+                        {selectedOrder.deliveryType === 'quick' ? '35 km Hyperlocal Hub' : 'Pan-India Logistics'}
+                      </span>
+                    </div>
+
+                    <div className="bg-black/30 border border-white/5 rounded-xl p-3">
+                      <span className="text-gray-400 text-[11px] block">Geo Coordinates (GPS)</span>
+                      {selectedOrder.deliveryLocation?.coordinates ? (
+                        <a
+                          href={`https://www.google.com/maps?q=${selectedOrder.deliveryLocation.coordinates[1]},${selectedOrder.deliveryLocation.coordinates[0]}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-amber-400 hover:text-amber-300 font-bold font-mono text-xs flex items-center gap-1 mt-0.5"
+                          title="Open customer location on Google Maps"
+                        >
+                          <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>
+                            {selectedOrder.deliveryLocation.coordinates[1].toFixed(4)}, {selectedOrder.deliveryLocation.coordinates[0].toFixed(4)}
+                          </span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 font-normal italic mt-0.5 block">
+                          Standard Address (No GPS pin)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
                 {/* 1. SHIPPING DESTINATION CARD (Customer Focus) */}
                 <div className="bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-transparent border border-amber-500/20 rounded-2xl p-5 relative overflow-hidden">
                   <div className="flex items-center justify-between mb-3">
@@ -913,6 +1215,23 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                       </a>
                     </div>
                   </div>
+
+                  {/* Quick Commerce Notice for Courier Dispatch */}
+                  {selectedOrder.deliveryType === 'quick' && (
+                    <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-start gap-3">
+                      <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400 shrink-0">
+                        <AlertTriangle className="w-4 h-4" />
+                      </div>
+                      <div className="text-xs">
+                        <span className="font-bold text-amber-300 block mb-0.5">
+                          ⚡ Quick Commerce Dispatch Advisory
+                        </span>
+                        <p className="text-amber-200/80 leading-relaxed">
+                          This order is specified as <strong>Quick Commerce (3-Hour Express)</strong>. It is designed for hyperlocal delivery via local delivery partner or nearby vendor dispatch. If you push this to Shiprocket for national courier air shipment, standard 3-7 day courier delivery will apply.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Shiprocket Automated Courier Actions Bar */}
                   <div className="bg-black/40 border border-white/10 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">

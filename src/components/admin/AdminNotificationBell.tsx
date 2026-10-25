@@ -140,17 +140,17 @@ export default function AdminNotificationBell() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+        className="relative p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-amber-500/30"
         aria-label="View notifications"
       >
-        <Bell className="w-5 h-5" />
+        <Bell className="w-4 h-4" />
         
         {unreadCount > 0 && (
           <>
-            <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-1 text-[11px] font-bold text-black shadow-lg shadow-orange-500/30 ring-2 ring-black">
+            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-1 text-[10px] font-bold text-black shadow-lg shadow-orange-500/30 ring-2 ring-black">
               {unreadCount > 99 ? '99+' : unreadCount}
             </span>
-            <span className="absolute -top-1 -right-1 flex h-5 min-w-5 animate-ping rounded-full bg-orange-400 opacity-60 pointer-events-none" />
+            <span className="absolute -top-1 -right-1 flex h-4 min-w-4 animate-ping rounded-full bg-orange-400 opacity-60 pointer-events-none" />
           </>
         )}
       </button>

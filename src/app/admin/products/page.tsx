@@ -17,7 +17,7 @@ export default async function AdminProductsPage() {
   const products = await getProducts();
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12">
+    <div className="w-full">
       <ProductTableClient initialProducts={products} />
     </div>
   );

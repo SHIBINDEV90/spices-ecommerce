@@ -230,6 +230,7 @@ export default function AdminQuickCommercePage() {
                   <th className="py-3 px-4">Items</th>
                   <th className="py-3 px-4">Total</th>
                   <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -255,6 +256,15 @@ export default function AdminQuickCommercePage() {
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         {o.orderStatus || 'Pending'}
                       </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <Link
+                        href="/admin/orders"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 hover:text-orange-300 text-xs font-semibold transition"
+                      >
+                        <span>Manage</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </Link>
                     </td>
                   </tr>
                 ))}

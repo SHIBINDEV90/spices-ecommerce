@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Package, Truck, Check, Clock } from 'lucide-react';
+import { Package, Truck, Check, Clock, Zap } from 'lucide-react';
 
 type VendorOrder = {
   _id: string;
@@ -11,6 +11,8 @@ type VendorOrder = {
   orderNote?: string;
   shippingAddress: any;
   paymentStatus: string;
+  deliveryType?: string;
+  estimatedDeliveryMinutes?: number;
   createdAt: string;
   sentToVendorAt?: string;
   vendorTotal: number;
@@ -89,6 +91,16 @@ export default function VendorOrders() {
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-200">
                         Assigned by Admin
                       </span>
+                      {order.deliveryType === 'quick' ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 animate-pulse">
+                          <Zap className="w-3.5 h-3.5 fill-current text-amber-600" />
+                          <span>⚡ Quick Commerce (3-Hr Express)</span>
+                        </span>
+                      ) : (
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
+                          📦 Standard Courier
+                        </span>
+                      )}
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
                       }`}>

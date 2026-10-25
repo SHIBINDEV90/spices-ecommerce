@@ -18,7 +18,7 @@ export default async function EditProductPage({ params }: { params: { id: string
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 md:p-12">
+    <div className="w-full">
       <ProductForm 
         initialData={JSON.parse(JSON.stringify(product))} 
         productId={params.id}

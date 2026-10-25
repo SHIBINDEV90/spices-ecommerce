@@ -9,10 +9,12 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen bg-black text-white selection:bg-orange-500/30">
       <Sidebar />
-      <main className="flex-1 overflow-x-hidden p-6 md:p-12 relative bg-gradient-to-br from-black via-[#0a0a0a] to-[#111]">
+      <div className="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-black via-[#0a0a0a] to-[#111]">
         <AdminHeader />
-        {children}
-      </main>
+        <main className="flex-1 overflow-x-hidden p-6 md:p-8 lg:p-10 relative">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

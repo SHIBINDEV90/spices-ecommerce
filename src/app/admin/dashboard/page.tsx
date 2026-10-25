@@ -3,7 +3,7 @@ import Product from '@/lib/models/Product';
 import Order from '@/lib/models/Order';
 import Enquiry from '@/lib/models/Enquiry';
 import DashboardCharts from '@/components/admin/DashboardCharts';
-import { Package, ShoppingCart, MessageSquare, Users, IndianRupee, Bell, ArrowRight } from 'lucide-react';
+import { Package, ShoppingCart, MessageSquare, Users, IndianRupee, Bell, ArrowRight, Zap, Truck, Clock } from 'lucide-react';
 import Link from 'next/link';
 
 // Mock data builder for charts for now
@@ -33,6 +33,11 @@ export default async function AdminDashboardPage() {
 
   const totalProducts = await Product.countDocuments();
   const totalOrders = await Order.countDocuments();
+  const quickOrdersCount = await Order.countDocuments({ deliveryType: 'quick' });
+  const pendingQuickOrdersCount = await Order.countDocuments({ 
+    deliveryType: 'quick', 
+    orderStatus: { $in: ['Pending', 'Paid'] } 
+  });
   const totalEnquiries = await Enquiry.countDocuments();
   const pendingEnquiriesCount = await Enquiry.countDocuments({ status: 'pending' });
   
@@ -59,6 +64,34 @@ export default async function AdminDashboardPage() {
           <p className="text-gray-400 mt-2">Welcome back. Here is your business at a glance.</p>
         </div>
       </div>
+
+      {/* Quick Commerce Urgent Dispatch Alert */}
+      {pendingQuickOrdersCount > 0 && (
+        <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-neutral-900/60 border border-amber-500/40 rounded-2xl p-5 backdrop-blur-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-amber-500/10">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="p-3 rounded-xl bg-amber-500/25 text-amber-300 border border-amber-500/40 flex-shrink-0 animate-pulse">
+              <Zap className="w-5 h-5 fill-current" />
+            </div>
+            <div>
+              <h3 className="text-white font-bold text-sm sm:text-base flex items-center gap-2 flex-wrap">
+                <span>{pendingQuickOrdersCount} Quick Commerce {pendingQuickOrdersCount === 1 ? 'Order' : 'Orders'} Pending 3-Hour Dispatch</span>
+                <span className="bg-amber-400 text-black text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Express 35km SLA
+                </span>
+              </h3>
+              <p className="text-gray-300 text-xs mt-0.5 leading-relaxed">
+                Hyperlocal orders require immediate packaging and local delivery assignment within Wayanad/Kerala.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/orders"
+            className="flex-shrink-0 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-black font-extrabold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md shadow-orange-500/25 flex items-center gap-1.5"
+          >
+            Fulfill Quick Orders <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      )}
 
       {/* Pending Purchase Enquiries Alert Banner */}
       {pendingEnquiriesCount > 0 && (
@@ -129,6 +162,7 @@ export default async function AdminDashboardPage() {
                 <tr className="bg-black/40 text-gray-400 text-sm">
                   <th className="p-4 font-medium">Order ID</th>
                   <th className="p-4 font-medium">Customer</th>
+                  <th className="p-4 font-medium">Delivery</th>
                   <th className="p-4 font-medium">Destination</th>
                   <th className="p-4 font-medium">Amount</th>
                   <th className="p-4 font-medium">Status</th>
@@ -136,7 +170,7 @@ export default async function AdminDashboardPage() {
               </thead>
               <tbody>
                 {recentOrders.length === 0 ? (
-                   <tr><td colSpan={5} className="p-4 text-center text-gray-500">No recent orders.</td></tr>
+                   <tr><td colSpan={6} className="p-4 text-center text-gray-500">No recent orders.</td></tr>
                 ) : (
                   recentOrders.map(order => (
                     <tr key={order._id.toString()} className="border-b border-white/5 hover:bg-white/5">
@@ -144,6 +178,19 @@ export default async function AdminDashboardPage() {
                       <td className="p-4">
                         <p className="font-medium text-white">{order.customerName}</p>
                         <p className="text-xs text-gray-400">{order.customerEmail}</p>
+                      </td>
+                      <td className="p-4">
+                        {order.deliveryType === 'quick' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/35 shadow-sm shadow-amber-500/10">
+                            <Zap className="w-3 h-3 fill-amber-400 text-amber-400 animate-pulse" />
+                            <span>Quick (3-Hr)</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-500/25">
+                            <Truck className="w-3 h-3 text-blue-400" />
+                            <span>Standard</span>
+                          </span>
+                        )}
                       </td>
                       <td className="p-4 text-xs text-gray-300">
                         <p className="font-medium text-white">{order.shippingAddress?.city || 'N/A'}, {order.shippingAddress?.state || ''}</p>
