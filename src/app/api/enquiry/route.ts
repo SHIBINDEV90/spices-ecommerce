@@ -18,6 +18,33 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
     }
 
+    // Destination Country validation - India only
+    if (country && country.trim().toLowerCase() !== 'india') {
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Bulk cargo enquiries are currently accepted exclusively within India. International supply is temporarily paused.' 
+        }, 
+        { status: 400 }
+      );
+    }
+
+    // Estimated Cargo Volume validation - max 500 KG
+    const numericMatch = quantity.toString().match(/(\d+(\.\d+)?)/);
+    const parsedKg = numericMatch ? parseFloat(numericMatch[0]) : null;
+    const lowerQuantity = quantity.toString().toLowerCase();
+    const hasTonUnit = lowerQuantity.includes('ton') || lowerQuantity.includes('tonne') || lowerQuantity.includes('mt');
+
+    if (hasTonUnit || (parsedKg !== null && parsedKg > 500)) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Estimated Cargo Volume cannot exceed 500 KG. Maximum permissible quantity is 500 KG.' 
+        }, 
+        { status: 400 }
+      );
+    }
+
     // Resolve product name if product is an ObjectId
     let resolvedProductName = product;
     try {

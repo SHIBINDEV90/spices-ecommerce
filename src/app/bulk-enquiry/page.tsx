@@ -25,10 +25,10 @@ export default async function BulkEnquiryPage() {
       <div className="container mx-auto px-4 relative z-10 flex flex-col items-center mb-12 text-center max-w-3xl">
         <PackageOpen className="w-16 h-16 text-orange-500 opacity-80 mb-6" />
         <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-xl leading-tight">
-          Global <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-600">Export</span> Quotes
+          Bulk <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-600">Wholesale</span> Quotes
         </h1>
         <p className="text-gray-400 text-lg md:text-xl font-medium">
-          Source direct from our origin. Please outline your commodity requirements and our industrial trade desk will configure a custom freight proposal.
+          Source direct from origin. Outline your commodity requirements (up to 500 KG) for wholesale delivery across India.
         </p>
       </div>
 
