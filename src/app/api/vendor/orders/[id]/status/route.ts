@@ -65,13 +65,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (status === 'Delivered' && currentStatus !== 'Delivered') {
         const vendorTotal = vendorProducts.reduce((sum: number, p: any) => sum + (p.price * p.quantity), 0);
         const commission = vendorTotal * 0.10; // 10% Admin Commission
-        const payoutAmount = vendorTotal - commission;
+        const payoutAmount = Math.round(vendorTotal - commission);
 
-        await Wallet.findOneAndUpdate(
-            { vendorId: vendor._id },
-            { $inc: { availableBalance: payoutAmount } },
-            { upsert: true, new: true }
-        );
         if (currentOrder.paymentStatus === 'paid') {
             await Wallet.findOneAndUpdate(
                 { vendorId: vendor._id },

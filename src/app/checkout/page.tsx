@@ -734,7 +734,18 @@ export default function CheckoutPage() {
                 </div>
 
                 <p className="text-[12px] text-center text-neutral-500 mt-4 leading-relaxed">
-                  By placing this order, you agree to our Terms &amp; Conditions<br/>and Privacy Policy.
+                  By placing this order, you agree to our{" "}
+                  <Link href="/terms-conditions" target="_blank" className="underline hover:text-neutral-800">
+                    Terms &amp; Conditions
+                  </Link>
+                  ,{" "}
+                  <Link href="/privacy-policy" target="_blank" className="underline hover:text-neutral-800">
+                    Privacy Policy
+                  </Link>
+                  , and{" "}
+                  <Link href="/cancellation-refund-policy" target="_blank" className="underline hover:text-neutral-800">
+                    Refund &amp; Cancellation Policy
+                  </Link>.
                 </p>
               </div>
             </div>

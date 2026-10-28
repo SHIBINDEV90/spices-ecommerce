@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { EB_Garamond, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { CartProvider } from "@/context/CartContext";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Providers } from "@/components/Providers";
@@ -31,12 +32,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${ebGaramond.variable} ${hankenGrotesk.variable} antialiased font-body-lg`}
+        className={`${ebGaramond.variable} ${hankenGrotesk.variable} antialiased font-body-lg flex flex-col min-h-screen`}
       >
         <Providers>
           <CartProvider>
             <Navbar />
-            <main>{children}</main>
+            <main className="flex-1">{children}</main>
+            <Footer />
           </CartProvider>
         </Providers>
       </body>

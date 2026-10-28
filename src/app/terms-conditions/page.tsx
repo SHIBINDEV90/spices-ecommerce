@@ -138,7 +138,12 @@ export default function TermsConditionsPage() {
               <hr className="my-8 border-outline-variant/50" />
 
               <h2 className="text-2xl font-bold mt-10 mb-4 text-moss-deep">10. Returns, Refunds, and Cancellations</h2>
-              <p>Returns, refunds, and cancellations are governed by our separate Return & Refund Policy.</p>
+              <p>
+                Returns, refunds, and cancellations are governed by our separate{" "}
+                <Link href="/cancellation-refund-policy" className="text-secondary font-semibold hover:underline">
+                  Cancellation &amp; Refund Policy
+                </Link>.
+              </p>
               <p>Certain products, including food products and export shipments, may not be eligible for return once dispatched, unless required by applicable law or otherwise stated.</p>
 
               <hr className="my-8 border-outline-variant/50" />

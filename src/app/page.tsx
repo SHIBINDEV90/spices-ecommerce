@@ -197,40 +197,6 @@ export default function Home() {
           </form>
         </AnimatedSection>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-slate-ink dark:bg-black w-full py-12 px-margin-desktop grid grid-cols-1 md:grid-cols-4 gap-gutter">
-        <div className="md:col-span-1">
-          <div className="font-display-lg text-headline-md text-saffron-glow mb-4">SpiceWizz</div>
-          <p className="text-surface-variant/60 font-body-md text-body-md mb-6 leading-relaxed">
-            Premium spice exporters connecting the lush hills of Kerala to global tables through transparency and tradition.
-          </p>
-        </div>
-        <div>
-          <h4 className="text-primary-fixed dark:text-primary-fixed-dim font-bold mb-4 uppercase tracking-wider text-sm">Quick Links</h4>
-          <ul className="space-y-2">
-            <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="/privacy-policy">Privacy Policy</Link></li>
-            <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="/terms-conditions">Terms & Conditions</Link></li>
-          </ul>
-        </div>
-        <div>
-          <h4 className="text-primary-fixed dark:text-primary-fixed-dim font-bold mb-4 uppercase tracking-wider text-sm">Verification</h4>
-          <ul className="space-y-2">
-            <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="#">Certification Log</Link></li>
-            <li><Link className="text-surface-variant/60 hover:text-saffron-glow transition-all duration-200" href="#">Global Logistics</Link></li>
-          </ul>
-        </div>
-        <div className="md:col-span-1">
-          <h4 className="text-primary-fixed dark:text-primary-fixed-dim font-bold mb-4 uppercase tracking-wider text-sm">Newsletter</h4>
-          <div className="flex gap-2">
-            <input className="bg-white/10 border border-white/20 text-white px-3 py-2 text-sm w-full focus:ring-1 focus:ring-saffron-glow focus:border-saffron-glow outline-none rounded-sm" placeholder="Your Email" type="text" />
-            <button className="bg-saffron-glow text-slate-ink px-3 py-2 rounded-sm flex items-center justify-center hover:bg-secondary-fixed-dim transition-colors"><ArrowRight size={20} /></button>
-          </div>
-          <p className="text-[10px] text-surface-variant/40 mt-8">
-            © {new Date().getFullYear()} SpiceWizz Export India. All Rights Reserved. ISO 22000 & FairTrade Certified.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

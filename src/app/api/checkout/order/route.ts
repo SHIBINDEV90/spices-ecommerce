@@ -136,7 +136,8 @@ export async function POST(req: Request) {
           order.paymentMethod = 'razorpay';
           await order.save();
 
-          const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+          const rawKeys = [process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, process.env.RAZORPAY_KEY_ID];
+          const key = rawKeys.find(k => k && k !== 'rzp_test_placeholder' && !k.includes('YOUR_KEY_ID'));
 
           return NextResponse.json({
             success: true,
