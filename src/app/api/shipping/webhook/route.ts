@@ -1,1 +1,2 @@
-export { POST, runtime } from '../events/route';
+export const runtime = 'nodejs';
+export { POST } from '../events/route';

@@ -1,9 +1,17 @@
+import crypto from 'crypto';
 import Razorpay from 'razorpay';
 
-export function getRazorpayClient(): Razorpay {
-  const rawKeys = [process.env.RAZORPAY_KEY_ID, process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID];
-  const key_id = rawKeys.find(k => k && k !== 'rzp_test_placeholder' && !k.includes('YOUR_KEY_ID'));
-  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+export function getRazorpayCredentials() {
+  const key_id = (
+    process.env.RAZORPAY_KEY_ID || 
+    process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 
+    ''
+  ).trim().replace(/^["']|["']$/g, '');
+
+  const key_secret = (
+    process.env.RAZORPAY_KEY_SECRET || 
+    ''
+  ).trim().replace(/^["']|["']$/g, '');
 
   if (!key_id || !key_secret) {
     throw new Error(
@@ -11,9 +19,39 @@ export function getRazorpayClient(): Razorpay {
     );
   }
 
+  return { key_id, key_secret };
+}
+
+export function getRazorpayClient(): Razorpay {
+  const { key_id, key_secret } = getRazorpayCredentials();
+
   return new Razorpay({
     key_id,
     key_secret,
   });
 }
 
+export function verifyRazorpaySignature(
+  orderId: string,
+  paymentId: string,
+  signature: string
+): boolean {
+  if (!orderId || !paymentId || !signature) {
+    return false;
+  }
+
+  const { key_secret } = getRazorpayCredentials();
+  const generatedSignature = crypto
+    .createHmac('sha256', key_secret)
+    .update(`${orderId}|${paymentId}`)
+    .digest('hex');
+
+  if (generatedSignature.length !== signature.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(
+    Buffer.from(generatedSignature, 'utf-8'),
+    Buffer.from(signature, 'utf-8')
+  );
+}
