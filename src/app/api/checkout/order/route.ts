@@ -4,7 +4,7 @@ import Order from '@/lib/models/Order';
 import Product from '@/lib/models/Product';
 import Coupon from '@/lib/models/Coupon';
 import Stripe from 'stripe';
-import { getRazorpayClient } from '@/lib/razorpay';
+import { getRazorpayClient, getRazorpayCredentials } from '@/lib/razorpay';
 
 function getStripeClient(): Stripe {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -118,6 +118,7 @@ export async function POST(req: Request) {
     // 2. RAZORPAY (UPI / QR / Indian Cards / Net Banking)
     if (paymentMethod === 'razorpay' || paymentMethod === 'upi') {
         try {
+          const { key_id } = getRazorpayCredentials();
           const razorpay = getRazorpayClient();
           const amountInPaisa = Math.round(totalAmount * 100);
 
@@ -136,16 +137,13 @@ export async function POST(req: Request) {
           order.paymentMethod = 'razorpay';
           await order.save();
 
-          const rawKeys = [process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID, process.env.RAZORPAY_KEY_ID];
-          const key = rawKeys.find(k => k && k !== 'rzp_test_placeholder' && !k.includes('YOUR_KEY_ID'));
-
           return NextResponse.json({
             success: true,
             orderId: order._id.toString(),
             razorpayOrderId: razorpayOrder.id,
             amount: razorpayOrder.amount,
             currency: razorpayOrder.currency,
-            key,
+            key: key_id,
             paymentMethod: 'razorpay',
           });
         } catch (rzpErr: any) {
