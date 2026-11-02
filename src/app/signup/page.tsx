@@ -22,7 +22,7 @@ export default function SignupPage() {
     setError('');
     setSuccess(false);
 
-    // Validate password policy: min 5 chars, 1 uppercase, 1 digit, no special chars
+    // Validate password policy: min 5 chars, 1 uppercase, 1 digit, allowed special characters: @, #
     if (password.length < 5) {
       setError('Password must be at least 5 characters long.');
       setLoading(false);
@@ -38,8 +38,8 @@ export default function SignupPage() {
       setLoading(false);
       return;
     }
-    if (!/^[A-Za-z0-9]+$/.test(password)) {
-      setError('Password must not contain any special characters (only letters and numbers are allowed).');
+    if (!/^[A-Za-z0-9@#]+$/.test(password)) {
+      setError('Password can only contain letters, numbers, and allowed special characters (@, #).');
       setLoading(false);
       return;
     }
@@ -197,7 +197,7 @@ export default function SignupPage() {
                   />
                 </div>
                 <p className="text-xs text-foreground/50 mt-1 ml-1 leading-relaxed">
-                  Password must be at least 5 characters, contain at least one uppercase letter and one digit, with no special characters.
+                  Password must be at least 5 characters, contain at least one uppercase letter and one digit. Special characters (@, #) are allowed.
                 </p>
               </div>
 

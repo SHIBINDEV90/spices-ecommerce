@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Validate password strength: min 5 chars, 1 uppercase, 1 digit, no special chars
+    // Validate password strength: min 5 chars, 1 uppercase, 1 digit, allowed special characters: @, #
     if (password.length < 5) {
       return NextResponse.json({ error: 'Password must be at least 5 characters long' }, { status: 400 });
     }
@@ -23,8 +23,8 @@ export async function POST(req: Request) {
     if (!/[0-9]/.test(password)) {
       return NextResponse.json({ error: 'Password must contain at least one digit' }, { status: 400 });
     }
-    if (!/^[A-Za-z0-9]+$/.test(password)) {
-      return NextResponse.json({ error: 'Password must not contain any special characters (only letters and numbers are allowed)' }, { status: 400 });
+    if (!/^[A-Za-z0-9@#]+$/.test(password)) {
+      return NextResponse.json({ error: 'Password can only contain letters, numbers, and allowed special characters (@, #)' }, { status: 400 });
     }
 
     await connectToDatabase();

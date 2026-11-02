@@ -48,9 +48,9 @@ export default function VendorRegisterPage() {
     setError('');
     setLoading(true);
 
-    // Validate password policy: min 5 chars, 1 uppercase, 1 digit, no special chars
-    if (formData.password.length < 5) {
-      setError('Password must be at least 5 characters long.');
+    // Validate password policy: min 8 chars, 1 uppercase, 1 lowercase, 1 digit, allowed special characters (@, #)
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       setLoading(false);
       return;
     }
@@ -59,13 +59,18 @@ export default function VendorRegisterPage() {
       setLoading(false);
       return;
     }
+    if (!/[a-z]/.test(formData.password)) {
+      setError('Password must contain at least one lowercase letter.');
+      setLoading(false);
+      return;
+    }
     if (!/[0-9]/.test(formData.password)) {
       setError('Password must contain at least one digit.');
       setLoading(false);
       return;
     }
-    if (!/^[A-Za-z0-9]+$/.test(formData.password)) {
-      setError('Password must not contain any special characters (only letters and numbers are allowed).');
+    if (!/^[A-Za-z0-9@#]+$/.test(formData.password)) {
+      setError('Password can only contain letters, numbers, and allowed special characters (@, #).');
       setLoading(false);
       return;
     }
@@ -171,7 +176,7 @@ export default function VendorRegisterPage() {
                   <label className="block text-sm font-medium text-neutral-700 mb-1">Password *</label>
                   <input required type="password" name="password" value={formData.password} onChange={handleChange} className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/50 outline-none bg-white text-neutral-900 caret-primary" />
                   <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                    Password must be at least 5 characters, contain at least one uppercase letter and one digit, with no special characters.
+                    Password must be at least 8 characters, contain uppercase, lowercase, a digit. Special characters (@, #) are allowed.
                   </p>
                 </div>
               </div>

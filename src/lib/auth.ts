@@ -187,8 +187,19 @@ export const authOptions: NextAuthOptions = {
         }
 
         await dbConnect();
+        
+        const cleanPhone = credentials.phone.trim();
+        const rawDigits = cleanPhone.replace(/[^0-9]/g, '');
+        const tenDigits = rawDigits.length >= 10 ? rawDigits.slice(-10) : rawDigits;
 
-        const user = await User.findOne({ phone: credentials.phone }).select('+otp +otpExpiry');
+        const user = await User.findOne({
+          $or: [
+            { phone: cleanPhone },
+            { phone: tenDigits },
+            { phone: `+91${tenDigits}` },
+            { phone: `91${tenDigits}` }
+          ]
+        }).select('+otp +otpExpiry');
 
         if (!user) {
           throw new Error('No user found with this mobile number');

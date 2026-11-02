@@ -26,8 +26,8 @@ export async function POST(
     if (!/[0-9]/.test(password)) {
       return NextResponse.json({ error: 'Password must contain at least one digit' }, { status: 400 });
     }
-    if (!/^[A-Za-z0-9]+$/.test(password)) {
-      return NextResponse.json({ error: 'Password must not contain any special characters (only letters and numbers are allowed)' }, { status: 400 });
+    if (!/^[A-Za-z0-9@#]+$/.test(password)) {
+      return NextResponse.json({ error: 'Password can only contain letters, numbers, and allowed special characters (@, #)' }, { status: 400 });
     }
 
     await connectToDatabase();

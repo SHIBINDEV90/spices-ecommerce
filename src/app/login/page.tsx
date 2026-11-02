@@ -9,7 +9,8 @@ import { Phone, Lock, Loader2, LogIn, ArrowRight, Mail } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [loginMode, setLoginMode] = useState<'otp' | 'password'>('otp');
+  // Default to password login as requested (OTP feature retained for future use)
+  const [loginMode, setLoginMode] = useState<'otp' | 'password'>('password');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [email, setEmail] = useState('');
@@ -175,13 +176,22 @@ export default function LoginPage() {
 
             {/* Login Mode Toggle */}
             <div className="flex bg-background/50 border border-foreground/10 rounded-xl p-1 mb-6 relative z-10">
-              <button
-                type="button"
-                onClick={() => { setLoginMode('otp'); setError(''); }}
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all cursor-pointer ${loginMode === 'otp' ? 'bg-primary text-black' : 'text-foreground/60 hover:text-foreground'}`}
+              {/* Preserved OTP login toggle for future use - blurred and disabled per requirement */}
+              <div 
+                className="flex-1 relative cursor-not-allowed"
+                title="OTP login is temporarily disabled"
               >
-                Sign In with OTP
-              </button>
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  tabIndex={-1}
+                  className="w-full py-2 text-sm font-semibold rounded-lg transition-all text-foreground/40 select-none pointer-events-none filter blur-[1.5px] opacity-40"
+                  style={{ filter: 'blur(1.5px)' }}
+                >
+                  Sign In with OTP
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => { setLoginMode('password'); setError(''); }}

@@ -50,8 +50,8 @@ export default function ResetPasswordPage({ params }: ResetPasswordProps) {
       setLoading(false);
       return;
     }
-    if (!/^[A-Za-z0-9]+$/.test(password)) {
-      setError('Password must not contain any special characters (only letters and numbers are allowed).');
+    if (!/^[A-Za-z0-9@#]+$/.test(password)) {
+      setError('Password can only contain letters, numbers, and allowed special characters (@, #).');
       setLoading(false);
       return;
     }
@@ -174,7 +174,7 @@ export default function ResetPasswordPage({ params }: ResetPasswordProps) {
                   />
                 </div>
                 <p className="text-xs text-foreground/50 mt-1 ml-1 leading-relaxed">
-                  Password must be at least 5 characters, contain at least one uppercase letter and one digit, with no special characters.
+                  Password must be at least 5 characters, contain at least one uppercase letter and one digit. Special characters (@, #) are allowed.
                 </p>
               </div>
 

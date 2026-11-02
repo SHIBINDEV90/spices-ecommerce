@@ -12,8 +12,20 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    // Check if user exists
-    const user = await User.findOne({ phone });
+    // Clean up input phone number
+    const cleanPhone = phone.trim();
+    const rawDigits = cleanPhone.replace(/[^0-9]/g, '');
+    const tenDigits = rawDigits.length >= 10 ? rawDigits.slice(-10) : rawDigits;
+
+    // Check if user exists (flexible check for raw 10 digits, +91, or clean input)
+    const user = await User.findOne({
+      $or: [
+        { phone: cleanPhone },
+        { phone: tenDigits },
+        { phone: `+91${tenDigits}` },
+        { phone: `91${tenDigits}` }
+      ]
+    });
 
     if (!user) {
       return NextResponse.json({ error: 'Mobile number is not registered. Please register or sign up first.' }, { status: 404 });
@@ -37,35 +49,35 @@ export async function POST(req: Request) {
     if (!authKey || !templateId || templateId === 'your_template_id_here') {
       console.warn('MSG91 credentials not fully configured. Falling back to console log.');
       console.log(`\n========================================`);
-      console.log(`MOCK SMS DELIVERED TO: ${phone}`);
+      console.log(`MOCK SMS DELIVERED TO: ${cleanPhone}`);
       console.log(`YOUR OTP IS: ${otp}`);
       console.log(`========================================\n`);
     } else {
-      // Ensure phone has country code (default to 91 for India if length is 10)
-      let formattedPhone = phone;
-      if (formattedPhone.length === 10) {
-        formattedPhone = `91${formattedPhone}`;
-      }
+      // Ensure phone has country code (default to 91 for India)
+      const formattedPhone = tenDigits.length === 10 ? `91${tenDigits}` : rawDigits;
 
-      const msg91Url = 'https://control.msg91.com/api/v5/otp';
-      const msg91Response = await fetch(msg91Url, {
+      // MSG91 v5 Send OTP API requires template_id, mobile, and otp as URL query parameters
+      const msg91Url = new URL('https://control.msg91.com/api/v5/otp');
+      msg91Url.searchParams.append('template_id', templateId);
+      msg91Url.searchParams.append('mobile', formattedPhone);
+      msg91Url.searchParams.append('otp', otp);
+      msg91Url.searchParams.append('otp_expiry', '5'); // 5 minutes
+
+      const msg91Response = await fetch(msg91Url.toString(), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'authkey': authKey
-        },
-        body: JSON.stringify({
-          template_id: templateId,
-          mobile: formattedPhone,
-          otp: otp
-        })
+        }
       });
 
       const responseData = await msg91Response.json();
       
       if (!msg91Response.ok || responseData.type === 'error') {
         console.error('MSG91 API Error:', responseData);
-        return NextResponse.json({ error: 'Failed to send OTP SMS' }, { status: 500 });
+        return NextResponse.json({ 
+          error: responseData.message || 'Failed to send OTP SMS via MSG91' 
+        }, { status: 500 });
       }
       
       console.log(`Successfully sent OTP via MSG91 to ${formattedPhone}`);
