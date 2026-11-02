@@ -14,13 +14,24 @@ interface QuickViewModalProps {
   product: Product | null;
 }
 
-const WEIGHT_OPTIONS = [
-  { label: '500g', value: 500 },
-  { label: '1kg', value: 1000 },
-];
-
 export default function QuickViewModal({ isOpen, onClose, product }: QuickViewModalProps) {
-  const [selectedWeight, setSelectedWeight] = useState(WEIGHT_OPTIONS[1]);
+  const basePrice = Number(product?.price) || 0;
+  const isAbove2000 = basePrice >= 2000;
+
+  const weightOptions = isAbove2000
+    ? [
+        { label: '250g', value: 250 },
+        { label: '500g', value: 500 },
+        { label: '1kg', value: 1000 },
+      ]
+    : [
+        { label: '500g', value: 500 },
+        { label: '1kg', value: 1000 },
+      ];
+
+  const [selectedWeight, setSelectedWeight] = useState(
+    isAbove2000 ? { label: '250g', value: 250 } : { label: '1kg', value: 1000 }
+  );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
@@ -31,8 +42,9 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   // Reset state when a new product is loaded
   useEffect(() => {
-    if (isOpen) {
-      setSelectedWeight(WEIGHT_OPTIONS[1]);
+    if (isOpen && product) {
+      const isHigh = (Number(product.price) || 0) >= 2000;
+      setSelectedWeight(isHigh ? { label: '250g', value: 250 } : { label: '1kg', value: 1000 });
       setQuantity(1);
       setIsAdded(false);
       setActiveImage(0);
@@ -48,7 +60,6 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   const isUploadedImage = (src: string) => typeof src === 'string' && src.startsWith('/uploads/');
 
   // Base calculations
-  const basePrice = Number(product.price) || 0;
   const perGramPrice = basePrice > 0
     ? basePrice / 1000
     : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
@@ -220,7 +231,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                 <div className="mb-6">
                   <h3 className="text-sm font-semibold text-white/80 mb-3 uppercase tracking-wider">Select Weight</h3>
                   <div className="flex flex-wrap gap-2">
-                    {WEIGHT_OPTIONS.map((weight) => (
+                    {weightOptions.map((weight) => (
                       <button
                         key={weight.label}
                         onClick={() => setSelectedWeight(weight)}

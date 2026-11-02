@@ -662,7 +662,7 @@ export default function CheckoutPage() {
                 
                 <div className="space-y-4 mb-6 max-h-[340px] overflow-y-auto pr-1">
                   {cartItems.map((item) => (
-                    <div key={item._id} className="flex gap-4">
+                    <div key={item.cartItemId || `${item._id}-${item.selectedWeight || '1kg'}`} className="flex gap-4">
                       <div className="relative w-[60px] h-[60px] rounded-md overflow-hidden bg-white flex-shrink-0 border border-neutral-200">
                         <Image src={item.imageUrl || '/images/Cardamom.jpg'} alt={item.name} fill className="object-cover" unoptimized={isUploadedImage(item.imageUrl || '/images/Cardamom.jpg')} />
                       </div>
@@ -671,7 +671,12 @@ export default function CheckoutPage() {
                           <h4 className="font-medium text-[14px] text-neutral-800 line-clamp-1 pr-2">{item.name}</h4>
                           <span className="font-semibold text-[14px] text-neutral-800">₹{((item.price || 500) * item.quantity).toFixed(0)}</span>
                         </div>
-                        <p className="text-[13px] text-neutral-500">Qty: {item.quantity}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[13px] text-neutral-500">Qty: {item.quantity}</p>
+                          <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded">
+                            {item.selectedWeight || item.weight || '1kg'}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -52,14 +52,23 @@ export async function POST(req: Request) {
       const dbProduct = await Product.findById(item._id);
       if (!dbProduct) throw new Error(`Product not found: ${item.name}`);
 
-      const itemTotal = dbProduct.price * item.quantity;
+      let unitPrice = dbProduct.price;
+      if (item.selectedWeight === '250g') {
+        unitPrice = Math.round(dbProduct.price * 0.25);
+      } else if (item.selectedWeight === '500g') {
+        unitPrice = Math.round(dbProduct.price * 0.5);
+      } else if (item.price && Number(item.price) > 0 && Number(item.price) < dbProduct.price) {
+        unitPrice = Number(item.price);
+      }
+
+      const itemTotal = unitPrice * item.quantity;
       subtotal += itemTotal;
 
       orderProducts.push({
           productId: dbProduct._id,
-          name: dbProduct.name,
+          name: item.selectedWeight ? `${dbProduct.name} (${item.selectedWeight})` : dbProduct.name,
           quantity: item.quantity,
-          price: dbProduct.price,
+          price: unitPrice,
           vendorId: dbProduct.vendorId, // Crucial for multi-vendor splitting
           status: 'Pending'
       });

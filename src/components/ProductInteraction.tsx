@@ -9,23 +9,34 @@ import { motion } from 'framer-motion';
 export default function ProductInteraction({ product }: { product: any }) {
   const { addToCart, setIsCartOpen } = useCart();
   const [added, setAdded] = useState(false);
-  const [selectedWeight, setSelectedWeight] = useState<'500g' | '1kg'>('1kg');
+
+  const basePrice = Number(product.price) || 0;
+  const isAbove2000 = basePrice >= 2000;
+  const [selectedWeight, setSelectedWeight] = useState<'250g' | '500g' | '1kg'>(
+    isAbove2000 ? '250g' : '1kg'
+  );
 
   // Calculate per gram price
-  const basePrice = Number(product.price) || 0;
   const perGramPrice = basePrice > 0
     ? basePrice / 1000
     : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
-  const grams = selectedWeight === '500g' ? 500 : 1000;
+  const grams = selectedWeight === '250g' ? 250 : selectedWeight === '500g' ? 500 : 1000;
   const calculatedPrice = selectedWeight === '1kg' && basePrice > 0
     ? basePrice
     : Math.round(perGramPrice * grams);
 
-  const weightOptions = [
-    { label: '500g', grams: 500, price: Math.round(perGramPrice * 500) },
-    { label: '1kg', grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
-  ];
+  // 250g is included ONLY if the product price is above 2000 rupees
+  const weightOptions = isAbove2000
+    ? [
+        { label: '250g' as const, grams: 250, price: Math.round(perGramPrice * 250) },
+        { label: '500g' as const, grams: 500, price: Math.round(perGramPrice * 500) },
+        { label: '1kg' as const, grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
+      ]
+    : [
+        { label: '500g' as const, grams: 500, price: Math.round(perGramPrice * 500) },
+        { label: '1kg' as const, grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
+      ];
 
   const handleAddToCart = () => {
     addToCart({
@@ -68,14 +79,14 @@ export default function ProductInteraction({ product }: { product: any }) {
         <label className="text-xs font-bold text-gray-300 uppercase tracking-widest">
           Select Weight
         </label>
-        <div className="grid grid-cols-2 gap-3">
+        <div className={`grid ${isAbove2000 ? 'grid-cols-3' : 'grid-cols-2'} gap-3`}>
           {weightOptions.map((option) => {
             const isSelected = selectedWeight === option.label;
             return (
               <button
                 key={option.label}
                 type="button"
-                onClick={() => setSelectedWeight(option.label as '500g' | '1kg')}
+                onClick={() => setSelectedWeight(option.label)}
                 className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
                   isSelected
                     ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-lg shadow-emerald-500/10 scale-[1.02]'

@@ -28,7 +28,9 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAdded(true);
-    addToCart({ ...product, price: basePrice, selectedWeight: '1kg' });
+    const weight = basePrice >= 2000 ? '250g' : '1kg';
+    const price = basePrice >= 2000 ? Math.round(perGramPrice * 250) : basePrice;
+    addToCart({ ...product, price, selectedWeight: weight });
     setIsCartOpen(true);
     setTimeout(() => {
       setIsAdded(false);
@@ -165,6 +167,9 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
           <div className="flex flex-col gap-0.5 mb-4">
             <span className="text-[11px] text-foreground/50">Inclusive of all taxes</span>
             <span className="text-[11px] text-foreground/50">USP: ₹{usp}/g</span>
+            <span className="text-[11px] font-semibold text-emerald-600">
+              {basePrice >= 2000 ? 'Weights: 250g, 500g, 1kg' : 'Weights: 500g, 1kg'}
+            </span>
           </div>
         </div>
         
@@ -190,7 +195,7 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-2"
                 >
-                  <Check size={18} /> Added
+                  <Check size={18} /> Added ({basePrice >= 2000 ? '250g' : '1kg'})
                 </motion.div>
               ) : (
                 <motion.div
@@ -201,7 +206,7 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-2"
                 >
-                  <ShoppingBag size={18} /> Add to Cart
+                  <ShoppingBag size={18} /> Add ({basePrice >= 2000 ? '250g' : '1kg'})
                 </motion.div>
               )}
             </AnimatePresence>
