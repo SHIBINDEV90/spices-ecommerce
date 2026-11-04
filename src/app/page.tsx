@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* 1. Hero Section */}
-      <section className="relative w-full h-[80vh] md:h-[90vh] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full min-h-[260px] sm:min-h-[300px] md:h-[36vh] lg:h-[38vh] py-6 md:py-8 flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center" 
@@ -47,37 +47,37 @@ export default function Home() {
         
         <div className="relative z-10 text-center px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto flex flex-col items-center">
           <motion.span 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="font-label-md text-label-md text-saffron-glow uppercase tracking-widest mb-4"
+            transition={{ duration: 0.5 }}
+            className="font-label-md text-xs text-saffron-glow uppercase tracking-widest mb-1.5"
           >
             Export Grade
           </motion.span>
           <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="font-headline-lg font-medium text-4xl md:text-[80px] md:leading-[88px] text-surface-container-lowest max-w-4xl mb-8"
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="font-headline-lg font-medium text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-surface-container-lowest max-w-3xl mb-2.5 leading-tight"
           >
             Premium Malabar Spices for Global Markets
           </motion.h1>
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="font-body-lg text-body-lg text-white md:text-surface-variant max-w-2xl mb-10"
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="font-body-lg text-xs sm:text-sm md:text-base text-white md:text-surface-variant max-w-2xl mb-4"
           >
             Sourced directly from the lush farms of Kerala. We deliver the authentic, pure, and sustainably sourced magic of Indian spices to modern kitchens worldwide.
           </motion.p>
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
             <Link 
               href="/bulk-enquiry" 
-              className="bg-saffron-glow text-slate-ink font-label-md text-label-md uppercase px-8 py-4 rounded hover:bg-secondary-fixed-dim transition-colors shadow-lg shadow-saffron-glow/20"
+              className="inline-block bg-saffron-glow text-slate-ink font-label-md text-xs sm:text-sm uppercase px-6 py-2.5 rounded hover:bg-secondary-fixed-dim transition-colors shadow-lg shadow-saffron-glow/20"
             >
               Request Export Quote
             </Link>
@@ -91,11 +91,11 @@ export default function Home() {
 
 
       {/* 3. Featured Products Grid */}
-      <section className="py-24 bg-surface-container-low border-y border-surface-variant w-full">
+      <section className="py-6 md:py-8 bg-surface-container-low border-y border-surface-variant w-full">
         <AnimatedSection className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="text-center mb-16">
-            <h4 className="font-label-md text-label-md text-moss-deep uppercase tracking-widest mb-2">From Our Farms</h4>
-            <h2 className="font-headline-lg text-headline-lg text-slate-ink">Featured Products</h2>
+          <div className="text-center mb-5 md:mb-6">
+            <h4 className="font-label-md text-xs text-moss-deep uppercase tracking-widest mb-1">From Our Farms</h4>
+            <h2 className="font-headline-lg text-2xl md:text-3xl text-slate-ink">Featured Products</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {products.map((product, idx) => (
