@@ -94,7 +94,7 @@ export default function VendorOrders() {
                       {order.deliveryType === 'quick' ? (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 animate-pulse">
                           <Zap className="w-3.5 h-3.5 fill-current text-amber-600" />
-                          <span>⚡ Quick Commerce (3-Hr Express)</span>
+                          <span>⚡ Quick Commerce (Same Day / Next Day after 5 PM)</span>
                         </span>
                       ) : (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">

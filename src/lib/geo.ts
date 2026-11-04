@@ -68,15 +68,57 @@ export function calculateHaversineDistanceKm(
 }
 
 /**
- * Estimates delivery time in minutes given distance and vendor preparation time.
- * Models realistic local two-wheeler transit (~2.5 minutes per km + prep time + 5 min dispatch buffer).
+ * Checks whether a given date/time is at or after the 5:00 PM (17:00 IST) cutoff for Same Day delivery.
+ * Orders placed before 5:00 PM qualify for Same Day Delivery; orders placed at or after 5:00 PM
+ * are scheduled for Next Day Delivery.
+ */
+export function getQuickDeliveryWindow(date: Date = new Date()): {
+  isAfterCutoff: boolean;
+  cutoffHour: number;
+  deliverySlotLabel: string;
+  shortLabel: string;
+  policyNote: string;
+  liveStatusText: string;
+} {
+  let currentHour = date.getHours();
+  try {
+    const istString = date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour12: false, hour: 'numeric' });
+    const parsedHour = parseInt(istString, 10);
+    if (!isNaN(parsedHour)) {
+      currentHour = parsedHour === 24 ? 0 : parsedHour;
+    }
+  } catch {
+    // Fallback to local system hour
+  }
+
+  const cutoffHour = 17; // 5:00 PM
+  const isAfterCutoff = currentHour >= cutoffHour;
+
+  return {
+    isAfterCutoff,
+    cutoffHour,
+    deliverySlotLabel: isAfterCutoff ? 'Next Day Delivery' : 'Same Day Delivery',
+    shortLabel: isAfterCutoff ? 'Next Day' : 'Same Day',
+    policyNote: 'Orders placed before 5:00 PM are delivered Same Day. Orders placed after 5:00 PM will be delivered the very next day.',
+    liveStatusText: isAfterCutoff
+      ? 'Ordered after 5:00 PM — Will be delivered the very next day'
+      : 'Order before 5:00 PM for Same Day delivery today (After 5:00 PM delivered next day)',
+  };
+}
+
+/**
+ * Estimates delivery window given distance and vendor preparation time.
+ * Orders before 5:00 PM get Same Day delivery; orders after 5:00 PM get Very Next Day delivery.
  */
 export function calculateDeliveryETA(
   distanceKm: number,
-  prepMinutes: number = 15
+  prepMinutes: number = 15,
+  orderDate: Date = new Date()
 ): {
   minMinutes: number;
   maxMinutes: number;
+  isNextDay: boolean;
+  deliverySlotLabel: string;
   formattedETA: string;
 } {
   const travelMinutes = Math.ceil(distanceKm * 2.5); // ~24 km/h average speed in city traffic
@@ -85,10 +127,14 @@ export function calculateDeliveryETA(
   const minMinutes = Math.max(25, Math.floor(baseMinutes / 5) * 5);
   const maxMinutes = minMinutes + 15;
 
+  const windowInfo = getQuickDeliveryWindow(orderDate);
+
   return {
     minMinutes,
     maxMinutes,
-    formattedETA: `${minMinutes}–${maxMinutes} mins`,
+    isNextDay: windowInfo.isAfterCutoff,
+    deliverySlotLabel: windowInfo.deliverySlotLabel,
+    formattedETA: windowInfo.deliverySlotLabel,
   };
 }
 

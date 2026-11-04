@@ -127,8 +127,8 @@ export default function AdminQuickCommercePage() {
         <div className="p-6 rounded-2xl bg-[#141414] border border-white/10 flex items-center justify-between">
           <div>
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block">Guaranteed Window</span>
-            <span className="text-3xl font-black text-white mt-1 block">3 Hours</span>
-            <span className="text-[11px] text-gray-400 font-medium">Under 35 km transit</span>
+            <span className="text-3xl font-black text-white mt-1 block">Same Day</span>
+            <span className="text-[11px] text-gray-400 font-medium">After 5:00 PM: Next Day</span>
           </div>
           <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
             <Clock className="w-6 h-6" />

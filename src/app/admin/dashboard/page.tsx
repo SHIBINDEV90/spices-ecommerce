@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
             </div>
             <div>
               <h3 className="text-white font-bold text-sm sm:text-base flex items-center gap-2 flex-wrap">
-                <span>{pendingQuickOrdersCount} Quick Commerce {pendingQuickOrdersCount === 1 ? 'Order' : 'Orders'} Pending 3-Hour Dispatch</span>
+                <span>{pendingQuickOrdersCount} Quick Commerce {pendingQuickOrdersCount === 1 ? 'Order' : 'Orders'} Pending Same-Day / Next-Day Dispatch</span>
                 <span className="bg-amber-400 text-black text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                   Express 35km SLA
                 </span>
@@ -183,7 +183,7 @@ export default async function AdminDashboardPage() {
                         {order.deliveryType === 'quick' ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/35 shadow-sm shadow-amber-500/10">
                             <Zap className="w-3 h-3 fill-amber-400 text-amber-400 animate-pulse" />
-                            <span>Quick (3-Hr)</span>
+                            <span>Quick (Same Day)</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-blue-500/15 text-blue-300 border border-blue-500/25">

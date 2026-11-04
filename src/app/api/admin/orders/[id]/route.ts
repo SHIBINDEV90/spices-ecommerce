@@ -98,7 +98,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     order.trackingHistory.push({
       status: order.trackingStatus || 'processing',
       description: `Delivery channel specified as ${
-        deliveryType === 'quick' ? '⚡ Quick Commerce (Express 3-Hour Delivery)' : '📦 Standard Courier Shipping'
+        deliveryType === 'quick' ? '⚡ Quick Commerce (Same Day / Next Day after 5 PM)' : '📦 Standard Courier Shipping'
       } by Admin (previously ${previousType === 'quick' ? 'Quick Commerce' : 'Standard'}).`,
       source: 'admin',
       location: 'Admin Portal',
@@ -114,7 +114,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({
       success: true,
       message: `Order #${params.id.slice(-6).toUpperCase()} specified as ${
-        deliveryType === 'quick' ? 'Quick Commerce (3-Hour Express)' : 'Standard Courier'
+        deliveryType === 'quick' ? 'Quick Commerce (Same Day Delivery)' : 'Standard Courier'
       }`,
       order: populatedOrder,
     });

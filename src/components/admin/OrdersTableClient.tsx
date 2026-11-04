@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getQuickDeliveryWindow } from '@/lib/geo';
 import { 
   ShoppingCart, 
   Loader2, 
@@ -194,7 +195,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
       showFeedback(
         'success',
         `Order #${orderId.substring(orderId.length - 8).toUpperCase()} specified as ${
-          newType === 'quick' ? '⚡ Quick Commerce (3-Hour Express)' : '📦 Standard Courier'
+          newType === 'quick' ? '⚡ Quick Commerce (Same Day Delivery)' : '📦 Standard Courier'
         }`
       );
     } catch (err: any) {
@@ -464,7 +465,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-xs text-amber-400 uppercase font-bold tracking-wider block">Quick Commerce</span>
-              <span className="px-1.5 py-0.2 rounded text-[10px] font-black bg-amber-400 text-black">3-HR</span>
+              <span className="px-1.5 py-0.2 rounded text-[10px] font-black bg-amber-400 text-black">SAME DAY</span>
             </div>
             <span className="text-2xl font-black text-amber-300 mt-0.5 block">{quickOrdersCount}</span>
             <span className="text-[11px] text-amber-400/80">Hyperlocal 35 km Dispatches</span>
@@ -583,7 +584,11 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                             </span>
                             <span className="text-[11px] text-amber-400/90 font-medium pl-1 flex items-center gap-1">
                               <Clock className="w-3 h-3 text-orange-400" />
-                              <span>3-Hr Express ({order.estimatedDeliveryMinutes || 180}m)</span>
+                              <span>
+                                {getQuickDeliveryWindow(order.createdAt ? new Date(order.createdAt) : new Date()).isAfterCutoff
+                                  ? 'Next Day (Ordered after 5 PM)'
+                                  : 'Same Day Delivery'}
+                              </span>
                             </span>
                             {order.deliveryLocation?.coordinates && (
                               <span className="text-[10px] text-emerald-400 pl-1 flex items-center gap-1 font-mono">
@@ -786,7 +791,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                             {selectedOrder.deliveryType === 'quick' ? (
                               <>
                                 <Zap className="w-3.5 h-3.5 fill-current" />
-                                <span>QUICK COMMERCE (3-HOUR EXPRESS)</span>
+                                <span>QUICK COMMERCE (SAME DAY / NEXT DAY AFTER 5 PM)</span>
                               </>
                             ) : (
                               <>
@@ -805,7 +810,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
 
                         <p className="text-xs text-gray-300 mt-1 leading-relaxed">
                           {selectedOrder.deliveryType === 'quick'
-                            ? '⚡ Customer ordered via Quick Commerce. Requires immediate packing and dispatch within 3 hours via local vendor pickup or direct rider. Do not send via standard national courier unless switched.'
+                            ? '⚡ Customer ordered via Quick Commerce. Orders placed before 5:00 PM require Same Day dispatch & delivery; orders placed after 5:00 PM are delivered the very next day via local vendor pickup or direct rider.'
                             : '📦 Customer ordered via Standard Delivery. Process via regular warehouse fulfillment and Shiprocket national courier AWB generation.'}
                         </p>
                       </div>
@@ -836,7 +841,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                             disabled={isUpdatingDeliveryType}
                             onClick={() => handleSpecifyDeliveryType(selectedOrder._id, 'quick')}
                             className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-black font-extrabold text-xs shadow-lg shadow-orange-500/25 transition flex items-center gap-1.5 disabled:opacity-50"
-                            title="Convert this order to Quick Commerce (Express 3-Hour Delivery)"
+                            title="Convert this order to Quick Commerce (Same Day / Next Day Delivery)"
                           >
                             {isUpdatingDeliveryType ? (
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -857,7 +862,9 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                       <span className="text-white font-bold text-sm flex items-center gap-1.5 mt-0.5">
                         <Clock className="w-3.5 h-3.5 text-orange-400" />
                         {selectedOrder.deliveryType === 'quick'
-                          ? `${selectedOrder.estimatedDeliveryMinutes || 180} Minutes (Under 3 Hrs)`
+                          ? getQuickDeliveryWindow(selectedOrder.createdAt ? new Date(selectedOrder.createdAt) : new Date()).isAfterCutoff
+                            ? 'Next Day Delivery (Ordered after 5:00 PM)'
+                            : 'Same Day Delivery (Ordered before 5:00 PM)'
                           : '3 - 7 Business Days'}
                       </span>
                     </div>
@@ -1227,7 +1234,7 @@ export default function OrdersTableClient({ initialOrders }: OrdersTableClientPr
                           ⚡ Quick Commerce Dispatch Advisory
                         </span>
                         <p className="text-amber-200/80 leading-relaxed">
-                          This order is specified as <strong>Quick Commerce (3-Hour Express)</strong>. It is designed for hyperlocal delivery via local delivery partner or nearby vendor dispatch. If you push this to Shiprocket for national courier air shipment, standard 3-7 day courier delivery will apply.
+                          This order is specified as <strong>Quick Commerce (Same Day / Next Day Delivery)</strong>. It is designed for hyperlocal delivery via local delivery partner or nearby vendor dispatch. If you push this to Shiprocket for national courier air shipment, standard 3-7 day courier delivery will apply.
                         </p>
                       </div>
                     </div>

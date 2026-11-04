@@ -19,6 +19,7 @@ import {
 import { useLocation } from '@/context/LocationContext';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getQuickDeliveryWindow } from '@/lib/geo';
 
 export default function QuickCommercePage() {
   const { location, setIsModalOpen, setQuickMode } = useLocation();
@@ -29,6 +30,15 @@ export default function QuickCommercePage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [addedItemNotice, setAddedItemNotice] = useState<string | null>(null);
+  const [deliveryWindow, setDeliveryWindow] = useState(() => getQuickDeliveryWindow());
+
+  useEffect(() => {
+    setDeliveryWindow(getQuickDeliveryWindow());
+    const interval = setInterval(() => {
+      setDeliveryWindow(getQuickDeliveryWindow());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Set quick mode active when visiting this page
   useEffect(() => {
@@ -101,18 +111,35 @@ export default function QuickCommercePage() {
         <div className="container mx-auto relative z-10 max-w-6xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-xs font-bold uppercase tracking-wider text-amber-200">
-                <Zap className="w-3.5 h-3.5 fill-current" />
-                <span>Wayanad Hyperlocal Quick Commerce</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-xs font-bold uppercase tracking-wider text-amber-200">
+                  <Zap className="w-3.5 h-3.5 fill-current" />
+                  <span>Wayanad Hyperlocal Quick Commerce</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/30 backdrop-blur-md border border-amber-300/40 text-xs font-bold text-amber-200">
+                  <Clock className="w-3.5 h-3.5 text-amber-300" />
+                  <span>
+                    {deliveryWindow.isAfterCutoff
+                      ? 'After 5:00 PM: Next Day Delivery'
+                      : 'Before 5:00 PM: Same Day Delivery'}
+                  </span>
+                </div>
               </div>
               
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight">
-                Fresh Wayanad Spices in <span className="text-amber-300">3 Hours</span>
+                Fresh Spices Delivered <span className="text-amber-300">Same Day</span>
               </h1>
               
               <p className="text-sm sm:text-base text-white/80 leading-relaxed">
                 Directly dispatched from our central hub in <strong className="text-white underline decoration-amber-400">Vythiri, Wayanad (PIN: 673576)</strong> within a 35 km delivery radius (Kalpetta, Meppadi, Lakkidi, Sultan Bathery, Mananthavady).
               </p>
+
+              <div className="p-3.5 rounded-xl bg-black/25 border border-white/20 text-xs sm:text-sm text-amber-100 flex items-start gap-2.5">
+                <Clock className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-amber-300">Delivery Cut-off Notice:</strong> Orders placed before <strong>5:00 PM</strong> are delivered <strong>Same Day</strong>. Any order coming after <strong>5:00 PM</strong> will be delivered to the customer the <strong>very next day</strong>.
+                </div>
+              </div>
             </div>
 
             {/* Current Location Badge */}
@@ -148,8 +175,8 @@ export default function QuickCommercePage() {
                 <Clock className="w-4 h-4 text-amber-300" />
               </div>
               <div>
-                <div className="font-bold text-white">Within 3 Hours</div>
-                <div className="text-white/70 text-[11px]">Guaranteed Window</div>
+                <div className="font-bold text-white">Same Day Delivery</div>
+                <div className="text-white/70 text-[11px]">After 5 PM: Next Day</div>
               </div>
             </div>
 
@@ -289,7 +316,7 @@ export default function QuickCommercePage() {
                     {/* ETA Badge */}
                     <div className="absolute top-3 left-3 bg-amber-500 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
                       <Zap className="w-3 h-3 fill-current" />
-                      <span>{qc.etaFormatted || 'Within 3 hrs'}</span>
+                      <span>{qc.etaFormatted || deliveryWindow.deliverySlotLabel}</span>
                     </div>
 
                     {/* Distance Badge */}

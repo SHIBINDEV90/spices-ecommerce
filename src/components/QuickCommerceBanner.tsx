@@ -1,11 +1,22 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Zap, MapPin, ArrowRight, Clock, Store } from 'lucide-react';
+import { Zap, MapPin, ArrowRight, Clock } from 'lucide-react';
 import { useLocation } from '@/context/LocationContext';
+import { getQuickDeliveryWindow } from '@/lib/geo';
 
 export default function QuickCommerceBanner() {
   const { location, setIsModalOpen } = useLocation();
+  const [deliveryWindow, setDeliveryWindow] = useState(() => getQuickDeliveryWindow());
+
+  useEffect(() => {
+    setDeliveryWindow(getQuickDeliveryWindow());
+    const interval = setInterval(() => {
+      setDeliveryWindow(getQuickDeliveryWindow());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="container mx-auto max-w-6xl px-4 sm:px-6 my-8">
@@ -16,18 +27,36 @@ export default function QuickCommerceBanner() {
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold uppercase tracking-wider text-amber-300">
-              <Zap className="w-3.5 h-3.5 fill-current" />
-              <span>⚡ Wayanad 35 km Quick Commerce</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-bold uppercase tracking-wider text-amber-300">
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>⚡ Wayanad 35 km Quick Commerce</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/25 backdrop-blur-md border border-amber-300/30 text-xs font-bold text-amber-200">
+                <Clock className="w-3.5 h-3.5 text-amber-300" />
+                <span>
+                  {deliveryWindow.isAfterCutoff
+                    ? 'After 5:00 PM: Next Day Delivery'
+                    : 'Before 5:00 PM: Same Day Delivery'}
+                </span>
+              </div>
             </div>
 
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight">
-              Fresh Spices Delivered in <span className="text-amber-300 underline decoration-amber-400">3 Hours</span>
+              Fresh Spices Delivered <span className="text-amber-300 underline decoration-amber-400">Same Day</span>
             </h2>
 
             <p className="text-sm text-white/85 leading-relaxed">
               Dispatched directly from our <strong>Spicewizz Hub in Vythiri, Wayanad (PIN: 673576)</strong> to Kalpetta, Meppadi, Lakkidi, Pozhuthana, Sultan Bathery, and surrounding areas within a 35 km radius.
             </p>
+
+            {/* 5:00 PM Cut-off Notice */}
+            <div className="p-3 rounded-xl bg-black/20 border border-white/15 text-xs text-amber-100 flex items-start gap-2.5">
+              <Clock className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+              <span>
+                <strong className="text-amber-300">Delivery Schedule:</strong> Orders placed before <strong>5:00 PM</strong> are delivered <strong>Same Day</strong>. Orders coming after <strong>5:00 PM</strong> will be delivered the <strong>very next day</strong>.
+              </span>
+            </div>
 
             {/* Delivering to status */}
             <div className="pt-1 flex items-center gap-2 text-xs text-white/90">

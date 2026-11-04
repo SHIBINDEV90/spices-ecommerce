@@ -72,7 +72,7 @@ export default function VendorDashboard() {
               <h3 className="font-bold text-neutral-900 text-base">Quick Delivery Products Catalog</h3>
             </div>
             <p className="text-xs text-neutral-600">
-              Deliver your farm-fresh spices within 3 hours within a 35 km radius in Wayanad.
+              Deliver your farm-fresh spices Same Day within a 35 km radius in Wayanad (orders after 5:00 PM delivered the very next day).
             </p>
           </div>
         </div>

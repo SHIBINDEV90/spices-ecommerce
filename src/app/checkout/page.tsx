@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
+import { getQuickDeliveryWindow } from '@/lib/geo';
 import { 
   ShoppingBag, 
   Tag, 
@@ -26,6 +27,15 @@ export default function CheckoutPage() {
 
   const [loading, setLoading] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [deliveryWindow, setDeliveryWindow] = useState(() => getQuickDeliveryWindow());
+
+  useEffect(() => {
+    setDeliveryWindow(getQuickDeliveryWindow());
+    const interval = setInterval(() => {
+      setDeliveryWindow(getQuickDeliveryWindow());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
   
   // Coupon States
   const [coupon, setCoupon] = useState('');
@@ -385,11 +395,18 @@ export default function CheckoutPage() {
                       </span>
                       <Clock className={`w-4 h-4 ${isQuickMode ? 'text-amber-600' : 'text-neutral-400'}`} />
                     </div>
-                    <p className="text-xs text-neutral-500 mb-3">
-                      Hyperlocal delivery from nearby stores within a 35 km radius in <strong className="text-amber-700 dark:text-amber-300">3 hours</strong>.
+                    <p className="text-xs text-neutral-500 mb-2">
+                      Hyperlocal delivery from nearby stores within a 35 km radius — <strong className="text-amber-700 dark:text-amber-300">Same Day Delivery</strong>.
+                    </p>
+                    <p className="text-[11px] text-amber-800 bg-amber-100/80 border border-amber-300/60 rounded-lg px-2.5 py-1.5 mb-2.5 leading-snug">
+                      <strong>Cut-off Notice:</strong> Orders placed before <strong>5:00 PM</strong> are delivered <strong>Same Day</strong>. Orders coming after <strong>5:00 PM</strong> will be delivered the <strong>very next day</strong>.
                     </p>
                     <div className="text-xs font-bold text-amber-700 flex items-center gap-1">
-                      <span>⚡ Express Local Dispatch</span>
+                      <span>
+                        {deliveryWindow.isAfterCutoff
+                          ? '⏰ Past 5:00 PM — Scheduled for Next Day Delivery'
+                          : '⚡ Before 5:00 PM — Eligible for Same Day Delivery'}
+                      </span>
                     </div>
                   </div>
                 </div>

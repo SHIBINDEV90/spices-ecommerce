@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { getQuickDeliveryWindow } from '@/lib/geo';
 
 function CheckoutSuccessContent() {
   const searchParams = useSearchParams();
@@ -172,9 +173,23 @@ function CheckoutSuccessContent() {
             <PackageCheck className="w-5 h-5 text-[#317a26] flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <h4 className="font-semibold text-neutral-800">What happens next?</h4>
-              <p className="text-neutral-600 text-xs leading-relaxed">
-                You will receive a confirmation email shortly. Our plantation partners will freshly pack your artisanal spices and dispatch them via express courier with tracking updates.
-              </p>
+              {order?.deliveryType === 'quick' ? (
+                <p className="text-neutral-600 text-xs leading-relaxed">
+                  {getQuickDeliveryWindow(order?.createdAt ? new Date(order.createdAt) : new Date()).isAfterCutoff ? (
+                    <>
+                      Your Quick Commerce order was placed <strong>after 5:00 PM</strong>, so your fresh spices will be delivered to you the <strong>very next day</strong>. (Orders placed before 5:00 PM are delivered Same Day.)
+                    </>
+                  ) : (
+                    <>
+                      Your Quick Commerce order was placed <strong>before 5:00 PM</strong> and is scheduled for <strong>Same Day Delivery</strong> today! (Orders placed after 5:00 PM are delivered the very next day.)
+                    </>
+                  )}
+                </p>
+              ) : (
+                <p className="text-neutral-600 text-xs leading-relaxed">
+                  You will receive a confirmation email shortly. Our plantation partners will freshly pack your artisanal spices and dispatch them via express courier with tracking updates.
+                </p>
+              )}
             </div>
           </div>
 

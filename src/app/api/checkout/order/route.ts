@@ -5,6 +5,7 @@ import Product from '@/lib/models/Product';
 import Coupon from '@/lib/models/Coupon';
 import Stripe from 'stripe';
 import { getRazorpayClient, getRazorpayCredentials } from '@/lib/razorpay';
+import { getQuickDeliveryWindow } from '@/lib/geo';
 
 function getStripeClient(): Stripe {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -93,6 +94,8 @@ export async function POST(req: Request) {
     }
 
     const totalAmount = Math.max(0, subtotal - discountAmount + deliveryFee + codFee);
+    const now = new Date();
+    const quickWindow = getQuickDeliveryWindow(now);
 
     // Create Order in DB
     const order = await Order.create({
@@ -111,6 +114,19 @@ export async function POST(req: Request) {
         deliveryType: deliveryType === 'quick' ? 'quick' : 'standard',
         deliveryLocation: deliveryLocation || undefined,
         estimatedDeliveryMinutes: estimatedDeliveryMinutes || undefined,
+        trackingHistory: [
+          {
+            status: 'processing',
+            description:
+              deliveryType === 'quick'
+                ? quickWindow.isAfterCutoff
+                  ? 'Quick Commerce order received after 5:00 PM — Scheduled for Very Next Day Delivery.'
+                  : 'Quick Commerce order received before 5:00 PM — Scheduled for Same Day Delivery.'
+                : 'Order confirmed and registered in system.',
+            source: 'system',
+            timestamp: now,
+          },
+        ],
     });
 
 
@@ -267,6 +283,7 @@ export async function GET(req: Request) {
         paymentMethod: order.paymentMethod,
         paymentGatewayId: order.paymentGatewayId,
         paymentId: order.paymentId,
+        deliveryType: order.deliveryType,
         createdAt: order.createdAt,
       }
     });
