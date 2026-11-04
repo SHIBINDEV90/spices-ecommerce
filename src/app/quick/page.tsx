@@ -20,6 +20,7 @@ import { useLocation } from '@/context/LocationContext';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getQuickDeliveryWindow } from '@/lib/geo';
+import { isSaffronProduct } from '@/components/Navbar';
 
 export default function QuickCommercePage() {
   const { location, setIsModalOpen, setQuickMode } = useLocation();
@@ -75,25 +76,28 @@ export default function QuickCommercePage() {
   }, [location.lat, location.lng]);
 
   const handleAddToCart = (product: any) => {
+    const isSaffron = isSaffronProduct(product);
+    const weight = isSaffron ? '50g' : '500g';
+    const price = isSaffron ? Math.round((Number(product.price) || 0) * 0.05) : product.price;
     addToCart({
       _id: product._id,
       name: product.name,
       slug: product.slug,
-      price: product.price,
+      price,
       imageUrl: product.imageUrl || (product.images && product.images[0]) || '/images/hero-spice.jpg',
       description: product.description,
       productType: product.productType || 'Spice',
       stock: product.stock,
       isRetailAvailable: true,
       isBulkAvailable: false,
-      selectedWeight: '500g',
+      selectedWeight: weight,
     } as any);
 
-    setAddedItemNotice(`Added "${product.name}" to cart!`);
+    setAddedItemNotice(`Added "${product.name}" (${weight}) to cart!`);
     setTimeout(() => setAddedItemNotice(null), 2500);
   };
 
-  const categories = ['All', 'Cardamom', 'Pepper', 'Cinnamon', 'Nutmeg', 'Cloves'];
+  const categories = ['All', 'Cardamom', 'Saffron', 'Pepper', 'Cinnamon', 'Nutmeg', 'Cloves'];
 
   const filteredProducts = selectedCategory === 'All' 
     ? products 

@@ -15,6 +15,7 @@ import { usePathname } from 'next/navigation';
 export const NAVBAR_PRODUCTS = [
   'Cardamom',
   'Black Cardamom',
+  'Saffron',
   'Vanilla',
   'Pepper',
   'Cinnamon',
@@ -25,6 +26,25 @@ export const NAVBAR_PRODUCTS = [
   'Honey',
   'Coffee seeds',
 ];
+
+export const SAFFRON_WEIGHT_OPTIONS = [
+  { label: '50g', grams: 50 },
+  { label: '100g', grams: 100 },
+  { label: '200g', grams: 200 },
+  { label: '250g', grams: 250 },
+  { label: '500g', grams: 500 },
+  { label: '1kg', grams: 1000 },
+] as const;
+
+export function isSaffronProduct(productOrName: any): boolean {
+  if (!productOrName) return false;
+  if (typeof productOrName === 'string') {
+    return productOrName.toLowerCase().includes('saffron');
+  }
+  return [productOrName.name, productOrName.productType, productOrName.category, productOrName.slug].some(
+    (v) => typeof v === 'string' && v.toLowerCase().includes('saffron')
+  );
+}
 
 export default function Navbar() {
   const { cartItems, isCartOpen, setIsCartOpen } = useCart();

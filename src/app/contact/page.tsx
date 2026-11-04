@@ -15,7 +15,7 @@ import {
   Compass, 
   Globe2 
 } from "lucide-react";
-import { NAVBAR_PRODUCTS } from "@/components/Navbar";
+import { NAVBAR_PRODUCTS, SAFFRON_WEIGHT_OPTIONS, isSaffronProduct } from "@/components/Navbar";
 
 const OFFICE_LOCATIONS = [
   {
@@ -365,16 +365,39 @@ export default function ContactPage() {
                     </select>
                   </div>
                   <div className="md:col-span-2 space-y-2">
-                    <label className="font-label-md text-label-md text-on-surface-variant">Volume &amp; Quantity (e.g. 500kg, 2 MT)</label>
+                    <label className="font-label-md text-label-md text-on-surface-variant">
+                      {isSaffronProduct(formState.product)
+                        ? 'Volume & Quantity (Saffron: 50g, 100g, 200g, 250g, 500g, 1kg)'
+                        : 'Volume & Quantity (e.g. 500kg, 2 MT)'}
+                    </label>
                     <input
                       required
                       name="quantity"
                       value={formState.quantity}
                       onChange={handleInputChange}
                       className="w-full bg-cream-paper border border-outline-variant rounded-sm focus:ring-secondary focus:border-secondary transition-all px-4 py-3"
-                      placeholder="e.g. 500 Kilograms / 2 Metric Tons"
+                      placeholder={isSaffronProduct(formState.product) ? "Select or enter Saffron weight (e.g. 50g, 100g, 200g, 250g, 500g, 1kg)" : "e.g. 500 Kilograms / 2 Metric Tons"}
                       type="text"
                     />
+                    {isSaffronProduct(formState.product) && (
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <span className="text-xs font-semibold text-on-surface-variant">Choose Saffron Weight:</span>
+                        {SAFFRON_WEIGHT_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.label}
+                            type="button"
+                            onClick={() => setFormState((prev) => ({ ...prev, quantity: opt.label }))}
+                            className={`px-3 py-1 rounded text-xs font-bold border transition-colors ${
+                              formState.quantity === opt.label
+                                ? 'bg-moss-deep text-white border-moss-deep'
+                                : 'bg-cream-paper text-slate-ink border-outline-variant hover:border-moss-deep'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="md:col-span-2 space-y-2">
                     <label className="font-label-md text-label-md text-on-surface-variant">Specifications &amp; Packaging Requirements</label>

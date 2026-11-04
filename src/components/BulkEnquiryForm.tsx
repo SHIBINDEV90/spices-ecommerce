@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { NAVBAR_PRODUCTS } from '@/components/Navbar';
+import { NAVBAR_PRODUCTS, SAFFRON_WEIGHT_OPTIONS, isSaffronProduct } from '@/components/Navbar';
 
 const COUNTRIES = [
   'India',
@@ -116,10 +116,10 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
     }
   };
 
-  const handlePresetSelect = (kg: number) => {
+  const handlePresetSelect = (kg: number, label?: string) => {
     setVolumeKg(kg.toString());
     setVolumeError('');
-    setFormData(prev => ({ ...prev, quantity: `${kg} KG` }));
+    setFormData(prev => ({ ...prev, quantity: label || `${kg} KG` }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +151,7 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
       const payload = {
         ...formData,
         country: 'India',
-        quantity: `${parsedKg} KG`
+        quantity: formData.quantity || `${parsedKg} KG`
       };
 
       const res = await fetch('/api/enquiry', {
@@ -257,13 +257,13 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
               <input
                 required
                 type="number"
-                min="1"
+                min={isSaffronProduct(formData.product) ? "0.05" : "1"}
                 max="500"
                 step="any"
                 name="quantity"
                 value={volumeKg}
                 onChange={handleVolumeChange}
-                placeholder="Enter volume in KG (1 - 500)"
+                placeholder={isSaffronProduct(formData.product) ? "Select weight below (50g - 1kg) or enter KG" : "Enter volume in KG (1 - 500)"}
                 className={`w-full bg-black/40 border rounded-xl px-4 py-4 pr-16 text-white focus:outline-none focus:ring-2 font-mono text-base ${
                   volumeError 
                     ? 'border-red-500 focus:ring-red-500/50' 
@@ -272,7 +272,7 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
               />
               <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                 <span className="text-xs font-bold text-gray-400 bg-white/10 px-2.5 py-1.5 rounded-lg border border-white/10">
-                  KG
+                  {isSaffronProduct(formData.product) && formData.quantity ? formData.quantity : 'KG'}
                 </span>
               </div>
             </div>
@@ -280,20 +280,40 @@ export default function BulkEnquiryForm({ products }: { products: any[] }) {
             {/* Quick volume presets */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <span className="text-[11px] text-gray-400 font-medium mr-1">Quick Select:</span>
-              {[25, 50, 100, 250, 500].map((kg) => (
-                <button
-                  key={kg}
-                  type="button"
-                  onClick={() => handlePresetSelect(kg)}
-                  className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
-                    parseFloat(volumeKg) === kg
-                      ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-400 font-bold shadow-md shadow-orange-500/20'
-                      : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
-                  }`}
-                >
-                  {kg} KG{kg === 500 ? ' (Max)' : ''}
-                </button>
-              ))}
+              {isSaffronProduct(formData.product) ? (
+                SAFFRON_WEIGHT_OPTIONS.map((opt) => {
+                  const kgVal = opt.grams / 1000;
+                  return (
+                    <button
+                      key={opt.label}
+                      type="button"
+                      onClick={() => handlePresetSelect(kgVal, opt.label)}
+                      className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                        parseFloat(volumeKg) === kgVal
+                          ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-400 font-bold shadow-md shadow-orange-500/20'
+                          : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })
+              ) : (
+                [25, 50, 100, 250, 500].map((kg) => (
+                  <button
+                    key={kg}
+                    type="button"
+                    onClick={() => handlePresetSelect(kg)}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
+                      parseFloat(volumeKg) === kg
+                        ? 'bg-gradient-to-r from-orange-500 to-amber-500 text-white border-orange-400 font-bold shadow-md shadow-orange-500/20'
+                        : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white border-white/10'
+                    }`}
+                  >
+                    {kg} KG{kg === 500 ? ' (Max)' : ''}
+                  </button>
+                ))
+              )}
             </div>
 
             {volumeError && (

@@ -5,15 +5,17 @@ import { ShoppingCart, PackageOpen, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct } from './Navbar';
 
 export default function ProductInteraction({ product }: { product: any }) {
   const { addToCart, setIsCartOpen } = useCart();
   const [added, setAdded] = useState(false);
 
+  const isSaffron = isSaffronProduct(product);
   const basePrice = Number(product.price) || 0;
   const isAbove2000 = basePrice >= 2000;
-  const [selectedWeight, setSelectedWeight] = useState<'250g' | '500g' | '1kg'>(
-    isAbove2000 ? '250g' : '1kg'
+  const [selectedWeight, setSelectedWeight] = useState<string>(
+    isSaffron ? '50g' : isAbove2000 ? '250g' : '1kg'
   );
 
   // Calculate per gram price
@@ -21,22 +23,25 @@ export default function ProductInteraction({ product }: { product: any }) {
     ? basePrice / 1000
     : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
-  const grams = selectedWeight === '250g' ? 250 : selectedWeight === '500g' ? 500 : 1000;
-  const calculatedPrice = selectedWeight === '1kg' && basePrice > 0
-    ? basePrice
-    : Math.round(perGramPrice * grams);
+  const weightOptions = isSaffron
+    ? SAFFRON_WEIGHT_OPTIONS.map((w) => ({
+        label: w.label,
+        grams: w.grams,
+        price: w.grams === 1000 && basePrice > 0 ? basePrice : Math.round(perGramPrice * w.grams),
+      }))
+    : isAbove2000
+      ? [
+          { label: '250g', grams: 250, price: Math.round(perGramPrice * 250) },
+          { label: '500g', grams: 500, price: Math.round(perGramPrice * 500) },
+          { label: '1kg', grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
+        ]
+      : [
+          { label: '500g', grams: 500, price: Math.round(perGramPrice * 500) },
+          { label: '1kg', grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
+        ];
 
-  // 250g is included ONLY if the product price is above 2000 rupees
-  const weightOptions = isAbove2000
-    ? [
-        { label: '250g' as const, grams: 250, price: Math.round(perGramPrice * 250) },
-        { label: '500g' as const, grams: 500, price: Math.round(perGramPrice * 500) },
-        { label: '1kg' as const, grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
-      ]
-    : [
-        { label: '500g' as const, grams: 500, price: Math.round(perGramPrice * 500) },
-        { label: '1kg' as const, grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
-      ];
+  const activeOption = weightOptions.find((o) => o.label === selectedWeight) || weightOptions[0];
+  const calculatedPrice = activeOption.price;
 
   const handleAddToCart = () => {
     addToCart({
@@ -79,7 +84,7 @@ export default function ProductInteraction({ product }: { product: any }) {
         <label className="text-xs font-bold text-gray-300 uppercase tracking-widest">
           Select Weight
         </label>
-        <div className={`grid ${isAbove2000 ? 'grid-cols-3' : 'grid-cols-2'} gap-3`}>
+        <div className={`grid ${isSaffron || isAbove2000 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-3`}>
           {weightOptions.map((option) => {
             const isSelected = selectedWeight === option.label;
             return (

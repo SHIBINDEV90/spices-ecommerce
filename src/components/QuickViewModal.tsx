@@ -7,6 +7,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/types/product';
+import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct } from './Navbar';
 
 interface QuickViewModalProps {
   isOpen: boolean;
@@ -17,20 +18,27 @@ interface QuickViewModalProps {
 export default function QuickViewModal({ isOpen, onClose, product }: QuickViewModalProps) {
   const basePrice = Number(product?.price) || 0;
   const isAbove2000 = basePrice >= 2000;
+  const isSaffron = isSaffronProduct(product);
 
-  const weightOptions = isAbove2000
-    ? [
-        { label: '250g', value: 250 },
-        { label: '500g', value: 500 },
-        { label: '1kg', value: 1000 },
-      ]
-    : [
-        { label: '500g', value: 500 },
-        { label: '1kg', value: 1000 },
-      ];
+  const weightOptions = isSaffron
+    ? SAFFRON_WEIGHT_OPTIONS.map((w) => ({ label: w.label, value: w.grams }))
+    : isAbove2000
+      ? [
+          { label: '250g', value: 250 },
+          { label: '500g', value: 500 },
+          { label: '1kg', value: 1000 },
+        ]
+      : [
+          { label: '500g', value: 500 },
+          { label: '1kg', value: 1000 },
+        ];
 
   const [selectedWeight, setSelectedWeight] = useState(
-    isAbove2000 ? { label: '250g', value: 250 } : { label: '1kg', value: 1000 }
+    isSaffron
+      ? { label: '50g', value: 50 }
+      : isAbove2000
+        ? { label: '250g', value: 250 }
+        : { label: '1kg', value: 1000 }
   );
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -43,8 +51,15 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   // Reset state when a new product is loaded
   useEffect(() => {
     if (isOpen && product) {
+      const saffron = isSaffronProduct(product);
       const isHigh = (Number(product.price) || 0) >= 2000;
-      setSelectedWeight(isHigh ? { label: '250g', value: 250 } : { label: '1kg', value: 1000 });
+      setSelectedWeight(
+        saffron
+          ? { label: '50g', value: 50 }
+          : isHigh
+            ? { label: '250g', value: 250 }
+            : { label: '1kg', value: 1000 }
+      );
       setQuantity(1);
       setIsAdded(false);
       setActiveImage(0);

@@ -8,6 +8,7 @@ import { ArrowRight, ShoppingBag, Check, Star, Store, Tractor, ShieldCheck } fro
 import { useState } from 'react';
 import { useCart } from '@/context/CartContext';
 import QuickViewModal from './QuickViewModal';
+import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct } from './Navbar';
 
 interface ProductCardProps {
   product: Product;
@@ -20,17 +21,34 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
   const { addToCart, setIsCartOpen } = useCart();
   const [isQuickViewOpen, setQuickViewOpen] = useState(false);
 
+  const isSaffron = isSaffronProduct(product);
   const basePrice = Number(product.price) || 500;
   const perGramPrice = basePrice > 0
     ? basePrice / 1000
     : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
+  const defaultWeight = isSaffron ? '50g' : (basePrice >= 2000 ? '250g' : '1kg');
+  const [selectedCardWeight, setSelectedCardWeight] = useState<string>(defaultWeight);
+
+  const getGramsForWeight = (w: string) => {
+    if (w === '50g') return 50;
+    if (w === '100g') return 100;
+    if (w === '200g') return 200;
+    if (w === '250g') return 250;
+    if (w === '500g') return 500;
+    return 1000;
+  };
+
+  const activeWeight = isSaffron ? selectedCardWeight : defaultWeight;
+  const activeGrams = getGramsForWeight(activeWeight);
+  const displayPrice = activeGrams === 1000 && basePrice > 0
+    ? basePrice
+    : Math.round(perGramPrice * activeGrams);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAdded(true);
-    const weight = basePrice >= 2000 ? '250g' : '1kg';
-    const price = basePrice >= 2000 ? Math.round(perGramPrice * 250) : basePrice;
-    addToCart({ ...product, price, selectedWeight: weight });
+    addToCart({ ...product, price: displayPrice, selectedWeight: activeWeight });
     setIsCartOpen(true);
     setTimeout(() => {
       setIsAdded(false);
@@ -150,11 +168,11 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
         <div className="mt-auto">
           <div className="flex items-baseline gap-2 mb-1">
             <span className="font-extrabold text-xl text-foreground tracking-tight">
-               ₹{basePrice}
+               ₹{isSaffron ? displayPrice : basePrice}
             </span>
             {originalPrice && (
               <span className="font-medium text-sm text-foreground/40 line-through decoration-1">
-                 ₹{originalPrice}
+                 ₹{isSaffron ? Math.round((originalPrice / 1000) * activeGrams) : originalPrice}
               </span>
             )}
             {discountPercent > 0 && (
@@ -164,13 +182,40 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
             )}
           </div>
           
-          <div className="flex flex-col gap-0.5 mb-4">
+          <div className="flex flex-col gap-0.5 mb-3">
             <span className="text-[11px] text-foreground/50">Inclusive of all taxes</span>
             <span className="text-[11px] text-foreground/50">USP: ₹{usp}/g</span>
             <span className="text-[11px] font-semibold text-emerald-600">
-              {basePrice >= 2000 ? 'Weights: 250g, 500g, 1kg' : 'Weights: 500g, 1kg'}
+              {isSaffron
+                ? 'Weights: 50g, 100g, 200g, 250g, 500g, 1kg'
+                : basePrice >= 2000
+                  ? 'Weights: 250g, 500g, 1kg'
+                  : 'Weights: 500g, 1kg'}
             </span>
           </div>
+
+          {isSaffron && (
+            <div className="flex flex-wrap gap-1 mb-3">
+              {SAFFRON_WEIGHT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.label}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedCardWeight(opt.label);
+                  }}
+                  className={`px-2 py-0.5 text-[11px] font-bold rounded-md border transition-colors ${
+                    selectedCardWeight === opt.label
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-neutral-100 text-foreground/70 border-neutral-200 hover:border-primary/40'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Animated Add to Cart Button */}
@@ -195,7 +240,7 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-2"
                 >
-                  <Check size={18} /> Added ({basePrice >= 2000 ? '250g' : '1kg'})
+                  <Check size={18} /> Added ({activeWeight})
                 </motion.div>
               ) : (
                 <motion.div
@@ -206,7 +251,7 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
                   transition={{ duration: 0.2 }}
                   className="flex items-center gap-2"
                 >
-                  <ShoppingBag size={18} /> Add ({basePrice >= 2000 ? '250g' : '1kg'})
+                  <ShoppingBag size={18} /> Add ({activeWeight})
                 </motion.div>
               )}
             </AnimatePresence>

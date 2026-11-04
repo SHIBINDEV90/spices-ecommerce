@@ -54,7 +54,13 @@ export async function POST(req: Request) {
       if (!dbProduct) throw new Error(`Product not found: ${item.name}`);
 
       let unitPrice = dbProduct.price;
-      if (item.selectedWeight === '250g') {
+      if (item.selectedWeight === '50g') {
+        unitPrice = Math.round(dbProduct.price * 0.05);
+      } else if (item.selectedWeight === '100g') {
+        unitPrice = Math.round(dbProduct.price * 0.1);
+      } else if (item.selectedWeight === '200g') {
+        unitPrice = Math.round(dbProduct.price * 0.2);
+      } else if (item.selectedWeight === '250g') {
         unitPrice = Math.round(dbProduct.price * 0.25);
       } else if (item.selectedWeight === '500g') {
         unitPrice = Math.round(dbProduct.price * 0.5);
