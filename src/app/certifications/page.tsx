@@ -10,7 +10,6 @@ export default function CertificationsPage() {
           <li className="text-lg text-gray-700 mb-2">IEC (Import Export Code)</li>
           <li className="text-lg text-gray-700 mb-2">FSSAI (Food Safety and Standards Authority of India)</li>
           <li className="text-lg text-gray-700 mb-2">Spice Board of India</li>
-          <li className="text-lg text-gray-700 mb-2">ISO (International Organization for Standardization)</li>
         </ul>
       </div>
     </div>
