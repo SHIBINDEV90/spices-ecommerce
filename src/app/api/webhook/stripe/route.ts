@@ -26,13 +26,15 @@ export async function POST(req: Request) {
 
   try {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    
-    if (webhookSecret) {
-       const stripe = getStripeClient();
-       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } else {
-       event = JSON.parse(body) as Stripe.Event;
+    if (!webhookSecret || !signature) {
+      return NextResponse.json(
+        { error: 'Webhook Error: Missing STRIPE_WEBHOOK_SECRET or stripe-signature header' },
+        { status: 400 }
+      );
     }
+
+    const stripe = getStripeClient();
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (error: any) {
     console.error(`Webhook Error Formatter: ${error.message}`);
     return NextResponse.json({ error: `Webhook Error: ${error.message}` }, { status: 400 });

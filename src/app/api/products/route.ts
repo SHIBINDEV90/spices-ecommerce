@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import connectToDatabase from '../../../lib/db';
 import Product from '../../../lib/models/Product';
 import Vendor from '../../../lib/models/Vendor';
@@ -15,6 +17,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'Admin') {
+    return NextResponse.json({ message: 'Unauthorized: Admin access required' }, { status: 401 });
+  }
+
   await connectToDatabase();
   
   try {

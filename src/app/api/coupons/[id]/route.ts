@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Coupon from '@/lib/models/Coupon';
 
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'Admin') {
+    return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 401 });
+  }
+
   await dbConnect();
   try {
     const body = await req.json();
@@ -23,6 +30,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'Admin') {
+    return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 401 });
+  }
+
   await dbConnect();
   try {
     const coupon = await Coupon.findByIdAndDelete(params.id);

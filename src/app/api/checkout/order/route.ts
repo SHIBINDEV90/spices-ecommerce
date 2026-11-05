@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     let subtotal = 0;
     const orderProducts = [];
 
-    // Map checkout items with trusted DB prices to prevent tampering
+    // Map checkout items strictly with trusted DB prices to prevent client price tampering
     for (const item of cartItems) {
       const dbProduct = await Product.findById(item._id);
       if (!dbProduct) throw new Error(`Product not found: ${item.name}`);
@@ -64,17 +64,16 @@ export async function POST(req: Request) {
         unitPrice = Math.round(dbProduct.price * 0.25);
       } else if (item.selectedWeight === '500g') {
         unitPrice = Math.round(dbProduct.price * 0.5);
-      } else if (item.price && Number(item.price) > 0 && Number(item.price) < dbProduct.price) {
-        unitPrice = Number(item.price);
       }
 
-      const itemTotal = unitPrice * item.quantity;
+      const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      const itemTotal = unitPrice * quantity;
       subtotal += itemTotal;
 
       orderProducts.push({
           productId: dbProduct._id,
           name: item.selectedWeight ? `${dbProduct.name} (${item.selectedWeight})` : dbProduct.name,
-          quantity: item.quantity,
+          quantity,
           price: unitPrice,
           vendorId: dbProduct.vendorId, // Crucial for multi-vendor splitting
           status: 'Pending'
@@ -86,8 +85,15 @@ export async function POST(req: Request) {
 
     let discountAmount = 0;
     if (couponCode) {
-        const coupon = await Coupon.findOne({ code: couponCode, isActive: true });
-        if (coupon) {
+        const coupon = await Coupon.findOne({ code: String(couponCode).toUpperCase(), isActive: true });
+        const checkTime = new Date();
+        const isWithinDates =
+          (!coupon?.startDate || new Date(coupon.startDate) <= checkTime) &&
+          (!coupon?.endDate || new Date(coupon.endDate) >= checkTime);
+        const meetsMinOrder = coupon && subtotal >= (coupon.minimumOrderAmount || 0);
+        const withinUsageLimit = coupon && (!coupon.usageLimit || coupon.usedCount < coupon.usageLimit);
+
+        if (coupon && isWithinDates && meetsMinOrder && withinUsageLimit) {
             if (coupon.discountType === 'percentage') {
                 discountAmount = (subtotal * coupon.discountValue) / 100;
                 if (coupon.maximumDiscount && discountAmount > coupon.maximumDiscount) {
@@ -96,6 +102,7 @@ export async function POST(req: Request) {
             } else {
                 discountAmount = coupon.discountValue;
             }
+            discountAmount = Math.min(Math.round(discountAmount), subtotal);
         }
     }
 

@@ -6,12 +6,17 @@ import bcrypt from 'bcryptjs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ success: false, message: 'Forbidden in production' }, { status: 403 });
+  }
+
   await dbConnect();
 
   try {
+    const defaultPassword = process.env.ADMIN_PASSWORD || 'admin';
     const admins = [
-      { email: 'admin@malabarcoast.com', password: 'malabar123', name: 'Malabar Admin' },
-      { email: 'admin@spicewizz.com', password: 'spicewizz123', name: 'Spicewizz Admin' }
+      { email: 'admin@malabarcoast.com', password: defaultPassword, name: 'Malabar Admin' },
+      { email: 'admin@spicewizz.com', password: defaultPassword, name: 'Spicewizz Admin' }
     ];
 
     for (const admin of admins) {
@@ -35,7 +40,7 @@ export async function GET() {
     return NextResponse.json({ 
       success: true, 
       message: 'Admin accounts updated/created successfully',
-      admins: admins.map(a => ({ email: a.email, password: a.password }))
+      admins: admins.map(a => ({ email: a.email }))
     });
 
   } catch (error) {

@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import connectToDatabase from '../../../../lib/db';
 import Product from '../../../../lib/models/Product';
 import mongoose from 'mongoose';
@@ -25,6 +27,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'Admin') {
+    return NextResponse.json({ message: 'Unauthorized: Admin access required' }, { status: 401 });
+  }
+
   await connectToDatabase();
   const { id } = params;
   const isObjectId = mongoose.Types.ObjectId.isValid(id);
@@ -101,6 +108,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'Admin') {
+    return NextResponse.json({ message: 'Unauthorized: Admin access required' }, { status: 401 });
+  }
+
   await connectToDatabase();
   const { id } = params;
   const isObjectId = mongoose.Types.ObjectId.isValid(id);

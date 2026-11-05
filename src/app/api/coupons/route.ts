@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Coupon from '@/lib/models/Coupon';
 
 export async function GET(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'Admin') {
+    return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 401 });
+  }
+
   await dbConnect();
   try {
     const coupons = await Coupon.find().sort({ createdAt: -1 });
@@ -14,6 +21,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const session = await getServerSession(authOptions);
+  if (!session || (session.user as any)?.role !== 'Admin') {
+    return NextResponse.json({ success: false, message: 'Unauthorized: Admin access required' }, { status: 401 });
+  }
+
   await dbConnect();
   try {
     const body = await req.json();

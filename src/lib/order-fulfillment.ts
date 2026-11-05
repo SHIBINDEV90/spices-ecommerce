@@ -31,6 +31,14 @@ export async function fulfillOrder({
     return { success: false, error: 'Order not found' };
   }
 
+  // Security check: prevent cross-order payment replay
+  if (orderId && paymentGatewayId && order.paymentGatewayId && order.paymentGatewayId !== paymentGatewayId) {
+    console.error(
+      `[FulfillOrder] Security mismatch: order ${order._id} expected gatewayId ${order.paymentGatewayId}, got ${paymentGatewayId}`
+    );
+    return { success: false, error: 'Payment gateway ID does not match order' };
+  }
+
   // Idempotency: If already paid, don't duplicate wallet or coupon actions
   if (order.paymentStatus === 'paid') {
     return { success: true, message: 'Order already marked as paid', order };

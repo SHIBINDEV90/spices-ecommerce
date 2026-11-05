@@ -4,11 +4,15 @@ import dbConnect from '@/lib/db';
 import User from '@/lib/models/User';
 
 export async function GET() {
+  if (process.env.NODE_ENV !== 'development') {
+    return NextResponse.json({ error: 'Forbidden in production' }, { status: 403 });
+  }
+
   try {
     await dbConnect();
     
     const email = 'admin@malabarcoast.com';
-    const password = 'admin'; // simple password for local dev
+    const password = process.env.ADMIN_PASSWORD || 'admin';
     
     const existingUser = await User.findOne({ email });
     if (existingUser) {
