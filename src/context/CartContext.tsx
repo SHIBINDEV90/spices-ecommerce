@@ -42,17 +42,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (storedCart) {
       try {
         const parsedCart: CartItem[] = JSON.parse(storedCart);
-        const sanitizedCart = parsedCart.map((item) => {
-          // If price was erroneously multiplied by 1000 in legacy state (e.g. 300000)
-          if (item.price && item.price >= 100000) {
-            const base = Number((item as any).pricePerGram) > 0 
-              ? Math.round(item.price / 100) 
-              : Math.round(item.price / 1000);
-            return { ...item, price: base > 0 ? base : item.price };
-          }
-          return item;
-        });
-        setCartItems(sanitizedCart);
+        setCartItems(parsedCart);
       } catch (err) {
         console.error('Failed to parse stored cart:', err);
       }
@@ -65,11 +55,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [cartItems]);
 
   const addToCart = (product: AddToCartInput) => {
+    const maxStock = product.stock !== undefined && product.stock !== null ? Number(product.stock) : Infinity;
+    if (maxStock <= 0) return;
+
     const quantityToAdd = Math.max(1, product.quantity ?? 1);
     const weightLabel = product.selectedWeight || product.weight || '1kg';
     const uniqueKey = `${product._id}-${weightLabel}`;
 
     setCartItems((prevItems) => {
+      const totalForProduct = prevItems
+        .filter((i) => i._id === product._id)
+        .reduce((sum, i) => sum + i.quantity, 0);
+      const allowedAdd = Math.max(0, Math.min(quantityToAdd, maxStock - totalForProduct));
+      if (allowedAdd <= 0) return prevItems;
+
       const existingItem = prevItems.find((item) => 
         (item.cartItemId && item.cartItemId === uniqueKey) || 
         (item._id === product._id && (item.selectedWeight || '1kg') === weightLabel)
@@ -78,7 +77,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (existingItem) {
         return prevItems.map((item) =>
           ((item.cartItemId && item.cartItemId === uniqueKey) || (item._id === product._id && (item.selectedWeight || '1kg') === weightLabel))
-            ? { ...item, quantity: item.quantity + quantityToAdd }
+            ? { ...item, stock: product.stock, quantity: item.quantity + allowedAdd }
             : item
         );
       } else {
@@ -88,7 +87,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             ...product,
             cartItemId: uniqueKey,
             selectedWeight: weightLabel,
-            quantity: quantityToAdd,
+            quantity: allowedAdd,
           },
         ];
       }
@@ -107,9 +106,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        ((item.cartItemId || item._id) === idOrKey || item._id === idOrKey) ? { ...item, quantity } : item
-      )
+      prevItems.map((item) => {
+        if ((item.cartItemId || item._id) === idOrKey || item._id === idOrKey) {
+          const maxStock = item.stock !== undefined && item.stock !== null ? Number(item.stock) : Infinity;
+          const otherWeightQty = prevItems
+            .filter((other) => other._id === item._id && (other.cartItemId || other._id) !== (item.cartItemId || item._id))
+            .reduce((sum, other) => sum + other.quantity, 0);
+          const cappedQty = Math.max(1, Math.min(quantity, Math.max(1, maxStock - otherWeightQty)));
+          return { ...item, quantity: cappedQty };
+        }
+        return item;
+      })
     );
   };
 

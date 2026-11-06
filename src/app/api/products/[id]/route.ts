@@ -41,14 +41,15 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     
     const rawOriginal = formData.get('originalPrice');
     const rawRating = formData.get('rating');
+    const rawStock = formData.get('stock');
     const payload: any = {
       name: formData.get('name') as string,
       slug: formData.get('slug') as string,
       description: formData.get('description') as string,
       price: Number(formData.get('price')),
-      originalPrice: rawOriginal ? Number(rawOriginal) : undefined,
+      originalPrice: rawOriginal && String(rawOriginal).trim() !== '' ? Number(rawOriginal) : null,
       productType: formData.get('productType') as string,
-      stock: Number(formData.get('stock')),
+      stock: rawStock !== null && String(rawStock).trim() !== '' ? Math.max(0, Number(rawStock)) : 0,
       isBulkAvailable: formData.get('isBulkAvailable') === 'true',
     };
 

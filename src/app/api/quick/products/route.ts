@@ -78,10 +78,6 @@ export async function GET(req: NextRequest) {
 
     const filterQuery: any = {
       approvalStatus: 'Approved',
-      $or: [
-        { stock: { $gt: 0 } },
-        { 'quickCommerce.quickStock': { $gt: 0 } },
-      ],
       'quickCommerce.isAvailable': { $ne: false },
     };
 
@@ -139,7 +135,9 @@ export async function GET(req: NextRequest) {
 
       return {
         ...prod,
-        stock: Math.max(prod.stock || 0, prod.quickCommerce?.quickStock || 0),
+        stock: prod.stock !== undefined && prod.stock !== null
+          ? Number(prod.stock)
+          : (prod.quickCommerce?.quickStock ?? 0),
         quickCommerce: {
           ...prod.quickCommerce,
           isAvailable: true,

@@ -1,14 +1,15 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, PackageOpen, Check } from 'lucide-react';
+import { ShoppingCart, PackageOpen, Check, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct, parseWeightGrams, formatWeightLabel } from './Navbar';
 
 export default function ProductInteraction({ product }: { product: any }) {
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart, setIsCartOpen, cartItems } = useCart();
   const [added, setAdded] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   const isSaffron = isSaffronProduct(product);
   const basePrice = Number(product.price) || 0;
@@ -16,6 +17,14 @@ export default function ProductInteraction({ product }: { product: any }) {
   const [selectedWeight, setSelectedWeight] = useState<string>(
     isSaffron ? '1g' : isAbove2000 ? '250g' : '1kg'
   );
+
+  const stockCount = product.stock !== undefined && product.stock !== null ? Number(product.stock) : 100;
+  const inCartQty = cartItems
+    .filter((item) => item._id === product._id)
+    .reduce((sum, item) => sum + item.quantity, 0);
+  const remainingStock = Math.max(0, stockCount - inCartQty);
+  const isOutOfStock = remainingStock <= 0;
+  const isStockLimitMet = quantity >= remainingStock;
 
   // Calculate per gram price (1g price)
   const perGramPrice = basePrice > 0
@@ -45,11 +54,13 @@ export default function ProductInteraction({ product }: { product: any }) {
     : (weightOptions.find((o) => o.label === selectedWeight) || weightOptions[0]).price;
 
   const handleAddToCart = () => {
+    if (isOutOfStock) return;
+    const safeQty = Math.min(quantity, remainingStock);
     addToCart({
       ...product,
       price: calculatedPrice,
       selectedWeight,
-      quantity: 1,
+      quantity: safeQty,
     });
     setIsCartOpen(true);
     setAdded(true);
@@ -71,13 +82,17 @@ export default function ProductInteraction({ product }: { product: any }) {
             </span>
           </p>
         </div>
-        {product.stock > 0 && (
-          <div className="text-right">
-            <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">
-              In Stock
+        <div className="text-right">
+          {isOutOfStock ? (
+            <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+              Out of Stock
             </span>
-          </div>
-        )}
+          ) : (
+            <span className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">
+              In Stock ({remainingStock} left)
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Weight Selector */}
@@ -140,18 +155,53 @@ export default function ProductInteraction({ product }: { product: any }) {
         )}
       </div>
 
+      {/* Quantity Selector & Stock Limit */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">Quantity</span>
+          <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 w-32">
+            <button
+              type="button"
+              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+              disabled={isOutOfStock || quantity <= 1}
+              className="text-white/60 hover:text-white transition-colors disabled:opacity-30"
+            >
+              <Minus size={16} />
+            </button>
+            <span className="font-bold text-white w-8 text-center">{isOutOfStock ? 0 : quantity}</span>
+            <button
+              type="button"
+              onClick={() => setQuantity(Math.min(remainingStock, quantity + 1))}
+              disabled={isOutOfStock || isStockLimitMet}
+              className="text-white/60 hover:text-white transition-colors disabled:opacity-30"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+        </div>
+        {!isOutOfStock && isStockLimitMet && (
+          <span className="text-xs font-bold text-red-400">
+            Out of Stock for additional units (Max {remainingStock})
+          </span>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
         {/* Retail Path */}
         <button 
           onClick={handleAddToCart}
-          disabled={product.stock === 0}
-          className={`flex-1 flex items-center justify-center gap-2 font-bold py-4 px-6 rounded-xl transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed ${
-            added 
-              ? 'bg-emerald-600 text-white shadow-emerald-500/25' 
-              : 'bg-gradient-to-tr from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white shadow-orange-500/20'
+          disabled={isOutOfStock}
+          className={`flex-1 flex items-center justify-center gap-2 font-bold py-4 px-6 rounded-xl transition-all shadow-lg active:scale-95 disabled:cursor-not-allowed ${
+            isOutOfStock
+              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+              : added 
+                ? 'bg-emerald-600 text-white shadow-emerald-500/25' 
+                : 'bg-gradient-to-tr from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 text-white shadow-orange-500/20'
           }`}
         >
-          {added ? (
+          {isOutOfStock ? (
+            <>Out of Stock</>
+          ) : added ? (
             <>Added to Cargo <Check className="w-5 h-5" /></>
           ) : (
             <>Add to Cart ({selectedWeight}) <ShoppingCart className="w-5 h-5" /></>

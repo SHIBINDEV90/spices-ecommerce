@@ -1,5 +1,6 @@
 import dbConnect from '@/lib/db';
 import Order from '@/lib/models/Order';
+import Product from '@/lib/models/Product';
 import Coupon from '@/lib/models/Coupon';
 import Wallet from '@/lib/models/Wallet';
 import mongoose from 'mongoose';
@@ -66,7 +67,22 @@ export async function fulfillOrder({
   });
   await order.save();
 
-  // 2. Increment Coupon Usage if applicable
+  // 2. Decrement Product Stock on Fulfillment
+  try {
+    for (const item of order.products) {
+      if (item.productId) {
+        const prod = await Product.findById(item.productId);
+        if (prod) {
+          prod.stock = Math.max(0, (Number(prod.stock) || 0) - (Number(item.quantity) || 1));
+          await prod.save();
+        }
+      }
+    }
+  } catch (stockErr) {
+    console.error('[FulfillOrder] Error decrementing product stock:', stockErr);
+  }
+
+  // 3. Increment Coupon Usage if applicable
   if (order.couponCode) {
     try {
       await Coupon.findOneAndUpdate(

@@ -18,7 +18,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, index = 0, featured = true }: ProductCardProps) {
   const [isAdded, setIsAdded] = useState(false);
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart, setIsCartOpen, cartItems } = useCart();
   const [isQuickViewOpen, setQuickViewOpen] = useState(false);
 
   const isSaffron = isSaffronProduct(product);
@@ -27,8 +27,15 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
     ? basePrice / 1000
     : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
+  const stockCount = product.stock !== undefined && product.stock !== null ? Number(product.stock) : 100;
+  const inCartQty = cartItems
+    .filter((item) => item._id === product._id)
+    .reduce((sum, item) => sum + item.quantity, 0);
+  const isOutOfStock = stockCount <= 0 || inCartQty >= stockCount;
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (isOutOfStock) return;
     if (isSaffron) {
       // Open Quick View so customer can select 1g to 1kg weight
       setQuickViewOpen(true);
@@ -67,12 +74,12 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
           src={imgSrc}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-1000 group-hover:scale-105"
+          className={`object-cover transition-transform duration-1000 group-hover:scale-105 ${isOutOfStock ? 'grayscale-[40%] opacity-80' : ''}`}
           unoptimized={isUploadedImage}
           onError={() => setImgSrc('/images/Cardamom.jpg')}
         />
         
-        {/* Source / Featured Badge */}
+        {/* Source / Stock / Featured Badge */}
         <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-10">
           {vendor ? (
             <span className="bg-emerald-700/90 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-md backdrop-blur-sm flex items-center gap-1">
@@ -85,11 +92,15 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
             </span>
           )}
 
-          {featured && (
+          {isOutOfStock ? (
+            <span className="bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-md ml-auto">
+              Out of Stock
+            </span>
+          ) : featured ? (
             <span className="bg-white/90 backdrop-blur text-foreground text-[10px] font-bold px-2 py-0.5 rounded-md shadow-sm border border-black/5 ml-auto">
               Featured
             </span>
-          )}
+          ) : null}
         </div>
 
         {/* Hover Quick View Overlay */}
@@ -160,30 +171,49 @@ export default function ProductCard({ product, index = 0, featured = true }: Pro
           <div className="flex flex-col gap-0.5 mb-2">
             <span className="text-[11px] text-foreground/50">Inclusive of all taxes</span>
             <span className="text-[11px] text-foreground/50">USP: ₹{usp}/g</span>
-            <span className="text-[11px] font-semibold text-emerald-600">
-              {isSaffron
-                ? 'Weights: 1g, 2g, 5g,'
-                : basePrice >= 2000
-                  ? 'Weights: 250g, 500g, 1kg'
-                  : 'Weights: 500g, 1kg'}
-            </span>
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-[11px] font-semibold text-emerald-600">
+                {isSaffron
+                  ? 'Weights: 1g, 2g, 5g,'
+                  : basePrice >= 2000
+                    ? 'Weights: 250g, 500g, 1kg'
+                    : 'Weights: 500g, 1kg'}
+              </span>
+              {isOutOfStock && (
+                <span className="text-[10px] font-bold text-red-600">
+                  Out of Stock
+                </span>
+              )}
+            </div>
           </div>
         </div>
         
         {/* Animated Add to Cart Button */}
         <div className="pt-2 border-t border-neutral-100 mt-1">
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={isOutOfStock ? {} : { scale: 1.02 }}
+            whileTap={isOutOfStock ? {} : { scale: 0.95 }}
             onClick={handleAddToCart}
+            disabled={isOutOfStock}
             className={`w-full py-2 px-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all duration-300 overflow-hidden relative text-xs ${
-              isAdded 
-                ? 'bg-primary text-white shadow-inner' 
-                : 'bg-primary/10 text-primary hover:bg-primary hover:text-white shadow-sm'
+              isOutOfStock
+                ? 'bg-red-500/10 text-red-600 border border-red-500/20 cursor-not-allowed'
+                : isAdded 
+                  ? 'bg-primary text-white shadow-inner' 
+                  : 'bg-primary/10 text-primary hover:bg-primary hover:text-white shadow-sm'
             }`}
           >
             <AnimatePresence mode="wait">
-              {isAdded ? (
+              {isOutOfStock ? (
+                <motion.div
+                  key="out-of-stock"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center gap-1.5"
+                >
+                  Out of Stock
+                </motion.div>
+              ) : isAdded ? (
                 <motion.div
                   key="added"
                   initial={{ opacity: 0, y: 15 }}

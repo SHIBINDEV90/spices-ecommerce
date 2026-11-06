@@ -24,10 +24,10 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     name: initialData?.name || '',
     slug: initialData?.slug || '',
     description: initialData?.description || '',
-    price: initialData?.price || '',
-    originalPrice: initialData?.originalPrice || '',
+    price: initialData?.price !== undefined && initialData?.price !== null ? String(initialData.price) : '',
+    originalPrice: initialData?.originalPrice !== undefined && initialData?.originalPrice !== null ? String(initialData.originalPrice) : '',
     productType: initialData?.productType || 'Spice',
-    stock: initialData?.stock || 0,
+    stock: initialData?.stock !== undefined && initialData?.stock !== null ? String(initialData.stock) : '0',
     isBulkAvailable: initialData?.isBulkAvailable || false,
     rating: initialData?.rating !== undefined ? Number(initialData.rating) : 5,
   });
@@ -81,10 +81,18 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
+    } else if (name === 'price' || name === 'originalPrice') {
+      // Allow typing numbers and decimal point freely in text field
+      const cleaned = value.replace(/[^0-9.]/g, '');
+      setFormData(prev => ({ ...prev, [name]: cleaned }));
+    } else if (name === 'stock') {
+      // Allow typing integer stock freely in text field
+      const cleaned = value.replace(/[^0-9]/g, '');
+      setFormData(prev => ({ ...prev, [name]: cleaned }));
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: name === 'price' || name === 'originalPrice' || name === 'stock' || name === 'rating' ? Number(value) : value
+        [name]: name === 'rating' ? Number(value) : value
       }));
     }
   };
@@ -93,6 +101,12 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
     e.preventDefault();
     if (images.length === 0) {
       setError('Please add at least one product image');
+      return;
+    }
+
+    const numericPrice = parseFloat(String(formData.price));
+    if (isNaN(numericPrice) || numericPrice < 0) {
+      setError('Please enter a valid Selling Price');
       return;
     }
 
@@ -107,12 +121,15 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
       payload.append('name', formData.name);
       payload.append('slug', formData.slug);
       payload.append('description', formData.description);
-      payload.append('price', formData.price.toString());
-      if (formData.originalPrice) {
-        payload.append('originalPrice', formData.originalPrice.toString());
+      payload.append('price', String(numericPrice));
+      if (formData.originalPrice && parseFloat(String(formData.originalPrice)) > 0) {
+        payload.append('originalPrice', String(parseFloat(String(formData.originalPrice))));
+      } else {
+        payload.append('originalPrice', '');
       }
       payload.append('productType', formData.productType);
-      payload.append('stock', formData.stock.toString());
+      const numericStock = Math.max(0, parseInt(String(formData.stock || '0'), 10) || 0);
+      payload.append('stock', String(numericStock));
       payload.append('isBulkAvailable', formData.isBulkAvailable.toString());
       payload.append('rating', (formData.rating || 5).toString());
       
@@ -265,17 +282,17 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
             <label className="text-sm font-medium text-gray-300">Selling Price (₹)</label>
             <input
               required
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               name="price"
               value={formData.price}
               onChange={handleChange}
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
-              placeholder="0.00"
+              placeholder="Type selling price (e.g. 2500)"
             />
             {Number(formData.price) > 0 && (
               <span className="text-xs text-emerald-400 block font-medium">
-                ⚡ Per Gram: ₹{(Number(formData.price) / 1000).toFixed(2)}/g
+                ⚡ Per Gram (1g): ₹{(Number(formData.price) / 1000).toFixed(2)}/g
               </span>
             )}
           </div>
@@ -283,13 +300,13 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">Original / MRP Price (₹) <span className="text-xs text-gray-500 font-normal">(Optional for offer badge)</span></label>
             <input
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               name="originalPrice"
               value={formData.originalPrice}
               onChange={handleChange}
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
-              placeholder="e.g. 3500"
+              placeholder="Type MRP price (e.g. 3500)"
             />
             {Number(formData.originalPrice) > Number(formData.price) && Number(formData.price) > 0 ? (
               <span className="text-xs text-emerald-400 block font-bold">
@@ -299,15 +316,27 @@ export default function ProductForm({ initialData, productId }: ProductFormProps
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-300">Stock</label>
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-300">Stock</label>
+              {Number(formData.stock || 0) <= 0 ? (
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/30">
+                  Out of Stock on UI
+                </span>
+              ) : (
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  In Stock ({formData.stock})
+                </span>
+              )}
+            </div>
             <input
               required
-              type="number"
+              type="text"
+              inputMode="numeric"
               name="stock"
               value={formData.stock}
               onChange={handleChange}
               className="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all placeholder:text-gray-600"
-              placeholder="100"
+              placeholder="Type stock quantity (0 = Out of Stock)"
             />
           </div>
 

@@ -45,7 +45,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   const [activeImage, setActiveImage] = useState(0);
   const [isBuying, setIsBuying] = useState(false);
   
-  const { addToCart, setIsCartOpen } = useCart();
+  const { addToCart, setIsCartOpen, cartItems } = useCart();
   const router = useRouter();
 
   // Reset state when a new product is loaded
@@ -67,6 +67,14 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   }, [isOpen, product]);
 
   if (!product) return null;
+
+  const stockCount = product.stock !== undefined && product.stock !== null ? Number(product.stock) : 100;
+  const inCartQty = cartItems
+    .filter((item) => item._id === product._id)
+    .reduce((sum, item) => sum + item.quantity, 0);
+  const remainingStock = Math.max(0, stockCount - inCartQty);
+  const isOutOfStock = remainingStock <= 0;
+  const isStockLimitMet = quantity >= remainingStock;
 
   // Use product images if available, otherwise fallback to single image
   const images = (product.images && product.images.length > 0)
@@ -93,15 +101,19 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   const usp = perGramPrice.toFixed(2);
 
   const handleAddToCart = () => {
-    addToCart({ ...product, price: currentPrice, selectedWeight: selectedWeight.label, quantity });
+    if (isOutOfStock) return;
+    const safeQty = Math.min(quantity, remainingStock);
+    addToCart({ ...product, price: currentPrice, selectedWeight: selectedWeight.label, quantity: safeQty });
     setIsAdded(true);
     setIsCartOpen(true);
     setTimeout(() => setIsAdded(false), 2000);
   };
 
   const handleBuyNow = () => {
+    if (isOutOfStock) return;
     setIsBuying(true);
-    addToCart({ ...product, price: currentPrice, selectedWeight: selectedWeight.label, quantity });
+    const safeQty = Math.min(quantity, remainingStock);
+    addToCart({ ...product, price: currentPrice, selectedWeight: selectedWeight.label, quantity: safeQty });
     onClose();
     router.push('/checkout');
     setIsBuying(false);
@@ -181,10 +193,19 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                   </button>
                 </div>
 
-                <div className="mb-2">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="text-primary text-xs font-bold uppercase tracking-widest bg-primary/10 px-2 py-1 rounded">
                     Wayanadan
                   </span>
+                  {isOutOfStock ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-500/20 text-red-400 border border-red-500/30">
+                      Out of Stock
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">
+                      In Stock ({remainingStock} left)
+                    </span>
+                  )}
                 </div>
 
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
@@ -293,18 +314,20 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                 </div>
 
                 {/* Quantity & Actions */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row gap-4 mb-3">
                   <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl px-4 py-2 w-full sm:w-32">
                     <button 
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="text-white/60 hover:text-white transition-colors"
+                      disabled={isOutOfStock || quantity <= 1}
+                      className="text-white/60 hover:text-white transition-colors disabled:opacity-30"
                     >
                       <Minus size={18} />
                     </button>
-                    <span className="font-bold text-white w-8 text-center">{quantity}</span>
+                    <span className="font-bold text-white w-8 text-center">{isOutOfStock ? 0 : quantity}</span>
                     <button 
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="text-white/60 hover:text-white transition-colors"
+                      onClick={() => setQuantity(Math.min(remainingStock, quantity + 1))}
+                      disabled={isOutOfStock || isStockLimitMet}
+                      className="text-white/60 hover:text-white transition-colors disabled:opacity-30"
                     >
                       <Plus size={18} />
                     </button>
@@ -313,9 +336,16 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                   <div className="flex-1 grid grid-cols-2 gap-2">
                     <button
                       onClick={handleAddToCart}
-                      className="px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all overflow-hidden relative text-sm bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-900/20 active:scale-95"
+                      disabled={isOutOfStock}
+                      className={`px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all overflow-hidden relative text-sm shadow-lg active:scale-95 ${
+                        isOutOfStock
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-900/20'
+                      }`}
                     >
-                      {isAdded ? (
+                      {isOutOfStock ? (
+                        <span>Out of Stock</span>
+                      ) : isAdded ? (
                         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2">
                           <Check size={18} /> Added ({selectedWeight.label})
                         </motion.div>
@@ -327,9 +357,11 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                     </button>
                     <button 
                       onClick={handleBuyNow}
-                      disabled={isBuying}
-                      className="px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-sm bg-white text-black hover:bg-gray-100 active:scale-95 shadow-lg disabled:opacity-70 disabled:cursor-wait">
-                      {isBuying ? (
+                      disabled={isBuying || isOutOfStock}
+                      className="px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all text-sm bg-white text-black hover:bg-gray-100 active:scale-95 shadow-lg disabled:opacity-40 disabled:cursor-not-allowed">
+                      {isOutOfStock ? (
+                        "Out of Stock"
+                      ) : isBuying ? (
                         <Loader2 size={18} className="animate-spin" />
                       ) : (
                         "Buy Now"
@@ -338,7 +370,13 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                   </div>
                 </div>
 
-                <div className="flex gap-4 mb-8 border-b border-white/10 pb-6">
+                {!isOutOfStock && isStockLimitMet && (
+                  <p className="text-xs font-bold text-red-400 mb-5">
+                    Out of Stock for additional units — maximum available stock ({remainingStock}) reached.
+                  </p>
+                )}
+
+                <div className="flex gap-4 mb-8 border-b border-white/10 pb-6 mt-3">
                   <button className="flex items-center gap-2 text-xs font-semibold text-white/50 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-lg">
                     <Heart size={14} /> Add to Wishlist
                   </button>

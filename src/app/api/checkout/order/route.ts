@@ -74,6 +74,13 @@ export async function POST(req: Request) {
         : Math.max(1, Math.round((dbProduct.price / 1000) * grams));
 
       const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      const availableStock = dbProduct.stock !== undefined && dbProduct.stock !== null ? Number(dbProduct.stock) : 100;
+      if (availableStock <= 0 || quantity > availableStock) {
+        return NextResponse.json(
+          { error: `${dbProduct.name} is Out of Stock (Available: ${Math.max(0, availableStock)})` },
+          { status: 400 }
+        );
+      }
       const itemTotal = unitPrice * quantity;
       subtotal += itemTotal;
 
@@ -152,6 +159,13 @@ export async function POST(req: Request) {
 
     // 1. CASH ON DELIVERY
     if (paymentMethod === 'cod') {
+        for (const item of orderProducts) {
+          const prod = await Product.findById(item.productId);
+          if (prod) {
+            prod.stock = Math.max(0, (Number(prod.stock) || 0) - item.quantity);
+            await prod.save();
+          }
+        }
         return NextResponse.json({ 
           success: true, 
           orderId: order._id.toString(), 

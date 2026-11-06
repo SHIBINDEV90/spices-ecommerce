@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
-import { X, ShoppingCart, Trash2, ArrowRight } from 'lucide-react';
+import { X, ShoppingCart, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect } from 'react';
@@ -15,7 +15,7 @@ interface CartDrawerProps {
 const isUploadedImage = (src: string) => src.startsWith('/uploads/');
 
 export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
-  const { cartItems, removeFromCart, getCartTotal, updateQuantity, clearCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
 
   // Prevent background scrolling when drawer is open
   useEffect(() => {
@@ -83,61 +83,75 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                   </button>
                 </div>
               ) : (
-                cartItems.map((item) => (
-                  <motion.div 
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    key={item.cartItemId || item._id} 
-                    className="flex gap-4 p-4 bg-white relative group border border-neutral-100 rounded-xl shadow-sm"
-                  >
-                    <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
-                      <Image 
-                        src={item.imageUrl || '/images/Cardamom.jpg'} 
-                        alt={item.name} 
-                        fill 
-                        className="object-cover"
-                        unoptimized={isUploadedImage(item.imageUrl || '/images/Cardamom.jpg')}
-                      />
-                    </div>
-                    <div className="flex flex-col flex-grow">
-                      <h4 className="text-[15px] font-semibold text-foreground pr-4 mb-0.5 line-clamp-1">{item.name}</h4>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                          {item.selectedWeight || item.weight || '1kg'}
-                        </span>
+                cartItems.map((item) => {
+                  const maxStock = item.stock !== undefined && item.stock !== null ? Number(item.stock) : Infinity;
+                  const totalProductQty = cartItems
+                    .filter((c) => c._id === item._id)
+                    .reduce((sum, c) => sum + c.quantity, 0);
+                  const isMaxStockReached = totalProductQty >= maxStock;
+
+                  return (
+                    <motion.div 
+                      layout
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      key={item.cartItemId || item._id} 
+                      className="flex gap-4 p-4 bg-white relative group border border-neutral-100 rounded-xl shadow-sm"
+                    >
+                      <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0">
+                        <Image 
+                          src={item.imageUrl || '/images/Cardamom.jpg'} 
+                          alt={item.name} 
+                          fill 
+                          className="object-cover"
+                          unoptimized={isUploadedImage(item.imageUrl || '/images/Cardamom.jpg')}
+                        />
                       </div>
-                      
-                      <div className="flex items-center justify-between mt-auto">
-                        <div className="flex items-center border border-neutral-200 rounded-lg">
-                          <button 
-                            onClick={() => updateQuantity(item.cartItemId || item._id, item.quantity - 1)}
-                            className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 transition-colors"
-                          >
-                            <span className="text-xl leading-none -mt-1">-</span>
-                          </button>
-                          <span className="w-8 text-center text-[15px] font-medium">{item.quantity}</span>
-                          <button 
-                            onClick={() => updateQuantity(item.cartItemId || item._id, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 transition-colors"
-                          >
-                            <span className="text-xl leading-none -mt-0.5">+</span>
-                          </button>
+                      <div className="flex flex-col flex-grow">
+                        <h4 className="text-[15px] font-semibold text-foreground pr-4 mb-0.5 line-clamp-1">{item.name}</h4>
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            {item.selectedWeight || item.weight || '1kg'}
+                          </span>
+                          {isMaxStockReached && (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200">
+                              Out of Stock (Max {maxStock} reached)
+                            </span>
+                          )}
                         </div>
-                        <div className="flex items-center gap-4">
-                          <span className="font-bold text-foreground">₹{((item.price || 500) * item.quantity).toFixed(0)}</span>
-                          <button 
-                            onClick={() => removeFromCart(item.cartItemId || item._id)}
-                            className="text-neutral-400 hover:text-neutral-600 transition-colors flex items-center"
-                          >
-                            <Trash2 size={18} />
-                          </button>
+                        
+                        <div className="flex items-center justify-between mt-auto">
+                          <div className="flex items-center border border-neutral-200 rounded-lg">
+                            <button 
+                              onClick={() => updateQuantity(item.cartItemId || item._id, item.quantity - 1)}
+                              className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 transition-colors"
+                            >
+                              <span className="text-xl leading-none -mt-1">-</span>
+                            </button>
+                            <span className="w-8 text-center text-[15px] font-medium">{item.quantity}</span>
+                            <button 
+                              onClick={() => updateQuantity(item.cartItemId || item._id, item.quantity + 1)}
+                              disabled={isMaxStockReached}
+                              className="w-8 h-8 flex items-center justify-center text-neutral-600 hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            >
+                              <span className="text-xl leading-none -mt-0.5">+</span>
+                            </button>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <span className="font-bold text-foreground">₹{((item.price || 500) * item.quantity).toFixed(0)}</span>
+                            <button 
+                              onClick={() => removeFromCart(item.cartItemId || item._id)}
+                              className="text-neutral-400 hover:text-neutral-600 transition-colors flex items-center"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))
+                    </motion.div>
+                  );
+                })
               )}
             </div>
 
