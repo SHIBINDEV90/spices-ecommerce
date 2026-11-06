@@ -18,6 +18,21 @@ function getStripeClient(): Stripe {
   });
 }
 
+function parseServerWeightGrams(selectedWeight?: string): number {
+  if (!selectedWeight) return 1000;
+  const trimmed = String(selectedWeight).trim().toLowerCase();
+  if (trimmed === '1kg' || trimmed === '1000g') return 1000;
+  const kgMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*kg$/);
+  if (kgMatch) {
+    return Math.min(1000, Math.max(1, Math.round(parseFloat(kgMatch[1]) * 1000)));
+  }
+  const gMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*g?$/);
+  if (gMatch) {
+    return Math.min(1000, Math.max(1, Math.round(parseFloat(gMatch[1]))));
+  }
+  return 1000;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -53,18 +68,10 @@ export async function POST(req: Request) {
       const dbProduct = await Product.findById(item._id);
       if (!dbProduct) throw new Error(`Product not found: ${item.name}`);
 
-      let unitPrice = dbProduct.price;
-      if (item.selectedWeight === '50g') {
-        unitPrice = Math.round(dbProduct.price * 0.05);
-      } else if (item.selectedWeight === '100g') {
-        unitPrice = Math.round(dbProduct.price * 0.1);
-      } else if (item.selectedWeight === '200g') {
-        unitPrice = Math.round(dbProduct.price * 0.2);
-      } else if (item.selectedWeight === '250g') {
-        unitPrice = Math.round(dbProduct.price * 0.25);
-      } else if (item.selectedWeight === '500g') {
-        unitPrice = Math.round(dbProduct.price * 0.5);
-      }
+      const grams = parseServerWeightGrams(item.selectedWeight);
+      const unitPrice = grams === 1000
+        ? dbProduct.price
+        : Math.max(1, Math.round((dbProduct.price / 1000) * grams));
 
       const quantity = Math.max(1, Math.floor(Number(item.quantity) || 1));
       const itemTotal = unitPrice * quantity;

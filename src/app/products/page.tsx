@@ -42,12 +42,22 @@ export default async function ProductsPage({
     filteredProducts = filteredProducts.filter((p: any) => !!p.vendorId);
   }
 
-  // Filter by search query / category
+  // Filter by search query / category (also match 'safron' <-> 'saffron')
   if (filter) {
-    filteredProducts = filteredProducts.filter((product: any) => 
-      product.name.toLowerCase().includes(filter) || 
-      (product.category && product.category.toLowerCase().includes(filter))
-    );
+    const isSaffronFilter = /^saff?ron$/i.test(filter.trim());
+    filteredProducts = filteredProducts.filter((product: any) => {
+      if (isSaffronFilter) {
+        return (
+          /saff?ron/i.test(product.name || '') ||
+          /saff?ron/i.test(product.category || '') ||
+          /saff?ron/i.test(product.slug || '')
+        );
+      }
+      return (
+        product.name.toLowerCase().includes(filter) ||
+        (product.category && product.category.toLowerCase().includes(filter))
+      );
+    });
   }
 
   const buildQuery = (newSource?: string, newFilter?: string | null) => {
@@ -169,4 +179,3 @@ export default async function ProductsPage({
     </div>
   );
 }
-

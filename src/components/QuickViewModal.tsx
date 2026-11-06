@@ -3,11 +3,11 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star, ShoppingBag, Check, Truck, ShieldCheck, Leaf, Heart, Share2, Plus, Minus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
-import { ReactNode, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
 import type { Product } from '@/types/product';
-import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct } from './Navbar';
+import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct, formatWeightLabel } from './Navbar';
 
 interface QuickViewModalProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
   const [selectedWeight, setSelectedWeight] = useState(
     isSaffron
-      ? { label: '50g', value: 50 }
+      ? { label: '1g', value: 1 }
       : isAbove2000
         ? { label: '250g', value: 250 }
         : { label: '1kg', value: 1000 }
@@ -55,7 +55,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
       const isHigh = (Number(product.price) || 0) >= 2000;
       setSelectedWeight(
         saffron
-          ? { label: '50g', value: 50 }
+          ? { label: '1g', value: 1 }
           : isHigh
             ? { label: '250g', value: 250 }
             : { label: '1kg', value: 1000 }
@@ -74,18 +74,18 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
     : [product.imageUrl || '/images/Cardamom.jpg'];
   const isUploadedImage = (src: string) => typeof src === 'string' && src.startsWith('/uploads/');
 
-  // Base calculations
+  // Base calculations (1g price)
   const perGramPrice = basePrice > 0
     ? basePrice / 1000
     : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
 
   const currentPrice = selectedWeight.value === 1000 && basePrice > 0
     ? basePrice
-    : Math.round(perGramPrice * selectedWeight.value);
+    : Math.max(1, Math.round(perGramPrice * selectedWeight.value));
   const hasOriginalPrice = product.originalPrice && Number(product.originalPrice) > basePrice;
   const originalBasePrice = hasOriginalPrice ? Number(product.originalPrice) : null;
   const originalPrice = originalBasePrice
-    ? (selectedWeight.value === 1000 ? originalBasePrice : Math.round((originalBasePrice / 1000) * selectedWeight.value))
+    ? (selectedWeight.value === 1000 ? originalBasePrice : Math.max(1, Math.round((originalBasePrice / 1000) * selectedWeight.value)))
     : null;
   const discountPercent = originalPrice && originalPrice > currentPrice
     ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
@@ -235,7 +235,7 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                     )}
                   </div>
                   <span className="text-xs text-white/40 font-medium">Inclusive of all taxes</span>
-                  <span className="text-xs text-white/40 font-medium">USP: ₹{usp}/g</span>
+                  <span className="text-xs text-emerald-400 font-semibold">USP: ₹{usp}/g (1g price)</span>
                 </div>
 
                 <p className="text-sm text-white/70 leading-relaxed mb-6 font-light">
@@ -244,13 +244,15 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
 
                 {/* Select Weight */}
                 <div className="mb-6">
-                  <h3 className="text-sm font-semibold text-white/80 mb-3 uppercase tracking-wider">Select Weight</h3>
+                  <h3 className="text-sm font-semibold text-white/80 mb-3 uppercase tracking-wider">
+                    {isSaffron ? 'Select Weight (1g to 1kg)' : 'Select Weight'}
+                  </h3>
                   <div className="flex flex-wrap gap-2">
                     {weightOptions.map((weight) => (
                       <button
                         key={weight.label}
                         onClick={() => setSelectedWeight(weight)}
-                        className={`px-4 py-2 text-sm font-medium rounded-lg transition-all border ${
+                        className={`px-3.5 py-1.5 text-xs sm:text-sm font-medium rounded-lg transition-all border ${
                           selectedWeight.label === weight.label 
                             ? 'bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(249,115,22,0.15)]' 
                             : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:border-white/30'
@@ -260,6 +262,34 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                       </button>
                     ))}
                   </div>
+                  {isSaffron && (
+                    <div className="mt-3 flex flex-wrap items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                      <span className="text-xs font-semibold text-white/70">Custom Weight (1g–1000g):</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={1000}
+                        value={selectedWeight.value}
+                        onChange={(e) => {
+                          const g = Math.min(1000, Math.max(1, parseInt(e.target.value, 10) || 1));
+                          setSelectedWeight({ label: formatWeightLabel(g), value: g });
+                        }}
+                        className="w-28 sm:w-36 accent-primary cursor-pointer"
+                      />
+                      <input
+                        type="number"
+                        min={1}
+                        max={1000}
+                        value={selectedWeight.value}
+                        onChange={(e) => {
+                          const g = Math.min(1000, Math.max(1, parseInt(e.target.value, 10) || 1));
+                          setSelectedWeight({ label: formatWeightLabel(g), value: g });
+                        }}
+                        className="w-20 bg-black/50 border border-white/20 rounded-lg px-2 py-1 text-xs font-bold text-white text-center focus:outline-none focus:border-primary"
+                      />
+                      <span className="text-xs font-bold text-primary">g ({selectedWeight.label})</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Quantity & Actions */}
@@ -287,11 +317,11 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                     >
                       {isAdded ? (
                         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2">
-                          <Check size={18} /> Added
+                          <Check size={18} /> Added ({selectedWeight.label})
                         </motion.div>
                       ) : (
                         <motion.div initial={{ opacity: 0, y: -15 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2">
-                          <ShoppingBag size={18} /> Add to Cart
+                          <ShoppingBag size={18} /> Add ({selectedWeight.label})
                         </motion.div>
                       )}
                     </button>

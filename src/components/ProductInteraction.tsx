@@ -4,8 +4,7 @@ import { useCart } from '@/context/CartContext';
 import { ShoppingCart, PackageOpen, Check } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct } from './Navbar';
+import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct, parseWeightGrams, formatWeightLabel } from './Navbar';
 
 export default function ProductInteraction({ product }: { product: any }) {
   const { addToCart, setIsCartOpen } = useCart();
@@ -15,10 +14,10 @@ export default function ProductInteraction({ product }: { product: any }) {
   const basePrice = Number(product.price) || 0;
   const isAbove2000 = basePrice >= 2000;
   const [selectedWeight, setSelectedWeight] = useState<string>(
-    isSaffron ? '50g' : isAbove2000 ? '250g' : '1kg'
+    isSaffron ? '1g' : isAbove2000 ? '250g' : '1kg'
   );
 
-  // Calculate per gram price
+  // Calculate per gram price (1g price)
   const perGramPrice = basePrice > 0
     ? basePrice / 1000
     : (product.pricePerGram && Number(product.pricePerGram) > 0 ? Number(product.pricePerGram) : 0.5);
@@ -27,7 +26,7 @@ export default function ProductInteraction({ product }: { product: any }) {
     ? SAFFRON_WEIGHT_OPTIONS.map((w) => ({
         label: w.label,
         grams: w.grams,
-        price: w.grams === 1000 && basePrice > 0 ? basePrice : Math.round(perGramPrice * w.grams),
+        price: w.grams === 1000 && basePrice > 0 ? basePrice : Math.max(1, Math.round(perGramPrice * w.grams)),
       }))
     : isAbove2000
       ? [
@@ -40,8 +39,10 @@ export default function ProductInteraction({ product }: { product: any }) {
           { label: '1kg', grams: 1000, price: basePrice > 0 ? basePrice : Math.round(perGramPrice * 1000) },
         ];
 
-  const activeOption = weightOptions.find((o) => o.label === selectedWeight) || weightOptions[0];
-  const calculatedPrice = activeOption.price;
+  const selectedGrams = parseWeightGrams(selectedWeight);
+  const calculatedPrice = isSaffron
+    ? (selectedGrams === 1000 && basePrice > 0 ? basePrice : Math.max(1, Math.round(perGramPrice * selectedGrams)))
+    : (weightOptions.find((o) => o.label === selectedWeight) || weightOptions[0]).price;
 
   const handleAddToCart = () => {
     addToCart({
@@ -66,7 +67,7 @@ export default function ProductInteraction({ product }: { product: any }) {
           <p className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
             ₹{calculatedPrice}
             <span className="text-xs text-emerald-400 font-normal ml-3">
-              (₹{perGramPrice.toFixed(2)} / gram)
+              (USP: ₹{perGramPrice.toFixed(2)}/g)
             </span>
           </p>
         </div>
@@ -82,9 +83,9 @@ export default function ProductInteraction({ product }: { product: any }) {
       {/* Weight Selector */}
       <div className="flex flex-col space-y-3">
         <label className="text-xs font-bold text-gray-300 uppercase tracking-widest">
-          Select Weight
+          {isSaffron ? 'Select Weight (1g to 1kg)' : 'Select Weight'}
         </label>
-        <div className={`grid ${isSaffron || isAbove2000 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-3`}>
+        <div className={`grid ${isSaffron ? 'grid-cols-3 sm:grid-cols-4' : isAbove2000 ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2'} gap-2.5`}>
           {weightOptions.map((option) => {
             const isSelected = selectedWeight === option.label;
             return (
@@ -92,19 +93,51 @@ export default function ProductInteraction({ product }: { product: any }) {
                 key={option.label}
                 type="button"
                 onClick={() => setSelectedWeight(option.label)}
-                className={`p-4 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
+                className={`p-3 rounded-xl border flex flex-col items-center justify-center transition-all cursor-pointer ${
                   isSelected
                     ? 'bg-emerald-500/20 border-emerald-500 text-white shadow-lg shadow-emerald-500/10 scale-[1.02]'
                     : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'
                 }`}
               >
-                <span className="text-lg font-bold">{option.label}</span>
-                <span className="text-sm font-semibold text-emerald-400 mt-1">₹{option.price}</span>
-                <span className="text-[10px] text-gray-400 mt-0.5">₹{(option.price / option.grams).toFixed(2)}/g</span>
+                <span className="text-base font-bold">{option.label}</span>
+                <span className="text-xs font-semibold text-emerald-400 mt-0.5">₹{option.price}</span>
               </button>
             );
           })}
         </div>
+
+        {isSaffron && (
+          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-white/5 border border-white/10">
+            <div className="text-xs text-gray-300 font-semibold">
+              Custom Saffron Weight (1g – 1000g / 1kg):
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={1}
+                max={1000}
+                value={selectedGrams}
+                onChange={(e) => {
+                  const g = Math.min(1000, Math.max(1, parseInt(e.target.value, 10) || 1));
+                  setSelectedWeight(formatWeightLabel(g));
+                }}
+                className="w-28 sm:w-36 accent-emerald-500 cursor-pointer"
+              />
+              <input
+                type="number"
+                min={1}
+                max={1000}
+                value={selectedGrams}
+                onChange={(e) => {
+                  const g = Math.min(1000, Math.max(1, parseInt(e.target.value, 10) || 1));
+                  setSelectedWeight(formatWeightLabel(g));
+                }}
+                className="w-20 bg-black/50 border border-white/20 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white text-center focus:outline-none focus:border-emerald-400"
+              />
+              <span className="text-xs font-bold text-emerald-400">grams</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">

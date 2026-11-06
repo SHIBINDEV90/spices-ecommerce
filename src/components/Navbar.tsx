@@ -28,6 +28,11 @@ export const NAVBAR_PRODUCTS = [
 ];
 
 export const SAFFRON_WEIGHT_OPTIONS = [
+  { label: '1g', grams: 1 },
+  { label: '2g', grams: 2 },
+  { label: '5g', grams: 5 },
+  { label: '10g', grams: 10 },
+  { label: '25g', grams: 25 },
   { label: '50g', grams: 50 },
   { label: '100g', grams: 100 },
   { label: '200g', grams: 200 },
@@ -36,13 +41,34 @@ export const SAFFRON_WEIGHT_OPTIONS = [
   { label: '1kg', grams: 1000 },
 ] as const;
 
+export function parseWeightGrams(weightLabel?: string | null): number {
+  if (!weightLabel) return 1000;
+  const trimmed = weightLabel.trim().toLowerCase();
+  if (trimmed === '1kg' || trimmed === '1000g') return 1000;
+  const kgMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*kg$/);
+  if (kgMatch) {
+    return Math.min(1000, Math.max(1, Math.round(parseFloat(kgMatch[1]) * 1000)));
+  }
+  const gMatch = trimmed.match(/^(\d+(?:\.\d+)?)\s*g?$/);
+  if (gMatch) {
+    return Math.min(1000, Math.max(1, Math.round(parseFloat(gMatch[1]))));
+  }
+  return 1000;
+}
+
+export function formatWeightLabel(grams: number): string {
+  const clamped = Math.min(1000, Math.max(1, Math.round(grams || 1)));
+  return clamped === 1000 ? '1kg' : `${clamped}g`;
+}
+
 export function isSaffronProduct(productOrName: any): boolean {
   if (!productOrName) return false;
+  const matchesSaffron = (str: string) => /saff?ron/i.test(str);
   if (typeof productOrName === 'string') {
-    return productOrName.toLowerCase().includes('saffron');
+    return matchesSaffron(productOrName);
   }
   return [productOrName.name, productOrName.productType, productOrName.category, productOrName.slug].some(
-    (v) => typeof v === 'string' && v.toLowerCase().includes('saffron')
+    (v) => typeof v === 'string' && matchesSaffron(v)
   );
 }
 
@@ -329,4 +355,3 @@ export default function Navbar() {
     </>
   );
 }
-
