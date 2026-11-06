@@ -70,9 +70,16 @@ export default function CheckoutPage() {
   // Payment State: 'razorpay' (UPI / Cards / Net Banking), 'stripe' (International), 'cod' (Cash on Delivery)
   const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'stripe' | 'cod'>('razorpay');
 
+  // Automatically disable COD when Quick Commerce is active
+  useEffect(() => {
+    if (isQuickMode && paymentMethod === 'cod') {
+      setPaymentMethod('razorpay');
+    }
+  }, [isQuickMode, paymentMethod]);
+
   const subtotal = getCartTotal();
   const delivery = subtotal > 500 ? 0 : 50; 
-  const codFee = paymentMethod === 'cod' ? 75 : 0;
+  const codFee = !isQuickMode && paymentMethod === 'cod' ? 75 : 0;
   
   // Calculate discount based on applied coupon
   let discountAmount = 0;
@@ -130,6 +137,11 @@ export default function CheckoutPage() {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isQuickMode && paymentMethod === 'cod') {
+      setPaymentMethod('razorpay');
+      alert('Cash on Delivery (COD) is not available for Quick Commerce. Please use an online payment method.');
+      return;
+    }
     setLoading(true);
     
     const shippingAddress = shipDifferent ? {
@@ -157,7 +169,7 @@ export default function CheckoutPage() {
                 customerEmail: email,
                 customerPhone: contactNo,
                 orderNote: orderNote,
-                paymentMethod,
+                paymentMethod: isQuickMode && paymentMethod === 'cod' ? 'razorpay' : paymentMethod,
                 couponCode: appliedCoupon?.coupon || null,
                 deliveryType: isQuickMode ? 'quick' : 'standard',
                 deliveryLocation: location.lat && location.lng ? {
@@ -375,13 +387,18 @@ export default function CheckoutPage() {
                       Delivered via trusted courier partner across India within 3–5 business days.
                     </p>
                     <div className="text-xs font-semibold text-neutral-700">
-                      Standard Rates Apply
+                      Standard Rates Apply (COD Available)
                     </div>
                   </div>
 
                   {/* 35 km Quick Commerce */}
                   <div
-                    onClick={() => setQuickMode(true)}
+                    onClick={() => {
+                      setQuickMode(true);
+                      if (paymentMethod === 'cod') {
+                        setPaymentMethod('razorpay');
+                      }
+                    }}
                     className={`p-4 rounded-xl border-2 cursor-pointer transition flex flex-col justify-between ${
                       isQuickMode
                         ? 'border-amber-500 bg-amber-500/10 text-neutral-900 ring-2 ring-amber-400/50'
@@ -401,11 +418,14 @@ export default function CheckoutPage() {
                     <p className="text-[11px] text-amber-800 bg-amber-100/80 border border-amber-300/60 rounded-lg px-2.5 py-1.5 mb-2.5 leading-snug">
                       <strong>Cut-off Notice:</strong> Orders placed before <strong>5:00 PM</strong> are delivered <strong>Same Day</strong>. Orders coming after <strong>5:00 PM</strong> will be delivered the <strong>very next day</strong>.
                     </p>
-                    <div className="text-xs font-bold text-amber-700 flex items-center gap-1">
+                    <div className="text-xs font-bold text-amber-700 flex items-center justify-between gap-1 flex-wrap">
                       <span>
                         {deliveryWindow.isAfterCutoff
                           ? '⏰ Past 5:00 PM — Scheduled for Next Day Delivery'
                           : '⚡ Before 5:00 PM — Eligible for Same Day Delivery'}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-200/80 text-amber-900">
+                        Prepaid Only (No COD)
                       </span>
                     </div>
                   </div>
@@ -638,33 +658,55 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  {/* Option 3: Cash On Delivery */}
+                  {/* Option 3: Cash On Delivery (Inactive during Quick Commerce) */}
                   <div 
-                    className={`border-2 rounded-xl p-4 md:p-5 flex items-center gap-3.5 cursor-pointer transition-all ${
-                      paymentMethod === 'cod' 
-                        ? 'bg-amber-50/40 border-amber-600 shadow-sm' 
-                        : 'bg-white border-neutral-200 hover:border-neutral-300'
+                    aria-disabled={isQuickMode}
+                    className={`border-2 rounded-xl p-4 md:p-5 flex items-center gap-3.5 transition-all ${
+                      isQuickMode
+                        ? 'bg-neutral-100/80 border-neutral-200 opacity-60 cursor-not-allowed select-none'
+                        : paymentMethod === 'cod' 
+                          ? 'bg-amber-50/40 border-amber-600 shadow-sm cursor-pointer' 
+                          : 'bg-white border-neutral-200 hover:border-neutral-300 cursor-pointer'
                     }`}
-                    onClick={() => setPaymentMethod('cod')}
+                    onClick={() => {
+                      if (!isQuickMode) {
+                        setPaymentMethod('cod');
+                      }
+                    }}
                   >
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                      paymentMethod === 'cod' ? 'border-amber-600' : 'border-neutral-400'
+                      isQuickMode
+                        ? 'border-neutral-300 bg-neutral-200'
+                        : paymentMethod === 'cod'
+                          ? 'border-amber-600'
+                          : 'border-neutral-400'
                     }`}>
-                      {paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-amber-600" />}
+                      {!isQuickMode && paymentMethod === 'cod' && <div className="w-2.5 h-2.5 rounded-full bg-amber-600" />}
                     </div>
 
                     <div className="flex-1">
-                      <span className="block font-semibold text-[15px] text-neutral-900 leading-snug">
-                        Cash On Delivery (COD)
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`font-semibold text-[15px] leading-snug ${isQuickMode ? 'text-neutral-500 line-through' : 'text-neutral-900'}`}>
+                          Cash On Delivery (COD)
+                        </span>
+                        {isQuickMode && (
+                          <span className="text-[10.5px] font-bold uppercase tracking-wider bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded">
+                            Not Active for Quick Commerce
+                          </span>
+                        )}
+                      </div>
                       <span className="block text-[13px] text-neutral-500 mt-0.5">
-                        Pay cash when the package arrives at your delivery address
+                        {isQuickMode
+                          ? 'Cash on Delivery is unavailable for Quick Commerce orders. Please select UPI / Cards above.'
+                          : 'Pay cash when the package arrives at your delivery address'}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="font-semibold text-[13.5px] text-[#d97706] bg-amber-100 px-2 py-0.5 rounded">+₹75</span>
-                      <Truck className="w-5 h-5 text-neutral-600" strokeWidth={2} />
+                      <span className={`font-semibold text-[13.5px] px-2 py-0.5 rounded ${
+                        isQuickMode ? 'text-neutral-400 bg-neutral-200' : 'text-[#d97706] bg-amber-100'
+                      }`}>+₹75</span>
+                      <Truck className="w-5 h-5 text-neutral-500" strokeWidth={2} />
                     </div>
                   </div>
 
@@ -716,7 +758,7 @@ export default function CheckoutPage() {
                       <span>-₹{discountAmount.toFixed(0)}</span>
                     </div>
                   )}
-                  {paymentMethod === 'cod' && (
+                  {!isQuickMode && paymentMethod === 'cod' && (
                     <div className="flex justify-between text-[14px] text-amber-700 font-medium animate-in fade-in slide-in-from-top-2 duration-300">
                       <span>COD Handling Fee</span>
                       <span>+₹75</span>
@@ -741,7 +783,7 @@ export default function CheckoutPage() {
                 >
                   {loading ? (
                     <span className="animate-pulse">Processing Order...</span>
-                  ) : paymentMethod === 'cod' ? (
+                  ) : !isQuickMode && paymentMethod === 'cod' ? (
                     'Place Order (Cash on Delivery)'
                   ) : paymentMethod === 'stripe' ? (
                     `Proceed to Stripe (₹${total.toFixed(0)})`

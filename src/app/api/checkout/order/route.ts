@@ -58,6 +58,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required shipping or customer details' }, { status: 400 });
     }
 
+    if (deliveryType === 'quick' && paymentMethod === 'cod') {
+      return NextResponse.json(
+        { error: 'Cash on Delivery (COD) is not available for Quick Commerce orders. Please choose an online payment method.' },
+        { status: 400 }
+      );
+    }
+
     await dbConnect();
 
     let subtotal = 0;
