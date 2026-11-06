@@ -2,13 +2,21 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowRight, Mail, Phone, MapPin, ShieldCheck, RotateCcw, CheckCircle2 } from 'lucide-react';
-import { useState } from 'react';
+import { ArrowRight, Mail, Phone, MapPin, ShieldCheck, RotateCcw, CheckCircle2, Share2, Copy, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Footer() {
   const pathname = usePathname();
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [siteUrl, setSiteUrl] = useState('https://spicewizz.com');
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      setSiteUrl(window.location.origin);
+    }
+  }, []);
 
   // Hide the footer on admin and vendor dashboards
   if (pathname?.startsWith('/admin') || pathname?.startsWith('/vendor')) {
@@ -21,6 +29,44 @@ export default function Footer() {
       setSubscribed(true);
       setEmail('');
       setTimeout(() => setSubscribed(false), 5000);
+    }
+  };
+
+  const handleCopyWebsiteLink = async () => {
+    const urlToShare = typeof window !== 'undefined' ? window.location.origin : siteUrl;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(urlToShare);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = urlToShare;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      }
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    } catch {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2500);
+    }
+  };
+
+  const handleShareWebsite = async () => {
+    const urlToShare = typeof window !== 'undefined' ? window.location.origin : siteUrl;
+    await handleCopyWebsiteLink();
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: 'SpiceWizz | Authentic Malabar Coast & Wayanad Spices',
+          text: 'Explore authentic single-origin Wayanad & Malabar Coast spices on SpiceWizz!',
+          url: urlToShare,
+        });
+      } catch {
+        // User cancelled native share sheet; link is already copied
+      }
     }
   };
 
@@ -144,7 +190,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Col 4: Newsletter & Verification */}
+          {/* Col 4: Newsletter, Share Website & Verification */}
           <div>
             <h4 className="text-primary-fixed dark:text-primary-fixed-dim font-bold mb-4 uppercase tracking-wider text-xs md:text-sm text-saffron-glow/90">
               Newsletter &amp; Updates
@@ -178,7 +224,55 @@ export default function Footer() {
               )}
             </form>
 
-            <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap gap-2 text-[11px] text-surface-variant/50">
+            {/* Share Entire Website Link Box */}
+            <div className="mt-5 p-3.5 rounded-lg bg-white/5 border border-white/10 space-y-2.5">
+              <div className="text-xs font-bold text-white flex items-center gap-1.5">
+                <Share2 size={14} className="text-saffron-glow" />
+                <span>Share Website Link with Friends</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  readOnly
+                  value={siteUrl}
+                  aria-label="Website share URL"
+                  className="bg-black/30 border border-white/15 text-white/80 text-xs px-2.5 py-1.5 rounded w-full outline-none select-all"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyWebsiteLink}
+                  className={`px-2.5 py-1.5 rounded text-xs font-semibold flex items-center gap-1 shrink-0 transition-all cursor-pointer ${
+                    linkCopied
+                      ? 'bg-emerald-500 text-white'
+                      : 'bg-white/10 hover:bg-white/20 text-white border border-white/15'
+                  }`}
+                >
+                  {linkCopied ? <Check size={13} /> : <Copy size={13} />}
+                  <span>{linkCopied ? 'Copied!' : 'Copy'}</span>
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleShareWebsite}
+                  className="flex-1 py-1.5 px-3 rounded bg-saffron-glow/20 hover:bg-saffron-glow/30 text-saffron-glow border border-saffron-glow/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <Share2 size={13} />
+                  <span>Share Website</span>
+                </button>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(`Explore authentic Wayanad & Malabar Coast spices at SpiceWizz: ${siteUrl}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-1.5 px-3 rounded bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 text-xs font-semibold transition-all"
+                >
+                  WhatsApp
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap gap-2 text-[11px] text-surface-variant/50">
               <span className="bg-white/5 px-2 py-0.5 rounded border border-white/10">FSSAI Certified</span>
               <span className="bg-white/5 px-2 py-0.5 rounded border border-white/10">ISO 22000</span>
               <span className="bg-white/5 px-2 py-0.5 rounded border border-white/10">Spice Board India</span>

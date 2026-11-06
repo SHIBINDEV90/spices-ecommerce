@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Star, ShoppingBag, Check, Truck, ShieldCheck, Leaf, Heart, Share2, Plus, Minus, Loader2 } from 'lucide-react';
+import { X, Star, ShoppingBag, Check, Truck, ShieldCheck, Leaf, Heart, Share2, Plus, Minus, Loader2, Copy } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
@@ -14,6 +14,8 @@ interface QuickViewModalProps {
   onClose: () => void;
   product: Product | null;
 }
+
+const WISHLIST_STORAGE_KEY = 'spicewizz_wishlist';
 
 export default function QuickViewModal({ isOpen, onClose, product }: QuickViewModalProps) {
   const basePrice = Number(product?.price) || 0;
@@ -44,6 +46,8 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
   const [isAdded, setIsAdded] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [isBuying, setIsBuying] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   
   const { addToCart, setIsCartOpen, cartItems } = useCart();
   const router = useRouter();
@@ -63,6 +67,15 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
       setQuantity(1);
       setIsAdded(false);
       setActiveImage(0);
+      setShareCopied(false);
+
+      try {
+        const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+        const list: string[] = saved ? JSON.parse(saved) : [];
+        setIsWishlisted(Array.isArray(list) && list.includes(product._id));
+      } catch {
+        setIsWishlisted(false);
+      }
     }
   }, [isOpen, product]);
 
@@ -117,6 +130,70 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
     onClose();
     router.push('/checkout');
     setIsBuying(false);
+  };
+
+  const handleToggleWishlist = () => {
+    try {
+      const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+      const list: string[] = saved ? JSON.parse(saved) : [];
+      const currentList = Array.isArray(list) ? list : [];
+      let updated: string[];
+      if (currentList.includes(product._id)) {
+        updated = currentList.filter((id) => id !== product._id);
+        setIsWishlisted(false);
+      } else {
+        updated = [...currentList, product._id];
+        setIsWishlisted(true);
+      }
+      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      setIsWishlisted((prev) => !prev);
+    }
+  };
+
+  const handleShareProduct = async () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://spicewizz.com';
+    const shareUrl = `${origin}/products/${product._id}`;
+    const shareTitle = `${product.name} | SpiceWizz`;
+    const shareText = `Check out ${product.name} (${selectedWeight.label} - ₹${currentPrice}) on SpiceWizz!`;
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2500);
+      }
+    } catch {
+      // Fallback below
+    }
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // User cancelled or share failed; clipboard copy already handled
+      }
+    }
+
+    if (!shareCopied) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      } catch {
+        // Ignore
+      }
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2500);
+    }
   };
 
   const ratingValue = product.rating !== undefined && !isNaN(Number(product.rating)) ? Number(product.rating) : 5;
@@ -376,12 +453,30 @@ export default function QuickViewModal({ isOpen, onClose, product }: QuickViewMo
                   </p>
                 )}
 
-                <div className="flex gap-4 mb-8 border-b border-white/10 pb-6 mt-3">
-                  <button className="flex items-center gap-2 text-xs font-semibold text-white/50 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-lg">
-                    <Heart size={14} /> Add to Wishlist
+                <div className="flex flex-wrap gap-3 mb-8 border-b border-white/10 pb-6 mt-3">
+                  <button
+                    type="button"
+                    onClick={handleToggleWishlist}
+                    className={`flex items-center gap-2 text-xs font-semibold transition-all px-4 py-2 rounded-lg border cursor-pointer ${
+                      isWishlisted
+                        ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+                        : 'text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border-white/10'
+                    }`}
+                  >
+                    <Heart size={14} className={isWishlisted ? 'fill-rose-500 text-rose-400' : ''} />
+                    <span>{isWishlisted ? 'Added to Wishlist' : 'Add to Wishlist'}</span>
                   </button>
-                  <button className="flex items-center gap-2 text-xs font-semibold text-white/50 hover:text-white transition-colors bg-white/5 px-4 py-2 rounded-lg">
-                    <Share2 size={14} /> Share
+                  <button
+                    type="button"
+                    onClick={handleShareProduct}
+                    className={`flex items-center gap-2 text-xs font-semibold transition-all px-4 py-2 rounded-lg border cursor-pointer ${
+                      shareCopied
+                        ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                        : 'text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border-white/10'
+                    }`}
+                  >
+                    {shareCopied ? <Check size={14} /> : <Share2 size={14} />}
+                    <span>{shareCopied ? 'Product Link Copied!' : 'Share'}</span>
                   </button>
                 </div>
 

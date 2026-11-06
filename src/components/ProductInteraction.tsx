@@ -1,15 +1,19 @@
 'use client';
 
 import { useCart } from '@/context/CartContext';
-import { ShoppingCart, PackageOpen, Check, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, PackageOpen, Check, Plus, Minus, Heart, Share2 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SAFFRON_WEIGHT_OPTIONS, isSaffronProduct, parseWeightGrams, formatWeightLabel } from './Navbar';
+
+const WISHLIST_STORAGE_KEY = 'spicewizz_wishlist';
 
 export default function ProductInteraction({ product }: { product: any }) {
   const { addToCart, setIsCartOpen, cartItems } = useCart();
   const [added, setAdded] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const isSaffron = isSaffronProduct(product);
   const basePrice = Number(product.price) || 0;
@@ -17,6 +21,16 @@ export default function ProductInteraction({ product }: { product: any }) {
   const [selectedWeight, setSelectedWeight] = useState<string>(
     isSaffron ? '1g' : isAbove2000 ? '250g' : '1kg'
   );
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+      const list: string[] = saved ? JSON.parse(saved) : [];
+      setIsWishlisted(Array.isArray(list) && list.includes(product._id));
+    } catch {
+      setIsWishlisted(false);
+    }
+  }, [product._id]);
 
   const stockCount = product.stock !== undefined && product.stock !== null ? Number(product.stock) : 100;
   const inCartQty = cartItems
@@ -65,6 +79,70 @@ export default function ProductInteraction({ product }: { product: any }) {
     setIsCartOpen(true);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
+  };
+
+  const handleToggleWishlist = () => {
+    try {
+      const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+      const list: string[] = saved ? JSON.parse(saved) : [];
+      const currentList = Array.isArray(list) ? list : [];
+      let updated: string[];
+      if (currentList.includes(product._id)) {
+        updated = currentList.filter((id) => id !== product._id);
+        setIsWishlisted(false);
+      } else {
+        updated = [...currentList, product._id];
+        setIsWishlisted(true);
+      }
+      localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      setIsWishlisted((prev) => !prev);
+    }
+  };
+
+  const handleShareProduct = async () => {
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://spicewizz.com';
+    const shareUrl = `${origin}/products/${product._id}`;
+    const shareTitle = `${product.name} | SpiceWizz`;
+    const shareText = `Check out ${product.name} (${selectedWeight} - ₹${calculatedPrice}) on SpiceWizz!`;
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        setShareCopied(true);
+        setTimeout(() => setShareCopied(false), 2500);
+      }
+    } catch {
+      // Fallback below
+    }
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // User cancelled or share failed; clipboard copy already handled
+      }
+    }
+
+    if (!shareCopied) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+      } catch {
+        // Ignore
+      }
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2500);
+    }
   };
 
   return (
@@ -216,9 +294,37 @@ export default function ProductInteraction({ product }: { product: any }) {
           Contact Exporter <PackageOpen className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
         </Link>
       </div>
+
+      {/* Add to Wishlist & Share Actions */}
+      <div className="flex flex-wrap gap-3 pt-2 border-t border-white/10">
+        <button
+          type="button"
+          onClick={handleToggleWishlist}
+          className={`flex items-center gap-2 text-xs font-semibold transition-all px-4 py-2.5 rounded-xl border cursor-pointer ${
+            isWishlisted
+              ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
+              : 'text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border-white/10'
+          }`}
+        >
+          <Heart size={15} className={isWishlisted ? 'fill-rose-500 text-rose-400' : ''} />
+          <span>{isWishlisted ? 'Added to Wishlist' : 'Add to Wishlist'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleShareProduct}
+          className={`flex items-center gap-2 text-xs font-semibold transition-all px-4 py-2.5 rounded-xl border cursor-pointer ${
+            shareCopied
+              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+              : 'text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border-white/10'
+          }`}
+        >
+          {shareCopied ? <Check size={15} /> : <Share2 size={15} />}
+          <span>{shareCopied ? 'Product Link Copied!' : 'Share'}</span>
+        </button>
+      </div>
       
       {product.isBulkAvailable && (
-         <div className="pt-2 text-center">
+         <div className="pt-1 text-center">
             <p className="text-xs text-amber-500/80 font-medium">✨ High-volume discounts available for bulk export orders.</p>
          </div>
       )}
