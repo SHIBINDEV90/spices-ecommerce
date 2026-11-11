@@ -42,15 +42,23 @@ export default async function ProductsPage({
     filteredProducts = filteredProducts.filter((p: any) => !!p.vendorId);
   }
 
-  // Filter by search query / category (also match 'safron' <-> 'saffron')
+  // Filter by search query / category (also match 'safron' <-> 'saffron' and 'coffee beans' <-> 'coffee')
   if (filter) {
     const isSaffronFilter = /^saff?ron$/i.test(filter.trim());
+    const isCoffeeFilter = /^coffee(\s+(beans?|seeds?))?$/i.test(filter.trim());
     filteredProducts = filteredProducts.filter((product: any) => {
       if (isSaffronFilter) {
         return (
           /saff?ron/i.test(product.name || '') ||
           /saff?ron/i.test(product.category || '') ||
           /saff?ron/i.test(product.slug || '')
+        );
+      }
+      if (isCoffeeFilter) {
+        return (
+          /coffee/i.test(product.name || '') ||
+          /coffee/i.test(product.category || '') ||
+          /coffee/i.test(product.slug || '')
         );
       }
       return (

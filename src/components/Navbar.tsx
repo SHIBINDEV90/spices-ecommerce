@@ -24,7 +24,7 @@ export const NAVBAR_PRODUCTS = [
   'Star anise',
   'Bay leafe',
   'Honey',
-  'Coffee seeds',
+  'Coffee beans',
 ];
 
 export const SAFFRON_WEIGHT_OPTIONS = [
