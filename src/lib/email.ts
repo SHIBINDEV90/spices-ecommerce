@@ -371,20 +371,38 @@ export async function sendAdminEnquiryNotificationEmail(params: SendAdminEnquiry
     baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
   } = params;
 
-  // Resolve admin destination emails
+  // Placeholder login-only admin emails that are not real mailboxes
+  const PLACEHOLDER_ADMIN_EMAILS = new Set([
+    'admin@spicewizz.com',
+    'admin@malabarcoast.com',
+  ]);
+
+  // Resolve admin destination emails:
+  // 1. Prefer explicitly configured ADMIN_EMAIL (excluding placeholder login emails)
+  // 2. Otherwise use the active verified SMTP_USER mailbox (e.g. contact@spicewizz.com)
+  // 3. Otherwise use non-placeholder admin user emails from DB, or fall back to contact@spicewizz.com
   const recipients: string[] = [];
-  if (adminEmails && adminEmails.length > 0) {
-    recipients.push(...adminEmails);
-  }
   if (process.env.ADMIN_EMAIL) {
-    const parsed = process.env.ADMIN_EMAIL.split(',').map(e => e.trim()).filter(Boolean);
+    const parsed = process.env.ADMIN_EMAIL
+      .split(',')
+      .map(e => e.trim())
+      .filter(e => e && !PLACEHOLDER_ADMIN_EMAILS.has(e.toLowerCase()));
     recipients.push(...parsed);
   }
   if (recipients.length === 0 && process.env.SMTP_USER) {
-    recipients.push(process.env.SMTP_USER);
+    const smtpUser = process.env.SMTP_USER.trim();
+    if (smtpUser && !PLACEHOLDER_ADMIN_EMAILS.has(smtpUser.toLowerCase())) {
+      recipients.push(smtpUser);
+    }
+  }
+  if (recipients.length === 0 && adminEmails && adminEmails.length > 0) {
+    const validDbAdmins = adminEmails
+      .map(e => e.trim())
+      .filter(e => e && !PLACEHOLDER_ADMIN_EMAILS.has(e.toLowerCase()));
+    recipients.push(...validDbAdmins);
   }
   if (recipients.length === 0) {
-    recipients.push('admin@spicewizz.com');
+    recipients.push(process.env.SMTP_USER?.trim() || 'contact@spicewizz.com');
   }
 
   // Deduplicate and filter valid emails
